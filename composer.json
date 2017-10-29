@@ -14,7 +14,8 @@
         "issues": "http://github.com/Innmind/Git/issues"
     },
     "require": {
-        "php": "~7.1"
+        "php": "~7.1",
+        "innmind/server-control": "^2.0"
     },
     "autoload": {
         "psr-4": {
@@ -27,7 +28,8 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "~6.0"
+        "phpunit/phpunit": "~6.0",
+        "symfony/filesystem": "^3.3"
     },
     "scripts": {
         "test": "vendor/bin/phpunit --colors=always"
