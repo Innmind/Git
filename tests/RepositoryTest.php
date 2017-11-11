@@ -5,6 +5,8 @@ namespace Tests\Innmind\Git;
 
 use Innmind\Git\{
     Repository,
+    Revision\Hash,
+    Revision\Branch,
     Exception\CommandFailed,
     Exception\RepositoryInitFailed
 };
@@ -169,5 +171,79 @@ class RepositoryTest extends TestCase
         $this->assertSame($repo, $repo->init());
         $this->assertSame($repo, $repo->init()); //validate reinit doesn't throw
         $this->assertTrue(is_dir('/tmp/foo/.git'));
+    }
+
+    /**
+     * @dataProvider heads
+     */
+    public function testHead(string $list, string $expected, string $class)
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->exactly(2))
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->at(0))
+            ->method('execute')
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $processes
+            ->expects($this->at(1))
+            ->method('execute')
+            ->with($this->callback(function($command): bool {
+                return (string) $command === 'git branch --no-color' &&
+                    $command->workingDirectory() === '/tmp/foo';
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+        $process
+            ->method('output')
+            ->willReturn($output = $this->createMock(Output::class));
+        $output
+            ->expects($this->once())
+            ->method('__toString')
+            ->willReturn($list);
+
+        $repo = new Repository(
+            $server,
+            '/tmp/foo'
+        );
+
+        $head = $repo->head();
+
+        $this->assertInstanceOf($class, $head);
+        $this->assertSame($expected, (string) $head);
+    }
+
+    public function heads(): array
+    {
+        $detached = <<<DETACHED
+* (HEAD detached at aa4a336)
+  develop
+  master
+DETACHED;
+        $branches = <<<BRANCHES
+* develop
+  master
+BRANCHES;
+
+        return [
+            [$detached, 'aa4a336', Hash::class],
+            [$branches, 'develop', Branch::class],
+        ];
     }
 }

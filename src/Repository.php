@@ -3,10 +3,12 @@ declare(strict_types = 1);
 
 namespace Innmind\Git;
 
-use Innmind\Git\Exception\{
-    CommandFailed,
-    RepositoryInitFailed,
-    PathNotUsable
+use Innmind\Git\{
+    Revision\Hash,
+    Revision\Branch,
+    Exception\CommandFailed,
+    Exception\RepositoryInitFailed,
+    Exception\PathNotUsable
 };
 use Innmind\Server\Control\{
     Server,
@@ -53,6 +55,27 @@ final class Repository
         }
 
         throw new RepositoryInitFailed($output);
+    }
+
+    public function head(): Revision
+    {
+        $output = new Str((string) $this->execute('branch --no-color'));
+        $revision = $output
+            ->split("\n")
+            ->filter(static function(Str $line): bool {
+                return $line->matches('~^\* .+~');
+            })
+            ->first();
+
+        if ($revision->matches('~\(HEAD detached at [a-z0-9]{7,40}\)~')) {
+            return new Hash(
+                (string) $revision
+                    ->capture('~\(HEAD detached at (?P<hash>[a-z0-9]{7,40})\)~')
+                    ->get('hash')
+            );
+        }
+
+        return new Branch((string) $revision->substring(2));
     }
 
     private function execute(string $command): Output
