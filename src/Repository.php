@@ -6,6 +6,7 @@ namespace Innmind\Git;
 use Innmind\Git\{
     Revision\Hash,
     Revision\Branch,
+    Repository\Branches,
     Exception\CommandFailed,
     Exception\RepositoryInitFailed,
     Exception\PathNotUsable
@@ -21,6 +22,7 @@ final class Repository
 {
     private $server;
     private $path;
+    private $branches;
 
     public function __construct(Server $server, string $path)
     {
@@ -76,6 +78,11 @@ final class Repository
         }
 
         return new Branch((string) $revision->substring(2));
+    }
+
+    public function branches(): Branches
+    {
+        return $this->branches ?? $this->branches = new Branches($this->server, $this->path);
     }
 
     private function execute(string $command): Output

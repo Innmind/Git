@@ -5,6 +5,7 @@ namespace Tests\Innmind\Git;
 
 use Innmind\Git\{
     Repository,
+    Repository\Branches,
     Revision\Hash,
     Revision\Branch,
     Exception\CommandFailed,
@@ -227,6 +228,16 @@ class RepositoryTest extends TestCase
 
         $this->assertInstanceOf($class, $head);
         $this->assertSame($expected, (string) $head);
+    }
+
+    public function testBranches()
+    {
+        $repo = new Repository(
+            (new ServerFactory)->make(),
+            '/tmp/foo'
+        );
+
+        $this->assertInstanceOf(Branches::class, $repo->branches());
     }
 
     public function heads(): array
