@@ -85,6 +85,20 @@ final class Repository
         return $this->branches ?? $this->branches = new Branches($this->server, $this->path);
     }
 
+    public function push(): self
+    {
+        $this->execute('push');
+
+        return $this;
+    }
+
+    public function pull(): self
+    {
+        $this->execute('pull');
+
+        return $this;
+    }
+
     private function execute(string $command): Output
     {
         $process = $this

@@ -240,6 +240,98 @@ class RepositoryTest extends TestCase
         $this->assertInstanceOf(Branches::class, $repo->branches());
     }
 
+    public function testPush()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->exactly(2))
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->at(0))
+            ->method('execute')
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $processes
+            ->expects($this->at(1))
+            ->method('execute')
+            ->with($this->callback(function($command): bool {
+                return (string) $command === 'git push' &&
+                    $command->workingDirectory() === '/tmp/foo';
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+        $process
+            ->method('output')
+            ->willReturn($this->createMock(Output::class));
+
+        $repo = new Repository(
+            $server,
+            '/tmp/foo'
+        );
+
+        $this->assertSame($repo, $repo->push());
+    }
+
+    public function testPull()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->exactly(2))
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->at(0))
+            ->method('execute')
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $processes
+            ->expects($this->at(1))
+            ->method('execute')
+            ->with($this->callback(function($command): bool {
+                return (string) $command === 'git pull' &&
+                    $command->workingDirectory() === '/tmp/foo';
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+        $process
+            ->method('output')
+            ->willReturn($this->createMock(Output::class));
+
+        $repo = new Repository(
+            $server,
+            '/tmp/foo'
+        );
+
+        $this->assertSame($repo, $repo->pull());
+    }
+
     public function heads(): array
     {
         $detached = <<<DETACHED
