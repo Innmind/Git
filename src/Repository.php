@@ -10,15 +10,18 @@ use Innmind\Git\{
     Repository\Remotes,
     Repository\Checkout,
     Repository\Tags,
-    Exception\CommandFailed,
     Exception\RepositoryInitFailed,
-    Exception\PathNotUsable
+    Exception\PathNotUsable,
+    Exception\DomainException
 };
 use Innmind\Server\Control\{
     Server,
     Server\Command
 };
-use Innmind\Url\PathInterface;
+use Innmind\Url\{
+    PathInterface,
+    Path
+};
 use Innmind\Immutable\Str;
 
 final class Repository
@@ -117,5 +120,23 @@ final class Repository
     public function tags(): Tags
     {
         return $this->tags ?? $this->tags = new Tags($this->execute);
+    }
+
+    public function add(string $file): self
+    {
+        ($this->execute)('add '.new Path($file));
+
+        return $this;
+    }
+
+    public function commit(string $message): self
+    {
+        if ($message === '') {
+            throw new DomainException;
+        }
+
+        ($this->execute)("commit -m '$message'");
+
+        return $this;
     }
 }

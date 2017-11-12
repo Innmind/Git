@@ -25,9 +25,15 @@ use Innmind\Server\Control\{
 use Innmind\Url\Path;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
+use Eris\{
+    Generator,
+    TestTrait
+};
 
 class RepositoryTest extends TestCase
 {
+    use TestTrait;
+
     public function setUp()
     {
         (new Filesystem)->remove('/tmp/foo');
@@ -364,6 +370,135 @@ class RepositoryTest extends TestCase
         );
 
         $this->assertInstanceOf(Tags::class, $repo->tags());
+    }
+
+    public function testAdd()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->exactly(2))
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->at(0))
+            ->method('execute')
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $processes
+            ->expects($this->at(1))
+            ->method('execute')
+            ->with($this->callback(function($command): bool {
+                return (string) $command === 'git add foo' &&
+                    $command->workingDirectory() === '/tmp/foo';
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+        $process
+            ->method('output')
+            ->willReturn($this->createMock(Output::class));
+
+        $repo = new Repository(
+            $server,
+            new Path('/tmp/foo')
+        );
+
+        $this->assertSame($repo, $repo->add('foo'));
+    }
+
+    public function testCommit()
+    {
+        $this
+            ->forAll(Generator\string())
+            ->when(static function(string $message): bool {
+                return strlen($message) > 0;
+            })
+            ->then(function(string $message): void {
+                $server = $this->createMock(Server::class);
+                $server
+                    ->expects($this->exactly(2))
+                    ->method('processes')
+                    ->willReturn($processes = $this->createMock(Processes::class));
+                $processes
+                    ->expects($this->at(0))
+                    ->method('execute')
+                    ->willReturn($process = $this->createMock(Process::class));
+                $process
+                    ->expects($this->once())
+                    ->method('wait')
+                    ->will($this->returnSelf());
+                $process
+                    ->method('exitCode')
+                    ->willReturn(new ExitCode(0));
+
+                $processes
+                    ->expects($this->at(1))
+                    ->method('execute')
+                    ->with($this->callback(function($command) use ($message): bool {
+                        return (string) $command === "git commit -m '$message'" &&
+                            $command->workingDirectory() === '/tmp/foo';
+                    }))
+                    ->willReturn($process = $this->createMock(Process::class));
+                $process
+                    ->expects($this->once())
+                    ->method('wait')
+                    ->will($this->returnSelf());
+                $process
+                    ->method('exitCode')
+                    ->willReturn(new ExitCode(0));
+                $process
+                    ->method('output')
+                    ->willReturn($this->createMock(Output::class));
+
+                $repo = new Repository(
+                    $server,
+                    new Path('/tmp/foo')
+                );
+
+                $this->assertSame($repo, $repo->commit($message));
+            });
+    }
+
+    /**
+     * @expectedException Innmind\Git\Exception\DomainException
+     */
+    public function testThrowWhenEmptyCommitMessage()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $repo = new Repository(
+            $server,
+            new Path('/tmp/foo')
+        );
+
+        $repo->commit('');
     }
 
     public function heads(): array
