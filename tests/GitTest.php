@@ -15,6 +15,7 @@ use Innmind\Server\Control\{
     Server\Process,
     Server\Process\ExitCode
 };
+use Innmind\Url\Path;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 
@@ -31,7 +32,7 @@ class GitTest extends TestCase
             (new ServerFactory)->make()
         );
 
-        $this->assertInstanceOf(Repository::class, $git->repository('/tmp/foo'));
+        $this->assertInstanceOf(Repository::class, $git->repository(new Path('/tmp/foo')));
     }
 
     public function testVersion()

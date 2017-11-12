@@ -5,7 +5,9 @@ namespace Tests\Innmind\Git\Repository;
 
 use Innmind\Git\{
     Repository\Tags,
-    Binary
+    Binary,
+    Message,
+    Repository\Tag\Name
 };
 use Innmind\Server\Control\{
     Server,
@@ -82,22 +84,9 @@ class TagsTest extends TestCase
             )
         );
 
-        $this->assertSame($tags, $tags->add('1.0.0', 'first release'));
-    }
-
-    /**
-     * @expectedException Innmind\Git\Exception\DomainException
-     */
-    public function testThrowWhenEmptyName()
-    {
-        (new Tags(new Binary($this->createMock(Server::class), new Path('/'))))->add('', 'foo');
-    }
-
-    /**
-     * @expectedException Innmind\Git\Exception\DomainException
-     */
-    public function testThrowWhenEmptyMessage()
-    {
-        (new Tags(new Binary($this->createMock(Server::class), new Path('/'))))->add('foo', '');
+        $this->assertSame(
+            $tags,
+            $tags->add(new Name('1.0.0'), new Message('first release'))
+        );
     }
 }

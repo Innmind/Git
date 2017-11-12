@@ -36,34 +36,30 @@ final class Remotes
                 new Set(Remote::class),
                 function(Set $remotes, Str $remote): Set {
                     return $remotes->add(
-                        $this->get((string) $remote)
+                        $this->get(new Name((string) $remote))
                     );
                 }
             );
     }
 
-    public function get(string $name): Remote
+    public function get(Name $name): Remote
     {
         return new Remote(
             $this->execute,
-            new Name($name)
+            $name
         );
     }
 
-    public function add(string $name, Url $url): Remote
+    public function add(Name $name, Url $url): Remote
     {
-        ($this->execute)(sprintf(
-            'remote add %s %s',
-            new Name($name),
-            $url
-        ));
+        ($this->execute)("remote add $name $url");
 
         return $this->get($name);
     }
 
-    public function remove(string $name): self
+    public function remove(Name $name): self
     {
-        ($this->execute)('remote remove '.new Name($name));
+        ($this->execute)("remote remove $name");
 
         return $this;
     }

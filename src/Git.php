@@ -8,7 +8,7 @@ use Innmind\Server\Control\{
     Server,
     Server\Command
 };
-use Innmind\Url\Path;
+use Innmind\Url\PathInterface;
 use Innmind\Immutable\Str;
 
 final class Git
@@ -20,9 +20,9 @@ final class Git
         $this->server = $server;
     }
 
-    public function repository(string $path): Repository
+    public function repository(PathInterface $path): Repository
     {
-        return new Repository($this->server, new Path($path));
+        return new Repository($this->server, $path);
     }
 
     public function version(): Version

@@ -6,6 +6,8 @@ namespace Innmind\Git\Repository;
 use Innmind\Git\{
     Binary,
     Revision,
+    Message,
+    Repository\Tag\Name,
     Exception\DomainException
 };
 use Innmind\Url\PathInterface;
@@ -26,12 +28,8 @@ final class Tags
         return $this;
     }
 
-    public function add(string $name, string $message): self
+    public function add(Name $name, Message $message): self
     {
-        if ($name === '' || $message === '') {
-            throw new DomainException;
-        }
-
         ($this->execute)("tag -a $name -m '$message'");
 
         return $this;

@@ -11,6 +11,7 @@ use Innmind\Git\{
     Repository\Tags,
     Revision\Hash,
     Revision\Branch,
+    Message,
     Exception\CommandFailed,
     Exception\RepositoryInitFailed
 };
@@ -415,7 +416,7 @@ class RepositoryTest extends TestCase
             new Path('/tmp/foo')
         );
 
-        $this->assertSame($repo, $repo->add('foo'));
+        $this->assertSame($repo, $repo->add(new Path('foo')));
     }
 
     public function testCommit()
@@ -467,38 +468,8 @@ class RepositoryTest extends TestCase
                     new Path('/tmp/foo')
                 );
 
-                $this->assertSame($repo, $repo->commit($message));
+                $this->assertSame($repo, $repo->commit(new Message($message)));
             });
-    }
-
-    /**
-     * @expectedException Innmind\Git\Exception\DomainException
-     */
-    public function testThrowWhenEmptyCommitMessage()
-    {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
-
-        $repo = new Repository(
-            $server,
-            new Path('/tmp/foo')
-        );
-
-        $repo->commit('');
     }
 
     public function testMerge()

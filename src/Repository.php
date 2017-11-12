@@ -122,19 +122,15 @@ final class Repository
         return $this->tags ?? $this->tags = new Tags($this->execute);
     }
 
-    public function add(string $file): self
+    public function add(PathInterface $file): self
     {
-        ($this->execute)('add '.new Path($file));
+        ($this->execute)("add $file");
 
         return $this;
     }
 
-    public function commit(string $message): self
+    public function commit(Message $message): self
     {
-        if ($message === '') {
-            throw new DomainException;
-        }
-
         ($this->execute)("commit -m '$message'");
 
         return $this;

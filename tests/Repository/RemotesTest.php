@@ -6,6 +6,7 @@ namespace Tests\Innmind\Git\Repository;
 use Innmind\Git\{
     Repository\Remotes,
     Repository\Remote,
+    Repository\Remote\Name,
     Repository\Remote\Url,
     Binary
 };
@@ -82,10 +83,10 @@ REMOTES
             )
         );
 
-        $remote = $remotes->get('origin');
+        $remote = $remotes->get($expected = new Name('origin'));
 
         $this->assertInstanceOf(Remote::class, $remote);
-        $this->assertSame('origin', (string) $remote->name());
+        $this->assertSame($expected, $remote->name());
     }
 
     public function testAdd()
@@ -118,10 +119,13 @@ REMOTES
             )
         );
 
-        $remote = $remotes->add('origin', new Url('git@github.com:Innmind/Git.git'));
+        $remote = $remotes->add(
+            $expected = new Name('origin'),
+            new Url('git@github.com:Innmind/Git.git')
+        );
 
         $this->assertInstanceOf(Remote::class, $remote);
-        $this->assertSame('origin', (string) $remote->name());
+        $this->assertSame($expected, $remote->name());
     }
 
     public function testRemove()
@@ -154,6 +158,6 @@ REMOTES
             )
         );
 
-        $this->assertSame($remotes, $remotes->remove('origin'));
+        $this->assertSame($remotes, $remotes->remove(new Name('origin')));
     }
 }
