@@ -7,6 +7,7 @@ use Innmind\Git\{
     Repository,
     Repository\Branches,
     Repository\Remotes,
+    Repository\Checkout,
     Revision\Hash,
     Revision\Branch,
     Exception\CommandFailed,
@@ -342,6 +343,16 @@ class RepositoryTest extends TestCase
         );
 
         $this->assertInstanceOf(Remotes::class, $repo->remotes());
+    }
+
+    public function testCheckout()
+    {
+        $repo = new Repository(
+            (new ServerFactory)->make(),
+            new Path('/tmp/foo')
+        );
+
+        $this->assertInstanceOf(Checkout::class, $repo->checkout());
     }
 
     public function heads(): array

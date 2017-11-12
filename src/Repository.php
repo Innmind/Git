@@ -8,6 +8,7 @@ use Innmind\Git\{
     Revision\Branch,
     Repository\Branches,
     Repository\Remotes,
+    Repository\Checkout,
     Exception\CommandFailed,
     Exception\RepositoryInitFailed,
     Exception\PathNotUsable
@@ -25,6 +26,7 @@ final class Repository
     private $path;
     private $branches;
     private $remotes;
+    private $checkout;
 
     public function __construct(Server $server, PathInterface $path)
     {
@@ -103,5 +105,10 @@ final class Repository
     public function remotes(): Remotes
     {
         return $this->remotes ?? $this->remotes = new Remotes($this->execute);
+    }
+
+    public function checkout(): Checkout
+    {
+        return $this->checkout ?? $this->checkout = new Checkout($this->execute);
     }
 }
