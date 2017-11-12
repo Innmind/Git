@@ -9,6 +9,7 @@ use Innmind\Git\{
     Repository\Branches,
     Repository\Remotes,
     Repository\Checkout,
+    Repository\Tags,
     Exception\CommandFailed,
     Exception\RepositoryInitFailed,
     Exception\PathNotUsable
@@ -27,6 +28,7 @@ final class Repository
     private $branches;
     private $remotes;
     private $checkout;
+    private $tags;
 
     public function __construct(Server $server, PathInterface $path)
     {
@@ -110,5 +112,10 @@ final class Repository
     public function checkout(): Checkout
     {
         return $this->checkout ?? $this->checkout = new Checkout($this->execute);
+    }
+
+    public function tags(): Tags
+    {
+        return $this->tags ?? $this->tags = new Tags($this->execute);
     }
 }

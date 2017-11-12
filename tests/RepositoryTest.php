@@ -8,6 +8,7 @@ use Innmind\Git\{
     Repository\Branches,
     Repository\Remotes,
     Repository\Checkout,
+    Repository\Tags,
     Revision\Hash,
     Revision\Branch,
     Exception\CommandFailed,
@@ -353,6 +354,16 @@ class RepositoryTest extends TestCase
         );
 
         $this->assertInstanceOf(Checkout::class, $repo->checkout());
+    }
+
+    public function testTags()
+    {
+        $repo = new Repository(
+            (new ServerFactory)->make(),
+            new Path('/tmp/foo')
+        );
+
+        $this->assertInstanceOf(Tags::class, $repo->tags());
     }
 
     public function heads(): array
