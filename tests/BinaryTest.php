@@ -12,7 +12,8 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Process,
     Server\Process\ExitCode,
-    Server\Process\Output
+    Server\Process\Output,
+    Server\Command
 };
 use Innmind\Url\Path;
 use PHPUnit\Framework\TestCase;
@@ -53,7 +54,10 @@ class BinaryTest extends TestCase
             new Path('/tmp/foo')
         );
 
-        $this->assertSame($output, $bin('watev'));
+        $this->assertInstanceOf(Command::class, $bin->command());
+        $this->assertSame('git', (string) $bin->command());
+        $this->assertSame('/tmp/foo', $bin->command()->workingDirectory());
+        $this->assertSame($output, $bin($bin->command()->withArgument('watev')));
     }
 
     public function testThrowWhenCommandFailed()
@@ -86,9 +90,11 @@ class BinaryTest extends TestCase
         );
 
         try {
-            $bin('watev');
+            $bin($bin->command()->withArgument('watev'));
             $this->fail('it should throw');
         } catch (CommandFailed $e) {
+            $this->assertInstanceOf(Command::class, $e->command());
+            $this->assertSame('git watev', (string) $e->command());
             $this->assertSame($process, $e->process());
         }
     }

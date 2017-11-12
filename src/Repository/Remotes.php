@@ -16,11 +16,11 @@ use Innmind\Immutable\{
 
 final class Remotes
 {
-    private $execute;
+    private $binary;
 
     public function __construct(Binary $binary)
     {
-        $this->execute = $binary;
+        $this->binary = $binary;
     }
 
     /**
@@ -28,7 +28,12 @@ final class Remotes
      */
     public function all(): SetInterface
     {
-        $remotes = new Str((string) ($this->execute)('remote'));
+        $remotes = new Str((string) ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('remote')
+        ));
 
         return $remotes
             ->split("\n")
@@ -45,21 +50,36 @@ final class Remotes
     public function get(Name $name): Remote
     {
         return new Remote(
-            $this->execute,
+            $this->binary,
             $name
         );
     }
 
     public function add(Name $name, Url $url): Remote
     {
-        ($this->execute)("remote add $name $url");
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('remote')
+                ->withArgument('add')
+                ->withArgument((string) $name)
+                ->withArgument((string) $url)
+        );
 
         return $this->get($name);
     }
 
     public function remove(Name $name): self
     {
-        ($this->execute)("remote remove $name");
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('remote')
+                ->withArgument('remove')
+                ->withArgument((string) $name)
+        );
 
         return $this;
     }

@@ -11,23 +11,36 @@ use Innmind\Url\PathInterface;
 
 final class Checkout
 {
-    private $execute;
+    private $binary;
 
     public function __construct(Binary $binary)
     {
-        $this->execute = $binary;
+        $this->binary = $binary;
     }
 
     public function file(PathInterface $path): self
     {
-        ($this->execute)("checkout -- $path");
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('checkout')
+                ->withArgument('--')
+                ->withArgument((string) $path)
+        );
 
         return $this;
     }
 
     public function revision(Revision $revision): self
     {
-        ($this->execute)("checkout $revision");
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('checkout')
+                ->withArgument((string) $revision)
+        );
 
         return $this;
     }

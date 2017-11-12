@@ -65,7 +65,7 @@ class TagsTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git tag -a 1.0.0 -m \'first release\'' &&
+                return (string) $command === 'git tag -a 1.0.0 -m first release' &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));

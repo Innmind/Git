@@ -12,12 +12,12 @@ use Innmind\Git\{
 
 final class Remote
 {
-    private $execute;
+    private $binary;
     private $name;
 
     public function __construct(Binary $binary, Name $name)
     {
-        $this->execute = $binary;
+        $this->binary = $binary;
         $this->name = $name;
     }
 
@@ -28,62 +28,90 @@ final class Remote
 
     public function prune(): self
     {
-        ($this->execute)('remote prune '.$this->name);
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('remote')
+                ->withArgument('prune')
+                ->withArgument((string) $this->name)
+        );
 
         return $this;
     }
 
     public function setUrl(Url $url): self
     {
-        ($this->execute)(sprintf(
-            'remote set-url %s %s',
-            $this->name,
-            $url
-        ));
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('remote')
+                ->withArgument('set-url')
+                ->withArgument((string) $this->name)
+                ->withArgument((string) $url)
+        );
 
         return $this;
     }
 
     public function addUrl(Url $url): self
     {
-        ($this->execute)(sprintf(
-            'remote set-url --add %s %s',
-            $this->name,
-            $url
-        ));
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('remote')
+                ->withArgument('set-url')
+                ->withOption('add')
+                ->withArgument((string) $this->name)
+                ->withArgument((string) $url)
+        );
 
         return $this;
     }
 
     public function removeUrl(Url $url): self
     {
-        ($this->execute)(sprintf(
-            'remote set-url --delete %s %s',
-            $this->name,
-            $url
-        ));
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('remote')
+                ->withArgument('set-url')
+                ->withOption('delete')
+                ->withArgument((string) $this->name)
+                ->withArgument((string) $url)
+        );
 
         return $this;
     }
 
     public function push(Branch $branch): self
     {
-        ($this->execute)(sprintf(
-            'push -u %s %s',
-            $this->name,
-            $branch
-        ));
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('push')
+                ->withShortOption('u')
+                ->withArgument((string) $this->name)
+                ->withArgument((string) $branch)
+        );
 
         return $this;
     }
 
     public function remove(Branch $branch): self
     {
-        ($this->execute)(sprintf(
-            'push %s :%s',
-            $this->name,
-            $branch
-        ));
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('push')
+                ->withArgument((string) $this->name)
+                ->withArgument(':'.$branch)
+        );
 
         return $this;
     }

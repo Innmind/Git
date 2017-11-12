@@ -14,23 +14,38 @@ use Innmind\Url\PathInterface;
 
 final class Tags
 {
-    private $execute;
+    private $binary;
 
     public function __construct(Binary $binary)
     {
-        $this->execute = $binary;
+        $this->binary = $binary;
     }
 
     public function push(): self
     {
-        ($this->execute)('push --tags');
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('push')
+                ->withOption('tags')
+        );
 
         return $this;
     }
 
     public function add(Name $name, Message $message): self
     {
-        ($this->execute)("tag -a $name -m '$message'");
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('tag')
+                ->withShortOption('a')
+                ->withArgument((string) $name)
+                ->withShortOption('m')
+                ->withArgument((string) $message)
+        );
 
         return $this;
     }

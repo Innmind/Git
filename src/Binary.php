@@ -23,14 +23,17 @@ final class Binary
             ->withWorkingDirectory((string) $path);
     }
 
-    public function __invoke(string $command): Output
+    public function command(): Command
+    {
+        return $this->command;
+    }
+
+    public function __invoke(Command $command): Output
     {
         $process = $this
             ->server
             ->processes()
-            ->execute(
-                $this->command->withArgument($command)
-            )
+            ->execute($command)
             ->wait();
 
         if (!$process->exitCode()->isSuccessful()) {

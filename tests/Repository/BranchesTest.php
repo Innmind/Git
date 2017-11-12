@@ -229,7 +229,7 @@ BRANCHES
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git branch bar ' &&
+                return (string) $command === 'git branch bar' &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));

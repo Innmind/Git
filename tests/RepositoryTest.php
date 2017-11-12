@@ -116,7 +116,7 @@ class RepositoryTest extends TestCase
             $repo->init();
             $this->fail('it should throw');
         } catch (CommandFailed $e) {
-            $this->assertSame('init', $e->command());
+            $this->assertSame('git init', (string) $e->command());
             $this->assertSame($process, $e->process());
         }
     }
@@ -448,7 +448,7 @@ class RepositoryTest extends TestCase
                     ->expects($this->at(1))
                     ->method('execute')
                     ->with($this->callback(function($command) use ($message): bool {
-                        return (string) $command === "git commit -m '$message'" &&
+                        return (string) $command === "git commit -m $message" &&
                             $command->workingDirectory() === '/tmp/foo';
                     }))
                     ->willReturn($process = $this->createMock(Process::class));

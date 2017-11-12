@@ -16,12 +16,12 @@ use Innmind\Immutable\{
 
 final class Branches
 {
-    private $execute;
+    private $binary;
     private $path;
 
     public function __construct(Binary $binary)
     {
-        $this->execute = $binary;
+        $this->binary = $binary;
     }
 
     /**
@@ -29,7 +29,13 @@ final class Branches
      */
     public function local(): SetInterface
     {
-        $branches = new Str((string) ($this->execute)('branch --no-color'));
+        $branches = new Str((string) ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('branch')
+                ->withOption('no-color')
+        ));
 
         return $branches
             ->split("\n")
@@ -51,7 +57,14 @@ final class Branches
      */
     public function remote(): SetInterface
     {
-        $branches = new Str((string) ($this->execute)('branch -r --no-color'));
+        $branches = new Str((string) ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('branch')
+                ->withShortOption('r')
+                ->withOption('no-color')
+        ));
 
         return $branches
             ->split("\n")
@@ -80,21 +93,45 @@ final class Branches
 
     public function new(Branch $name, Revision $off = null): self
     {
-        ($this->execute)("branch $name $off");
+        $command = $this
+            ->binary
+            ->command()
+            ->withArgument('branch')
+            ->withArgument((string) $name);
+
+        if ($off) {
+            $command = $command->withArgument((string) $off);
+        }
+
+        ($this->binary)($command);
 
         return $this;
     }
 
     public function delete(Branch $name): self
     {
-        ($this->execute)("branch -d $name");
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('branch')
+                ->withShortOption('d')
+                ->withArgument((string) $name)
+        );
 
         return $this;
     }
 
     public function forceDelete(Branch $name): self
     {
-        ($this->execute)("branch -D $name");
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('branch')
+                ->withShortOption('D')
+                ->withArgument((string) $name)
+        );
 
         return $this;
     }

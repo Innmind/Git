@@ -31,13 +31,13 @@ final class Git
             ->server
             ->processes()
             ->execute(
-                Command::foreground('git')
+                $command = Command::foreground('git')
                     ->withOption('version')
             )
             ->wait();
 
         if (!$process->exitCode()->isSuccessful()) {
-            throw new CommandFailed('git --version', $process);
+            throw new CommandFailed($command, $process);
         }
 
         $parts = (new Str((string) $process->output()))->capture(

@@ -26,7 +26,7 @@ use Innmind\Immutable\Str;
 
 final class Repository
 {
-    private $execute;
+    private $binary;
     private $path;
     private $branches;
     private $remotes;
@@ -35,7 +35,7 @@ final class Repository
 
     public function __construct(Server $server, PathInterface $path)
     {
-        $this->execute = new Binary($server, $path);
+        $this->binary = new Binary($server, $path);
 
         $code = $server
             ->processes()
@@ -54,7 +54,12 @@ final class Repository
 
     public function init(): self
     {
-        $output = ($this->execute)('init');
+        $output = ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('init')
+        );
         $outputStr = new Str((string) $output);
 
         if (
@@ -69,7 +74,13 @@ final class Repository
 
     public function head(): Revision
     {
-        $output = new Str((string) ($this->execute)('branch --no-color'));
+        $output = new Str((string) ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('branch')
+                ->withOption('no-color')
+        ));
         $revision = $output
             ->split("\n")
             ->filter(static function(Str $line): bool {
@@ -90,55 +101,84 @@ final class Repository
 
     public function branches(): Branches
     {
-        return $this->branches ?? $this->branches = new Branches($this->execute);
+        return $this->branches ?? $this->branches = new Branches($this->binary);
     }
 
     public function push(): self
     {
-        ($this->execute)('push');
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('push')
+        );
 
         return $this;
     }
 
     public function pull(): self
     {
-        ($this->execute)('pull');
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('pull')
+        );
 
         return $this;
     }
 
     public function remotes(): Remotes
     {
-        return $this->remotes ?? $this->remotes = new Remotes($this->execute);
+        return $this->remotes ?? $this->remotes = new Remotes($this->binary);
     }
 
     public function checkout(): Checkout
     {
-        return $this->checkout ?? $this->checkout = new Checkout($this->execute);
+        return $this->checkout ?? $this->checkout = new Checkout($this->binary);
     }
 
     public function tags(): Tags
     {
-        return $this->tags ?? $this->tags = new Tags($this->execute);
+        return $this->tags ?? $this->tags = new Tags($this->binary);
     }
 
     public function add(PathInterface $file): self
     {
-        ($this->execute)("add $file");
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('add')
+                ->withArgument((string) $file)
+        );
 
         return $this;
     }
 
     public function commit(Message $message): self
     {
-        ($this->execute)("commit -m '$message'");
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('commit')
+                ->withShortOption('m')
+                ->withArgument((string) $message)
+        );
 
         return $this;
     }
 
     public function merge(Branch $branch): self
     {
-        ($this->execute)("merge $branch");
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('merge')
+                ->withArgument((string) $branch)
+        );
 
         return $this;
     }
