@@ -7,6 +7,7 @@ use Innmind\Git\{
     Revision\Hash,
     Revision\Branch,
     Repository\Branches,
+    Repository\Remotes,
     Exception\CommandFailed,
     Exception\RepositoryInitFailed,
     Exception\PathNotUsable
@@ -23,6 +24,7 @@ final class Repository
     private $server;
     private $path;
     private $branches;
+    private $remotes;
 
     public function __construct(Server $server, string $path)
     {
@@ -97,6 +99,11 @@ final class Repository
         $this->execute('pull');
 
         return $this;
+    }
+
+    public function remotes(): Remotes
+    {
+        return $this->remotes ?? $this->remotes = new Remotes($this->server, $this->path);
     }
 
     private function execute(string $command): Output

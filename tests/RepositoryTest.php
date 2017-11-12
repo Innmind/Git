@@ -6,6 +6,7 @@ namespace Tests\Innmind\Git;
 use Innmind\Git\{
     Repository,
     Repository\Branches,
+    Repository\Remotes,
     Revision\Hash,
     Revision\Branch,
     Exception\CommandFailed,
@@ -330,6 +331,16 @@ class RepositoryTest extends TestCase
         );
 
         $this->assertSame($repo, $repo->pull());
+    }
+
+    public function testRemotes()
+    {
+        $repo = new Repository(
+            (new ServerFactory)->make(),
+            '/tmp/foo'
+        );
+
+        $this->assertInstanceOf(Remotes::class, $repo->remotes());
     }
 
     public function heads(): array
