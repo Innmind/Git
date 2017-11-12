@@ -3,26 +3,20 @@ declare(strict_types = 1);
 
 namespace Innmind\Git\Repository;
 
-use Innmind\Git\Repository\Remote\{
-    Name,
-    Url
-};
-use Innmind\Server\Control\{
-    Server,
-    Server\Command,
-    Server\Process\Output
+use Innmind\Git\{
+    Binary,
+    Repository\Remote\Name,
+    Repository\Remote\Url
 };
 
 final class Remote
 {
-    private $server;
-    private $path;
+    private $execute;
     private $name;
 
-    public function __construct(Server $server, string $path, Name $name)
+    public function __construct(Binary $binary, Name $name)
     {
-        $this->server = $server;
-        $this->path = $path;
+        $this->execute = $binary;
         $this->name = $name;
     }
 
@@ -33,14 +27,14 @@ final class Remote
 
     public function prune(): self
     {
-        $this->execute('remote prune '.$this->name);
+        ($this->execute)('remote prune '.$this->name);
 
         return $this;
     }
 
     public function setUrl(Url $url): self
     {
-        $this->execute(sprintf(
+        ($this->execute)(sprintf(
             'remote set-url %s %s',
             $this->name,
             $url
@@ -51,7 +45,7 @@ final class Remote
 
     public function addUrl(Url $url): self
     {
-        $this->execute(sprintf(
+        ($this->execute)(sprintf(
             'remote set-url --add %s %s',
             $this->name,
             $url
@@ -62,31 +56,12 @@ final class Remote
 
     public function removeUrl(Url $url): self
     {
-        $this->execute(sprintf(
+        ($this->execute)(sprintf(
             'remote set-url --delete %s %s',
             $this->name,
             $url
         ));
 
         return $this;
-    }
-
-    private function execute(string $command): Output
-    {
-        $process = $this
-            ->server
-            ->processes()
-            ->execute(
-                Command::foreground('git')
-                    ->withWorkingDirectory($this->path)
-                    ->withArgument($command)
-            )
-            ->wait();
-
-        if (!$process->exitCode()->isSuccessful()) {
-            throw new CommandFailed($command, $process->exitCode());
-        }
-
-        return $process->output();
     }
 }

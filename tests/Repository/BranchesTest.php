@@ -5,7 +5,8 @@ namespace Tests\Innmind\Git\Repository;
 
 use Innmind\Git\{
     Repository\Branches,
-    Revision\Branch
+    Revision\Branch,
+    Binary
 };
 use Innmind\Server\Control\{
     Server,
@@ -14,6 +15,7 @@ use Innmind\Server\Control\{
     Server\Process\Output,
     Server\Process\ExitCode
 };
+use Innmind\Url\Path;
 use Innmind\Immutable\SetInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -56,8 +58,10 @@ BRANCHES
         );
 
         $branches = new Branches(
-            $server,
-            '/tmp/foo'
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            )
         );
         $local = $branches->local();
 
@@ -108,8 +112,10 @@ BRANCHES
         );
 
         $branches = new Branches(
-            $server,
-            '/tmp/foo'
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            )
         );
         $remote = $branches->remote();
 
@@ -189,8 +195,10 @@ BRANCHES
         );
 
         $branches = new Branches(
-            $server,
-            '/tmp/foo'
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            )
         );
         $all = $branches->all();
 
@@ -237,8 +245,10 @@ BRANCHES
             ->willReturn($this->createMock(Output::class));
 
         $branches = new Branches(
-            $server,
-            '/tmp/foo'
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            )
         );
 
         $this->assertSame($branches, $branches->new(new Branch('bar')));
@@ -271,8 +281,10 @@ BRANCHES
             ->willReturn($this->createMock(Output::class));
 
         $branches = new Branches(
-            $server,
-            '/tmp/foo'
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            )
         );
 
         $this->assertSame($branches, $branches->new(new Branch('bar'), new Branch('develop')));
@@ -305,8 +317,10 @@ BRANCHES
             ->willReturn($this->createMock(Output::class));
 
         $branches = new Branches(
-            $server,
-            '/tmp/foo'
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            )
         );
 
         $this->assertSame($branches, $branches->delete(new Branch('bar')));
@@ -339,8 +353,10 @@ BRANCHES
             ->willReturn($this->createMock(Output::class));
 
         $branches = new Branches(
-            $server,
-            '/tmp/foo'
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            )
         );
 
         $this->assertSame($branches, $branches->forceDelete(new Branch('bar')));

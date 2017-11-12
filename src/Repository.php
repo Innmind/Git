@@ -14,41 +14,40 @@ use Innmind\Git\{
 };
 use Innmind\Server\Control\{
     Server,
-    Server\Command,
-    Server\Process\Output
+    Server\Command
 };
+use Innmind\Url\PathInterface;
 use Innmind\Immutable\Str;
 
 final class Repository
 {
-    private $server;
+    private $execute;
     private $path;
     private $branches;
     private $remotes;
 
-    public function __construct(Server $server, string $path)
+    public function __construct(Server $server, PathInterface $path)
     {
-        $this->server = $server;
-        $this->path = $path;
+        $this->execute = new Binary($server, $path);
 
         $code = $server
             ->processes()
             ->execute(
                 Command::foreground('mkdir')
                     ->withShortOption('p')
-                    ->withArgument($path)
+                    ->withArgument((string) $path)
             )
             ->wait()
             ->exitCode();
 
         if (!$code->isSuccessful()) {
-            throw new PathNotUsable($path);
+            throw new PathNotUsable((string) $path);
         }
     }
 
     public function init(): self
     {
-        $output = $this->execute('init');
+        $output = ($this->execute)('init');
         $outputStr = new Str((string) $output);
 
         if (
@@ -63,7 +62,7 @@ final class Repository
 
     public function head(): Revision
     {
-        $output = new Str((string) $this->execute('branch --no-color'));
+        $output = new Str((string) ($this->execute)('branch --no-color'));
         $revision = $output
             ->split("\n")
             ->filter(static function(Str $line): bool {
@@ -84,44 +83,25 @@ final class Repository
 
     public function branches(): Branches
     {
-        return $this->branches ?? $this->branches = new Branches($this->server, $this->path);
+        return $this->branches ?? $this->branches = new Branches($this->execute);
     }
 
     public function push(): self
     {
-        $this->execute('push');
+        ($this->execute)('push');
 
         return $this;
     }
 
     public function pull(): self
     {
-        $this->execute('pull');
+        ($this->execute)('pull');
 
         return $this;
     }
 
     public function remotes(): Remotes
     {
-        return $this->remotes ?? $this->remotes = new Remotes($this->server, $this->path);
-    }
-
-    private function execute(string $command): Output
-    {
-        $process = $this
-            ->server
-            ->processes()
-            ->execute(
-                Command::foreground('git')
-                    ->withWorkingDirectory($this->path)
-                    ->withArgument($command)
-            )
-            ->wait();
-
-        if (!$process->exitCode()->isSuccessful()) {
-            throw new CommandFailed($command, $process->exitCode());
-        }
-
-        return $process->output();
+        return $this->remotes ?? $this->remotes = new Remotes($this->execute);
     }
 }

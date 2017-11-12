@@ -3,18 +3,18 @@ declare(strict_types = 1);
 
 namespace Innmind\Git\Exception;
 
-use Innmind\Server\Control\Server\Process\ExitCode;
+use Innmind\Server\Control\Server\Process;
 
 final class CommandFailed extends RuntimeException
 {
     private $command;
-    private $exitCode;
+    private $process;
 
-    public function __construct(string $command, ExitCode $exitCode)
+    public function __construct(string $command, Process $process)
     {
         parent::__construct();
         $this->command = $command;
-        $this->exitCode = $exitCode;
+        $this->process = $process;
     }
 
     public function command(): string
@@ -22,8 +22,8 @@ final class CommandFailed extends RuntimeException
         return $this->command;
     }
 
-    public function exitCode(): ExitCode
+    public function process(): Process
     {
-        return $this->exitCode;
+        return $this->process;
     }
 }

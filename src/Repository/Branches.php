@@ -4,14 +4,9 @@ declare(strict_types = 1);
 namespace Innmind\Git\Repository;
 
 use Innmind\Git\{
+    Binary,
     Revision,
-    Revision\Branch,
-    Exception\CommandFailed
-};
-use Innmind\Server\Control\{
-    Server,
-    Server\Command,
-    Server\Process\Output
+    Revision\Branch
 };
 use Innmind\Immutable\{
     SetInterface,
@@ -21,13 +16,12 @@ use Innmind\Immutable\{
 
 final class Branches
 {
-    private $server;
+    private $execute;
     private $path;
 
-    public function __construct(Server $server, string $path)
+    public function __construct(Binary $binary)
     {
-        $this->server = $server;
-        $this->path = $path;
+        $this->execute = $binary;
     }
 
     /**
@@ -35,7 +29,7 @@ final class Branches
      */
     public function local(): SetInterface
     {
-        $branches = new Str((string) $this->execute('branch --no-color'));
+        $branches = new Str((string) ($this->execute)('branch --no-color'));
 
         return $branches
             ->split("\n")
@@ -57,7 +51,7 @@ final class Branches
      */
     public function remote(): SetInterface
     {
-        $branches = new Str((string) $this->execute('branch -r --no-color'));
+        $branches = new Str((string) ($this->execute)('branch -r --no-color'));
 
         return $branches
             ->split("\n")
@@ -86,41 +80,22 @@ final class Branches
 
     public function new(Branch $name, Revision $off = null): self
     {
-        $this->execute("branch $name $off");
+        ($this->execute)("branch $name $off");
 
         return $this;
     }
 
     public function delete(Branch $name): self
     {
-        $this->execute("branch -d $name");
+        ($this->execute)("branch -d $name");
 
         return $this;
     }
 
     public function forceDelete(Branch $name): self
     {
-        $this->execute("branch -D $name");
+        ($this->execute)("branch -D $name");
 
         return $this;
-    }
-
-    private function execute(string $command): Output
-    {
-        $process = $this
-            ->server
-            ->processes()
-            ->execute(
-                Command::foreground('git')
-                    ->withWorkingDirectory($this->path)
-                    ->withArgument($command)
-            )
-            ->wait();
-
-        if (!$process->exitCode()->isSuccessful()) {
-            throw new CommandFailed($command, $process->exitCode());
-        }
-
-        return $process->output();
     }
 }

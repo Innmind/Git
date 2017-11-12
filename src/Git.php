@@ -8,6 +8,7 @@ use Innmind\Server\Control\{
     Server,
     Server\Command
 };
+use Innmind\Url\Path;
 use Innmind\Immutable\Str;
 
 final class Git
@@ -21,7 +22,7 @@ final class Git
 
     public function repository(string $path): Repository
     {
-        return new Repository($this->server, $path);
+        return new Repository($this->server, new Path($path));
     }
 
     public function version(): Version
@@ -36,7 +37,7 @@ final class Git
             ->wait();
 
         if (!$process->exitCode()->isSuccessful()) {
-            throw new CommandFailed('git --version', $process->exitCode());
+            throw new CommandFailed('git --version', $process);
         }
 
         $parts = (new Str((string) $process->output()))->capture(

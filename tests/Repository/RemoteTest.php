@@ -3,10 +3,11 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git\Repository;
 
-use Innmind\Git\Repository\{
-    Remote,
-    Remote\Name,
-    Remote\Url
+use Innmind\Git\{
+    Repository\Remote,
+    Repository\Remote\Name,
+    Repository\Remote\Url,
+    Binary
 };
 use Innmind\Server\Control\{
     Server,
@@ -16,6 +17,7 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode,
     ServerFactory
 };
+use Innmind\Url\Path;
 use PHPUnit\Framework\TestCase;
 
 class RemoteTest extends TestCase
@@ -23,8 +25,10 @@ class RemoteTest extends TestCase
     public function testName()
     {
         $remote = new Remote(
-            $this->createMock(Server::class),
-            '/tmp/foo',
+            new Binary(
+                $this->createMock(Server::class),
+                new Path('/tmp/foo')
+            ),
             $expected = new Name('origin')
         );
 
@@ -58,8 +62,10 @@ class RemoteTest extends TestCase
             ->willReturn($this->createMock(Output::class));
 
         $remote = new Remote(
-            $server,
-            '/tmp/foo',
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            ),
             new Name('origin')
         );
 
@@ -93,8 +99,10 @@ class RemoteTest extends TestCase
             ->willReturn($this->createMock(Output::class));
 
         $remote = new Remote(
-            $server,
-            '/tmp/foo',
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            ),
             new Name('origin')
         );
 
@@ -128,8 +136,10 @@ class RemoteTest extends TestCase
             ->willReturn($this->createMock(Output::class));
 
         $remote = new Remote(
-            $server,
-            '/tmp/foo',
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            ),
             new Name('origin')
         );
 
@@ -163,8 +173,10 @@ class RemoteTest extends TestCase
             ->willReturn($this->createMock(Output::class));
 
         $remote = new Remote(
-            $server,
-            '/tmp/foo',
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            ),
             new Name('origin')
         );
 

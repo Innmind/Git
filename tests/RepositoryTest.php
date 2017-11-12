@@ -20,6 +20,7 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode,
     ServerFactory
 };
+use Innmind\Url\Path;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 
@@ -58,7 +59,7 @@ class RepositoryTest extends TestCase
 
         new Repository(
             $server,
-            '/tmp/foo'
+            new Path('/tmp/foo')
         );
     }
 
@@ -95,11 +96,11 @@ class RepositoryTest extends TestCase
             ->will($this->returnSelf());
         $process
             ->method('exitCode')
-            ->willReturn($exitCode = new ExitCode(1));
+            ->willReturn(new ExitCode(1));
 
         $repo = new Repository(
             $server,
-            '/tmp/foo'
+            new Path('/tmp/foo')
         );
 
         try {
@@ -107,7 +108,7 @@ class RepositoryTest extends TestCase
             $this->fail('it should throw');
         } catch (CommandFailed $e) {
             $this->assertSame('init', $e->command());
-            $this->assertSame($exitCode, $e->exitCode());
+            $this->assertSame($process, $e->process());
         }
     }
 
@@ -151,7 +152,7 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            '/tmp/foo'
+            new Path('/tmp/foo')
         );
 
         try {
@@ -166,7 +167,7 @@ class RepositoryTest extends TestCase
     {
         $repo = new Repository(
             (new ServerFactory)->make(),
-            '/tmp/foo'
+            new Path('/tmp/foo')
         );
 
         $this->assertFalse(is_dir('/tmp/foo/.git'));
@@ -222,7 +223,7 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            '/tmp/foo'
+            new Path('/tmp/foo')
         );
 
         $head = $repo->head();
@@ -235,7 +236,7 @@ class RepositoryTest extends TestCase
     {
         $repo = new Repository(
             (new ServerFactory)->make(),
-            '/tmp/foo'
+            new Path('/tmp/foo')
         );
 
         $this->assertInstanceOf(Branches::class, $repo->branches());
@@ -281,7 +282,7 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            '/tmp/foo'
+            new Path('/tmp/foo')
         );
 
         $this->assertSame($repo, $repo->push());
@@ -327,7 +328,7 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            '/tmp/foo'
+            new Path('/tmp/foo')
         );
 
         $this->assertSame($repo, $repo->pull());
@@ -337,7 +338,7 @@ class RepositoryTest extends TestCase
     {
         $repo = new Repository(
             (new ServerFactory)->make(),
-            '/tmp/foo'
+            new Path('/tmp/foo')
         );
 
         $this->assertInstanceOf(Remotes::class, $repo->remotes());

@@ -6,7 +6,8 @@ namespace Tests\Innmind\Git\Repository;
 use Innmind\Git\{
     Repository\Remotes,
     Repository\Remote,
-    Repository\Remote\Url
+    Repository\Remote\Url,
+    Binary
 };
 use Innmind\Server\Control\{
     Server,
@@ -15,6 +16,7 @@ use Innmind\Server\Control\{
     Server\Process\Output,
     Server\Process\ExitCode
 };
+use Innmind\Url\Path;
 use Innmind\Immutable\SetInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -52,8 +54,10 @@ REMOTES
             );
 
         $remotes = new Remotes(
-            $server,
-            '/tmp/foo'
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            )
         );
 
         $all = $remotes->all();
@@ -72,8 +76,10 @@ REMOTES
     public function testGet()
     {
         $remotes = new Remotes(
-            $this->createMock(Server::class),
-            'watev'
+            new Binary(
+                $this->createMock(Server::class),
+                new Path('watev')
+            )
         );
 
         $remote = $remotes->get('origin');
@@ -106,8 +112,10 @@ REMOTES
             ->willReturn(new ExitCode(0));
 
         $remotes = new Remotes(
-            $server,
-            '/tmp/foo'
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            )
         );
 
         $remote = $remotes->add('origin', new Url('git@github.com:Innmind/Git.git'));
@@ -140,8 +148,10 @@ REMOTES
             ->willReturn(new ExitCode(0));
 
         $remotes = new Remotes(
-            $server,
-            '/tmp/foo'
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            )
         );
 
         $this->assertSame($remotes, $remotes->remove('origin'));
