@@ -15,11 +15,6 @@ final class RepositoryInitFailed extends RuntimeException
         $this->output = $output;
     }
 
-    public function command(): string
-    {
-        return $this->command;
-    }
-
     public function output(): Output
     {
         return $this->output;
