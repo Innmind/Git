@@ -7,7 +7,8 @@ use Innmind\Git\{
     Repository\Remote,
     Repository\Remote\Name,
     Repository\Remote\Url,
-    Binary
+    Binary,
+    Revision\Branch
 };
 use Innmind\Server\Control\{
     Server,
@@ -181,5 +182,73 @@ class RemoteTest extends TestCase
         );
 
         $this->assertSame($remote, $remote->removeUrl(new Url('/local/remote')));
+    }
+
+    public function testPush()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function($command): bool {
+                return (string) $command === 'git push -u origin develop' &&
+                    $command->workingDirectory() === '/tmp/foo';
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $remote = new Remote(
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            ),
+            new Name('origin')
+        );
+
+        $this->assertSame($remote, $remote->push(new Branch('develop')));
+    }
+
+    public function testRemove()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function($command): bool {
+                return (string) $command === 'git push origin :develop' &&
+                    $command->workingDirectory() === '/tmp/foo';
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $remote = new Remote(
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            ),
+            new Name('origin')
+        );
+
+        $this->assertSame($remote, $remote->remove(new Branch('develop')));
     }
 }

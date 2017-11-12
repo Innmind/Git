@@ -6,7 +6,8 @@ namespace Innmind\Git\Repository;
 use Innmind\Git\{
     Binary,
     Repository\Remote\Name,
-    Repository\Remote\Url
+    Repository\Remote\Url,
+    Revision\Branch
 };
 
 final class Remote
@@ -60,6 +61,28 @@ final class Remote
             'remote set-url --delete %s %s',
             $this->name,
             $url
+        ));
+
+        return $this;
+    }
+
+    public function push(Branch $branch): self
+    {
+        ($this->execute)(sprintf(
+            'push -u %s %s',
+            $this->name,
+            $branch
+        ));
+
+        return $this;
+    }
+
+    public function remove(Branch $branch): self
+    {
+        ($this->execute)(sprintf(
+            'push %s :%s',
+            $this->name,
+            $branch
         ));
 
         return $this;
