@@ -501,6 +501,52 @@ class RepositoryTest extends TestCase
         $repo->commit('');
     }
 
+    public function testMerge()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->exactly(2))
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->at(0))
+            ->method('execute')
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $processes
+            ->expects($this->at(1))
+            ->method('execute')
+            ->with($this->callback(function($command): bool {
+                return (string) $command === 'git merge develop' &&
+                    $command->workingDirectory() === '/tmp/foo';
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+        $process
+            ->method('output')
+            ->willReturn($this->createMock(Output::class));
+
+        $repo = new Repository(
+            $server,
+            new Path('/tmp/foo')
+        );
+
+        $this->assertSame($repo, $repo->merge(new Branch('develop')));
+    }
+
     public function heads(): array
     {
         $detached = <<<DETACHED

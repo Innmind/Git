@@ -139,4 +139,11 @@ final class Repository
 
         return $this;
     }
+
+    public function merge(Branch $branch): self
+    {
+        ($this->execute)("merge $branch");
+
+        return $this;
+    }
 }
