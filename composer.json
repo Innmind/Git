@@ -1,0 +1,40 @@
+{
+    "name": "innmind/git",
+    "type": "library",
+    "description": "Git abstraction",
+    "homepage": "http://github.com/Innmind/Git",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Baptiste Langlade",
+            "email": "langlade.baptiste@gmail.com"
+        }
+    ],
+    "support": {
+        "issues": "http://github.com/Innmind/Git/issues"
+    },
+    "require": {
+        "php": "~7.1",
+        "innmind/server-control": "^2.1",
+        "innmind/immutable": "^2.5",
+        "giorgiosironi/eris": "^0.9.0",
+        "innmind/url": "^2.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Innmind\\Git\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\Innmind\\Git\\": "tests/"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "~6.0",
+        "symfony/filesystem": "^3.3"
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit --colors=always"
+    }
+}
