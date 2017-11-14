@@ -21,6 +21,7 @@ use Innmind\Server\Control\{
     Server\Process,
     Server\Process\Output,
     Server\Process\ExitCode,
+    Server\Command\Str,
     ServerFactory
 };
 use Innmind\Url\Path;
@@ -55,7 +56,7 @@ class RepositoryTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'mkdir -p /tmp/foo';
+                return (string) $command === "mkdir '-p' '/tmp/foo'";
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
@@ -95,7 +96,7 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git init' &&
+                return (string) $command === "git 'init'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -116,7 +117,7 @@ class RepositoryTest extends TestCase
             $repo->init();
             $this->fail('it should throw');
         } catch (CommandFailed $e) {
-            $this->assertSame('git init', (string) $e->command());
+            $this->assertSame("git 'init'", (string) $e->command());
             $this->assertSame($process, $e->process());
         }
     }
@@ -144,7 +145,7 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git init' &&
+                return (string) $command === "git 'init'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -211,7 +212,7 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git branch --no-color' &&
+                return (string) $command === "git 'branch' '--no-color'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -274,7 +275,7 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git push' &&
+                return (string) $command === "git 'push'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -320,7 +321,7 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git pull' &&
+                return (string) $command === "git 'pull'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -396,7 +397,7 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git add foo' &&
+                return (string) $command === "git 'add' 'foo'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -448,7 +449,9 @@ class RepositoryTest extends TestCase
                     ->expects($this->at(1))
                     ->method('execute')
                     ->with($this->callback(function($command) use ($message): bool {
-                        return (string) $command === "git commit -m $message" &&
+                        $message = (string) new Str($message);
+
+                        return (string) $command === "git 'commit' '-m' $message" &&
                             $command->workingDirectory() === '/tmp/foo';
                     }))
                     ->willReturn($process = $this->createMock(Process::class));
@@ -495,7 +498,7 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git merge develop' &&
+                return (string) $command === "git 'merge' 'develop'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));

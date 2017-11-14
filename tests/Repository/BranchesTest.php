@@ -32,7 +32,7 @@ class BranchesTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git branch --no-color' &&
+                return (string) $command === "git 'branch' '--no-color'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -86,7 +86,7 @@ BRANCHES
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git branch -r --no-color' &&
+                return (string) $command === "git 'branch' '-r' '--no-color'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -140,7 +140,7 @@ BRANCHES
             ->expects($this->at(0))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git branch --no-color' &&
+                return (string) $command === "git 'branch' '--no-color'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -169,7 +169,7 @@ BRANCHES
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git branch -r --no-color' &&
+                return (string) $command === "git 'branch' '-r' '--no-color'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -229,7 +229,7 @@ BRANCHES
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git branch bar' &&
+                return (string) $command === "git 'branch' 'bar'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -265,7 +265,7 @@ BRANCHES
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git branch bar develop' &&
+                return (string) $command === "git 'branch' 'bar' 'develop'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -301,7 +301,7 @@ BRANCHES
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git branch -d bar' &&
+                return (string) $command === "git 'branch' '-d' 'bar'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -337,7 +337,7 @@ BRANCHES
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git branch -D bar' &&
+                return (string) $command === "git 'branch' '-D' 'bar'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));

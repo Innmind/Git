@@ -31,7 +31,7 @@ class BinaryTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git watev' &&
+                return (string) $command === "git 'watev'" &&
                     $command->workingDirectory() === '/tmp/foo' &&
                     $command->toBeRunInBackground() === false;
             }))
@@ -71,7 +71,7 @@ class BinaryTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git watev' &&
+                return (string) $command === "git 'watev'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -94,7 +94,7 @@ class BinaryTest extends TestCase
             $this->fail('it should throw');
         } catch (CommandFailed $e) {
             $this->assertInstanceOf(Command::class, $e->command());
-            $this->assertSame('git watev', (string) $e->command());
+            $this->assertSame("git 'watev'", (string) $e->command());
             $this->assertSame($process, $e->process());
         }
     }

@@ -36,7 +36,7 @@ class CheckoutTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command) use ($path): bool {
-                return (string) $command === 'git checkout -- '.$path &&
+                return (string) $command === "git 'checkout' '--' '$path'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -72,7 +72,7 @@ class CheckoutTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command) use ($revision): bool {
-                return (string) $command === 'git checkout '.$revision &&
+                return (string) $command === "git 'checkout' '$revision'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));

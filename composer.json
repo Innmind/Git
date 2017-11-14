@@ -15,7 +15,7 @@
     },
     "require": {
         "php": "~7.1",
-        "innmind/server-control": "^2.0",
+        "innmind/server-control": "^2.1",
         "innmind/immutable": "^2.5",
         "giorgiosironi/eris": "^0.9.0",
         "innmind/url": "^2.0"

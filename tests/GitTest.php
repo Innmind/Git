@@ -60,7 +60,7 @@ class GitTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git --version';
+                return (string) $command === "git '--version'";
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process

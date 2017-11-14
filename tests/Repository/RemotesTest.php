@@ -100,7 +100,7 @@ REMOTES
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git remote add origin git@github.com:Innmind/Git.git' &&
+                return (string) $command === "git 'remote' 'add' 'origin' 'git@github.com:Innmind/Git.git'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -139,7 +139,7 @@ REMOTES
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === 'git remote remove origin' &&
+                return (string) $command === "git 'remote' 'remove' 'origin'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
