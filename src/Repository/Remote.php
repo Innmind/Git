@@ -71,7 +71,7 @@ final class Remote
         return $this;
     }
 
-    public function removeUrl(Url $url): self
+    public function deleteUrl(Url $url): self
     {
         ($this->binary)(
             $this
@@ -102,7 +102,7 @@ final class Remote
         return $this;
     }
 
-    public function remove(Branch $branch): self
+    public function delete(Branch $branch): self
     {
         ($this->binary)(
             $this
