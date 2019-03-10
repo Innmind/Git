@@ -92,6 +92,42 @@ class TagsTest extends TestCase
         );
     }
 
+    public function testSign()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function($command): bool {
+                return (string) $command === "git 'tag' '-s' '-a' '1.0.0' '-m' 'first release'" &&
+                    $command->workingDirectory() === '/tmp/foo';
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $tags = new Tags(
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            )
+        );
+
+        $this->assertSame(
+            $tags,
+            $tags->sign(new Name('1.0.0'), new Message('first release'))
+        );
+    }
+
     public function testAll()
     {
         $tags = new Tags(

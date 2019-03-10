@@ -55,6 +55,23 @@ final class Tags
         return $this;
     }
 
+    public function sign(Name $name, Message $message): self
+    {
+        ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('tag')
+                ->withShortOption('s')
+                ->withShortOption('a')
+                ->withArgument((string) $name)
+                ->withShortOption('m')
+                ->withArgument((string) $message)
+        );
+
+        return $this;
+    }
+
     /**
      * @return SetInterface<Tag>
      */
