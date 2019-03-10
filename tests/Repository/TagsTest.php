@@ -139,4 +139,47 @@ class TagsTest extends TestCase
         $this->assertSame('1.0.1', (string) $all->current()->name());
         $this->assertSame('fix eris dependency', (string) $all->current()->message());
     }
+
+    public function testAllWhenNoTag()
+    {
+        $tags = new Tags(
+            new Binary(
+                $server = $this->createMock(Server::class),
+                new Path('/tmp/foo')
+            )
+        );
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function($command): bool {
+                return (string) $command === "git 'tag' '--list' '--format=%(refname:strip=2)|||%(subject)'" &&
+                    $command->workingDirectory() === '/tmp/foo';
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+        $process
+            ->expects($this->once())
+            ->method('output')
+            ->willReturn($output = $this->createMock(Output::class));
+        $output
+            ->expects($this->once())
+            ->method('__toString')
+            ->willReturn(' ');
+
+        $all = $tags->all();
+
+        $this->assertInstanceOf(SetInterface::class, $all);
+        $this->assertSame(Tag::class, (string) $all->type());
+        $this->assertCount(0, $all);
+    }
 }

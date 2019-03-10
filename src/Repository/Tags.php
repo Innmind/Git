@@ -72,6 +72,9 @@ final class Tags
 
         return $output
             ->split("\n")
+            ->filter(static function(Str $line): bool {
+                return !$line->trim()->empty();
+            })
             ->reduce(
                 new Set(Tag::class),
                 static function(SetInterface $tags, Str $line): SetInterface {
