@@ -11,6 +11,11 @@ use Innmind\Git\{
     Exception\DomainException
 };
 use Innmind\Url\PathInterface;
+use Innmind\Immutable\{
+    SetInterface,
+    Set,
+    Str
+};
 
 final class Tags
 {
@@ -48,5 +53,35 @@ final class Tags
         );
 
         return $this;
+    }
+
+    /**
+     * @return SetInterface<Tag>
+     */
+    public function all(): SetInterface
+    {
+        $output = ($this->binary)(
+            $this
+                ->binary
+                ->command()
+                ->withArgument('tag')
+                ->withOption('list')
+                ->withOption('format', '%(refname:strip=2)|||%(subject)')
+        );
+        $output = new Str((string) $output);
+
+        return $output
+            ->split("\n")
+            ->reduce(
+                new Set(Tag::class),
+                static function(SetInterface $tags, Str $line): SetInterface {
+                    [$name, $message] = $line->split('|||');
+
+                    return $tags->add(new Tag(
+                        new Name((string) $name),
+                        new Message((string) $message)
+                    ));
+                }
+            );
     }
 }
