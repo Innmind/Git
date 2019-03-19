@@ -39,18 +39,22 @@ final class Tags
         return $this;
     }
 
-    public function add(Name $name, Message $message): self
+    public function add(Name $name, Message $message = null): self
     {
-        ($this->binary)(
-            $this
-                ->binary
-                ->command()
-                ->withArgument('tag')
-                ->withShortOption('a')
-                ->withArgument((string) $name)
+        $command = $this
+            ->binary
+            ->command()
+            ->withArgument('tag')
+            ->withShortOption('a')
+            ->withArgument((string) $name);
+
+        if (null !== $message) {
+            $command = $command
                 ->withShortOption('m')
-                ->withArgument((string) $message)
-        );
+                ->withArgument((string) $message);
+        }
+
+        ($this->binary)($command);
 
         return $this;
     }
