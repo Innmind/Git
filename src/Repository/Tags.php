@@ -45,11 +45,11 @@ final class Tags
             ->binary
             ->command()
             ->withArgument('tag')
-            ->withShortOption('a')
             ->withArgument((string) $name);
 
         if (null !== $message) {
             $command = $command
+                ->withShortOption('a')
                 ->withShortOption('m')
                 ->withArgument((string) $message);
         }

@@ -67,7 +67,7 @@ class TagsTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'tag' '-a' '1.0.0' '-m' 'first release'" &&
+                return (string) $command === "git 'tag' '1.0.0' '-a' '-m' 'first release'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -103,7 +103,7 @@ class TagsTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'tag' '-a' '1.0.0'" &&
+                return (string) $command === "git 'tag' '1.0.0'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
