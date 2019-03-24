@@ -67,7 +67,7 @@ class TagsTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'tag' '-a' '1.0.0' '-m' 'first release'" &&
+                return (string) $command === "git 'tag' '1.0.0' '-a' '-m' 'first release'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -89,6 +89,42 @@ class TagsTest extends TestCase
         $this->assertSame(
             $tags,
             $tags->add(new Name('1.0.0'), new Message('first release'))
+        );
+    }
+
+    public function testAddWithoutMessage()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(function($command): bool {
+                return (string) $command === "git 'tag' '1.0.0'" &&
+                    $command->workingDirectory() === '/tmp/foo';
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait')
+            ->will($this->returnSelf());
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $tags = new Tags(
+            new Binary(
+                $server,
+                new Path('/tmp/foo')
+            )
+        );
+
+        $this->assertSame(
+            $tags,
+            $tags->add(new Name('1.0.0'))
         );
     }
 
