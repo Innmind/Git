@@ -6,7 +6,8 @@ namespace Tests\Innmind\Git;
 use Innmind\Git\{
     Git,
     Repository,
-    Version
+    Version,
+    Exception\CommandFailed,
 };
 use Innmind\Server\Control\{
     ServerFactory,
@@ -16,12 +17,13 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode
 };
 use Innmind\Url\Path;
+use Innmind\TimeContinuum\TimeContinuumInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 
 class GitTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         (new Filesystem)->remove('/tmp/foo');
     }
@@ -29,7 +31,8 @@ class GitTest extends TestCase
     public function testRepository()
     {
         $git = new Git(
-            (new ServerFactory)->make()
+            (new ServerFactory)->make(),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertInstanceOf(Repository::class, $git->repository(new Path('/tmp/foo')));
@@ -38,19 +41,18 @@ class GitTest extends TestCase
     public function testVersion()
     {
         $git = new Git(
-            (new ServerFactory)->make()
+            (new ServerFactory)->make(),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertInstanceOf(Version::class, $git->version());
     }
 
-    /**
-     * @expectedException Innmind\Git\Exception\CommandFailed
-     */
     public function testThrowWhenFailToDetermineVersion()
     {
         $git = new Git(
-            $server = $this->createMock(Server::class)
+            $server = $this->createMock(Server::class),
+            $this->createMock(TimeContinuumInterface::class)
         );
         $server
             ->expects($this->once())
@@ -69,6 +71,8 @@ class GitTest extends TestCase
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(1));
+
+        $this->expectException(CommandFailed::class);
 
         $git->version();
     }

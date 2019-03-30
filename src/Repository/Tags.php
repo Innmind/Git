@@ -11,6 +11,10 @@ use Innmind\Git\{
     Exception\DomainException
 };
 use Innmind\Url\PathInterface;
+use Innmind\TimeContinuum\{
+    TimeContinuumInterface,
+    Format\RFC2822
+};
 use Innmind\Immutable\{
     SetInterface,
     Set,
@@ -20,10 +24,12 @@ use Innmind\Immutable\{
 final class Tags
 {
     private $binary;
+    private $clock;
 
-    public function __construct(Binary $binary)
+    public function __construct(Binary $binary, TimeContinuumInterface $clock)
     {
         $this->binary = $binary;
+        $this->clock = $clock;
     }
 
     public function push(): self
@@ -87,7 +93,7 @@ final class Tags
                 ->command()
                 ->withArgument('tag')
                 ->withOption('list')
-                ->withOption('format', '%(refname:strip=2)|||%(subject)')
+                ->withOption('format', '%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)')
         );
         $output = new Str((string) $output);
 
@@ -98,12 +104,16 @@ final class Tags
             })
             ->reduce(
                 new Set(Tag::class),
-                static function(SetInterface $tags, Str $line): SetInterface {
-                    [$name, $message] = $line->split('|||');
+                function(SetInterface $tags, Str $line): SetInterface {
+                    [$name, $message, $time] = $line->split('|||');
 
                     return $tags->add(new Tag(
                         new Name((string) $name),
-                        new Message((string) $message)
+                        new Message((string) $message),
+                        $this->clock->at(
+                            (string) $time,
+                            new RFC2822
+                        )
                     ));
                 }
             );

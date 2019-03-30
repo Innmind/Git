@@ -18,6 +18,11 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode
 };
 use Innmind\Url\Path;
+use Innmind\TimeContinuum\{
+    TimeContinuum\Earth,
+    Format\ISO8601,
+    Timezone\Earth\UTC
+};
 use Innmind\Immutable\SetInterface;
 use PHPUnit\Framework\TestCase;
 
@@ -50,7 +55,8 @@ class TagsTest extends TestCase
             new Binary(
                 $server,
                 new Path('/tmp/foo')
-            )
+            ),
+            new Earth(new UTC)
         );
 
         $this->assertSame($tags, $tags->push());
@@ -83,7 +89,8 @@ class TagsTest extends TestCase
             new Binary(
                 $server,
                 new Path('/tmp/foo')
-            )
+            ),
+            new Earth(new UTC)
         );
 
         $this->assertSame(
@@ -119,7 +126,8 @@ class TagsTest extends TestCase
             new Binary(
                 $server,
                 new Path('/tmp/foo')
-            )
+            ),
+            new Earth(new UTC)
         );
 
         $this->assertSame(
@@ -155,7 +163,8 @@ class TagsTest extends TestCase
             new Binary(
                 $server,
                 new Path('/tmp/foo')
-            )
+            ),
+            new Earth(new UTC)
         );
 
         $this->assertSame(
@@ -170,7 +179,8 @@ class TagsTest extends TestCase
             new Binary(
                 $server = $this->createMock(Server::class),
                 new Path('/tmp/foo')
-            )
+            ),
+            new Earth(new UTC)
         );
         $server
             ->expects($this->once())
@@ -180,7 +190,7 @@ class TagsTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'tag' '--list' '--format=%(refname:strip=2)|||%(subject)'" &&
+                return (string) $command === "git 'tag' '--list' '--format=%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -198,7 +208,7 @@ class TagsTest extends TestCase
         $output
             ->expects($this->once())
             ->method('__toString')
-            ->willReturn("1.0.0|||first release\n1.0.1|||fix eris dependency");
+            ->willReturn("1.0.0|||first release|||Sat, 16 Mar 2019 12:09:24 +0100\n1.0.1|||fix eris dependency|||Sat, 30 Mar 2019 12:30:35 +0100");
 
         $all = $tags->all();
 
@@ -207,9 +217,17 @@ class TagsTest extends TestCase
         $this->assertCount(2, $all);
         $this->assertSame('1.0.0', (string) $all->current()->name());
         $this->assertSame('first release', (string) $all->current()->message());
+        $this->assertSame(
+            '2019-03-16T11:09:24+00:00',
+            $all->current()->date()->format(new ISO8601)
+        );
         $all->next();
         $this->assertSame('1.0.1', (string) $all->current()->name());
         $this->assertSame('fix eris dependency', (string) $all->current()->message());
+        $this->assertSame(
+            '2019-03-30T11:30:35+00:00',
+            $all->current()->date()->format(new ISO8601)
+        );
     }
 
     public function testAllWhenNoTag()
@@ -218,7 +236,8 @@ class TagsTest extends TestCase
             new Binary(
                 $server = $this->createMock(Server::class),
                 new Path('/tmp/foo')
-            )
+            ),
+            new Earth(new UTC)
         );
         $server
             ->expects($this->once())
@@ -228,7 +247,7 @@ class TagsTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'tag' '--list' '--format=%(refname:strip=2)|||%(subject)'" &&
+                return (string) $command === "git 'tag' '--list' '--format=%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)'" &&
                     $command->workingDirectory() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));

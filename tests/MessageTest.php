@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git;
 
-use Innmind\Git\Message;
+use Innmind\Git\{
+    Message,
+    Exception\DomainException,
+};
 use PHPUnit\Framework\TestCase;
 use Eris\{
     Generator,
@@ -26,11 +29,10 @@ class MessageTest extends TestCase
             });
     }
 
-    /**
-     * @expectedException Innmind\Git\Exception\DomainException
-     */
     public function testThrowWhenEmptyString()
     {
+        $this->expectException(DomainException::class);
+
         new Message(' ');
     }
 }

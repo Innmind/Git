@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git;
 
-use Innmind\Git\Version;
+use Innmind\Git\{
+    Version,
+    Exception\DomainException,
+};
 use PHPUnit\Framework\TestCase;
 
 class VersionTest extends TestCase
@@ -17,27 +20,24 @@ class VersionTest extends TestCase
         $this->assertSame(3, $version->bugfix());
     }
 
-    /**
-     * @expectedException Innmind\Git\Exception\DomainException
-     */
     public function testThrowWhenMajorTooLow()
     {
+        $this->expectException(DomainException::class);
+
         new Version(-1, 1, 1);
     }
 
-    /**
-     * @expectedException Innmind\Git\Exception\DomainException
-     */
     public function testThrowWhenMinorTooLow()
     {
+        $this->expectException(DomainException::class);
+
         new Version(1, -1, 1);
     }
 
-    /**
-     * @expectedException Innmind\Git\Exception\DomainException
-     */
     public function testThrowWhenBugfixTooLow()
     {
+        $this->expectException(DomainException::class);
+
         new Version(1, 1, -1);
     }
 }

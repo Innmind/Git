@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git\Repository\Tag;
 
-use Innmind\Git\Repository\Tag\Name;
+use Innmind\Git\{
+    Repository\Tag\Name,
+    Exception\DomainException,
+};
 use PHPUnit\Framework\TestCase;
 use Eris\{
     Generator,
@@ -26,11 +29,10 @@ class NameTest extends TestCase
             });
     }
 
-    /**
-     * @expectedException Innmind\Git\Exception\DomainException
-     */
     public function testThrowWhenEmptyString()
     {
+        $this->expectException(DomainException::class);
+
         new Name(' ');
     }
 }

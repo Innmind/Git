@@ -7,16 +7,19 @@ use Innmind\Git\{
     Repository\Tag\Name,
     Message
 };
+use Innmind\TimeContinuum\PointInTimeInterface;
 
 final class Tag
 {
     private $name;
     private $message;
+    private $date;
 
-    public function __construct(Name $name, Message $message)
+    public function __construct(Name $name, Message $message, PointInTimeInterface $date)
     {
         $this->name = $name;
         $this->message = $message;
+        $this->date = $date;
     }
 
     public function name(): Name
@@ -27,5 +30,10 @@ final class Tag
     public function message(): Message
     {
         return $this->message;
+    }
+
+    public function date(): PointInTimeInterface
+    {
+        return $this->date;
     }
 }
