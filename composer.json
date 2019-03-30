@@ -14,7 +14,7 @@
         "issues": "http://github.com/Innmind/Git/issues"
     },
     "require": {
-        "php": "~7.1",
+        "php": "~7.2",
         "innmind/server-control": "^2.1",
         "innmind/immutable": "^2.5",
         "innmind/url": "^2.0",
