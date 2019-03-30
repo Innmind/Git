@@ -9,20 +9,23 @@ use Innmind\Server\Control\{
     Server\Command
 };
 use Innmind\Url\PathInterface;
+use Innmind\TimeContinuum\TimeContinuumInterface;
 use Innmind\Immutable\Str;
 
 final class Git
 {
     private $server;
+    private $clock;
 
-    public function __construct(Server $server)
+    public function __construct(Server $server, TimeContinuumInterface $clock)
     {
         $this->server = $server;
+        $this->clock = $clock;
     }
 
     public function repository(PathInterface $path): Repository
     {
-        return new Repository($this->server, $path);
+        return new Repository($this->server, $path, $this->clock);
     }
 
     public function version(): Version

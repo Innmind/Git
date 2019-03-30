@@ -16,6 +16,7 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode
 };
 use Innmind\Url\Path;
+use Innmind\TimeContinuum\TimeContinuumInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 
@@ -29,7 +30,8 @@ class GitTest extends TestCase
     public function testRepository()
     {
         $git = new Git(
-            (new ServerFactory)->make()
+            (new ServerFactory)->make(),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertInstanceOf(Repository::class, $git->repository(new Path('/tmp/foo')));
@@ -38,7 +40,8 @@ class GitTest extends TestCase
     public function testVersion()
     {
         $git = new Git(
-            (new ServerFactory)->make()
+            (new ServerFactory)->make(),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertInstanceOf(Version::class, $git->version());
@@ -50,7 +53,8 @@ class GitTest extends TestCase
     public function testThrowWhenFailToDetermineVersion()
     {
         $git = new Git(
-            $server = $this->createMock(Server::class)
+            $server = $this->createMock(Server::class),
+            $this->createMock(TimeContinuumInterface::class)
         );
         $server
             ->expects($this->once())

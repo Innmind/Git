@@ -22,20 +22,26 @@ use Innmind\Url\{
     PathInterface,
     Path
 };
+use Innmind\TimeContinuum\TimeContinuumInterface;
 use Innmind\Immutable\Str;
 
 final class Repository
 {
     private $binary;
+    private $clock;
     private $path;
     private $branches;
     private $remotes;
     private $checkout;
     private $tags;
 
-    public function __construct(Server $server, PathInterface $path)
-    {
+    public function __construct(
+        Server $server,
+        PathInterface $path,
+        TimeContinuumInterface $clock
+    ) {
         $this->binary = new Binary($server, $path);
+        $this->clock = $clock;
 
         $code = $server
             ->processes()
@@ -140,7 +146,7 @@ final class Repository
 
     public function tags(): Tags
     {
-        return $this->tags ?? $this->tags = new Tags($this->binary);
+        return $this->tags ?? $this->tags = new Tags($this->binary, $this->clock);
     }
 
     public function add(PathInterface $file): self

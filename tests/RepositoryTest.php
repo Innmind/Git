@@ -25,6 +25,7 @@ use Innmind\Server\Control\{
     ServerFactory
 };
 use Innmind\Url\Path;
+use Innmind\TimeContinuum\TimeContinuumInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 use Eris\{
@@ -69,7 +70,8 @@ class RepositoryTest extends TestCase
 
         new Repository(
             $server,
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
     }
 
@@ -110,7 +112,8 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         try {
@@ -162,7 +165,8 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         try {
@@ -177,7 +181,8 @@ class RepositoryTest extends TestCase
     {
         $repo = new Repository(
             (new ServerFactory)->make(),
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertFalse(is_dir('/tmp/foo/.git'));
@@ -233,7 +238,8 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $head = $repo->head();
@@ -246,7 +252,8 @@ class RepositoryTest extends TestCase
     {
         $repo = new Repository(
             (new ServerFactory)->make(),
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertInstanceOf(Branches::class, $repo->branches());
@@ -292,7 +299,8 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertSame($repo, $repo->push());
@@ -338,7 +346,8 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertSame($repo, $repo->pull());
@@ -348,7 +357,8 @@ class RepositoryTest extends TestCase
     {
         $repo = new Repository(
             (new ServerFactory)->make(),
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertInstanceOf(Remotes::class, $repo->remotes());
@@ -358,7 +368,8 @@ class RepositoryTest extends TestCase
     {
         $repo = new Repository(
             (new ServerFactory)->make(),
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertInstanceOf(Checkout::class, $repo->checkout());
@@ -368,7 +379,8 @@ class RepositoryTest extends TestCase
     {
         $repo = new Repository(
             (new ServerFactory)->make(),
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertInstanceOf(Tags::class, $repo->tags());
@@ -414,7 +426,8 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertSame($repo, $repo->add(new Path('foo')));
@@ -468,7 +481,8 @@ class RepositoryTest extends TestCase
 
                 $repo = new Repository(
                     $server,
-                    new Path('/tmp/foo')
+                    new Path('/tmp/foo'),
+                    $this->createMock(TimeContinuumInterface::class)
                 );
 
                 $this->assertSame($repo, $repo->commit(new Message($message)));
@@ -515,7 +529,8 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo')
+            new Path('/tmp/foo'),
+            $this->createMock(TimeContinuumInterface::class)
         );
 
         $this->assertSame($repo, $repo->merge(new Branch('develop')));
