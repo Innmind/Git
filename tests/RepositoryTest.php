@@ -13,7 +13,8 @@ use Innmind\Git\{
     Revision\Branch,
     Message,
     Exception\CommandFailed,
-    Exception\RepositoryInitFailed
+    Exception\RepositoryInitFailed,
+    Exception\PathNotUsable,
 };
 use Innmind\Server\Control\{
     Server,
@@ -37,15 +38,11 @@ class RepositoryTest extends TestCase
 {
     use TestTrait;
 
-    public function setUp()
+    public function setUp(): void
     {
         (new Filesystem)->remove('/tmp/foo');
     }
 
-    /**
-     * @expectedException Innmind\Git\Exception\PathNotUsable
-     * @expectedExceptionMessage /tmp/foo
-     */
     public function testThrowWhenDirectoryIsNotAccessible()
     {
         $server = $this->createMock(Server::class);
@@ -67,6 +64,9 @@ class RepositoryTest extends TestCase
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(1));
+
+        $this->expectException(PathNotUsable::class);
+        $this->expectExceptionMessage('/tmp/foo');
 
         new Repository(
             $server,

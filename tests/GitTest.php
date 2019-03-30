@@ -6,7 +6,8 @@ namespace Tests\Innmind\Git;
 use Innmind\Git\{
     Git,
     Repository,
-    Version
+    Version,
+    Exception\CommandFailed,
 };
 use Innmind\Server\Control\{
     ServerFactory,
@@ -22,7 +23,7 @@ use PHPUnit\Framework\TestCase;
 
 class GitTest extends TestCase
 {
-    public function setUp()
+    public function setUp(): void
     {
         (new Filesystem)->remove('/tmp/foo');
     }
@@ -47,9 +48,6 @@ class GitTest extends TestCase
         $this->assertInstanceOf(Version::class, $git->version());
     }
 
-    /**
-     * @expectedException Innmind\Git\Exception\CommandFailed
-     */
     public function testThrowWhenFailToDetermineVersion()
     {
         $git = new Git(
@@ -73,6 +71,8 @@ class GitTest extends TestCase
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(1));
+
+        $this->expectException(CommandFailed::class);
 
         $git->version();
     }
