@@ -16,7 +16,7 @@ use Innmind\Immutable\{
 
 final class Remotes
 {
-    private $binary;
+    private Binary $binary;
 
     public function __construct(Binary $binary)
     {

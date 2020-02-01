@@ -27,13 +27,13 @@ use Innmind\Immutable\Str;
 
 final class Repository
 {
-    private $binary;
-    private $clock;
-    private $path;
-    private $branches;
-    private $remotes;
-    private $checkout;
-    private $tags;
+    private Binary $binary;
+    private TimeContinuumInterface $clock;
+    private PathInterface $path;
+    private ?Branches $branches = null;
+    private ?Remotes $remotes = null;
+    private ?Checkout $checkout = null;
+    private ?Tags $tags = null;
 
     public function __construct(
         Server $server,
@@ -107,7 +107,7 @@ final class Repository
 
     public function branches(): Branches
     {
-        return $this->branches ?? $this->branches = new Branches($this->binary);
+        return $this->branches ??= new Branches($this->binary);
     }
 
     public function push(): self
@@ -136,17 +136,17 @@ final class Repository
 
     public function remotes(): Remotes
     {
-        return $this->remotes ?? $this->remotes = new Remotes($this->binary);
+        return $this->remotes ??= new Remotes($this->binary);
     }
 
     public function checkout(): Checkout
     {
-        return $this->checkout ?? $this->checkout = new Checkout($this->binary);
+        return $this->checkout ??= new Checkout($this->binary);
     }
 
     public function tags(): Tags
     {
-        return $this->tags ?? $this->tags = new Tags($this->binary, $this->clock);
+        return $this->tags ??= new Tags($this->binary, $this->clock);
     }
 
     public function add(PathInterface $file): self

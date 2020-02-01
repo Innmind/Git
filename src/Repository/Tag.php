@@ -11,9 +11,9 @@ use Innmind\TimeContinuum\PointInTimeInterface;
 
 final class Tag
 {
-    private $name;
-    private $message;
-    private $date;
+    private Name $name;
+    private Message $message;
+    private PointInTimeInterface $date;
 
     public function __construct(Name $name, Message $message, PointInTimeInterface $date)
     {

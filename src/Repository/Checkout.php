@@ -11,7 +11,7 @@ use Innmind\Url\PathInterface;
 
 final class Checkout
 {
-    private $binary;
+    private Binary $binary;
 
     public function __construct(Binary $binary)
     {

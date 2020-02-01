@@ -14,8 +14,8 @@ use Innmind\Immutable\Str;
 
 final class Git
 {
-    private $server;
-    private $clock;
+    private Server $server;
+    private TimeContinuumInterface $clock;
 
     public function __construct(Server $server, TimeContinuumInterface $clock)
     {

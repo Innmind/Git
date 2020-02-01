@@ -23,8 +23,8 @@ use Innmind\Immutable\{
 
 final class Tags
 {
-    private $binary;
-    private $clock;
+    private Binary $binary;
+    private TimeContinuumInterface $clock;
 
     public function __construct(Binary $binary, TimeContinuumInterface $clock)
     {

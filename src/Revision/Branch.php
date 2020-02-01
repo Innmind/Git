@@ -11,7 +11,7 @@ use Innmind\Immutable\Str;
 
 final class Branch implements Revision
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $branch)
     {

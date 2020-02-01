@@ -13,8 +13,8 @@ use Innmind\Url\PathInterface;
 
 final class Binary
 {
-    private $server;
-    private $command;
+    private Server $server;
+    private Command $command;
 
     public function __construct(Server $server, PathInterface $path)
     {

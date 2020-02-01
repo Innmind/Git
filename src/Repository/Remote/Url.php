@@ -15,7 +15,7 @@ use Innmind\Immutable\Str;
  */
 final class Url
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $url)
     {

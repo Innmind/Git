@@ -12,8 +12,8 @@ use Innmind\Git\{
 
 final class Remote
 {
-    private $binary;
-    private $name;
+    private Binary $binary;
+    private Name $name;
 
     public function __construct(Binary $binary, Name $name)
     {

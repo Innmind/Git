@@ -8,7 +8,7 @@ use Innmind\Immutable\Str;
 
 final class Message
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $message)
     {

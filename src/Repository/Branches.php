@@ -16,8 +16,7 @@ use Innmind\Immutable\{
 
 final class Branches
 {
-    private $binary;
-    private $path;
+    private Binary $binary;
 
     public function __construct(Binary $binary)
     {
