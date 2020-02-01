@@ -16,7 +16,7 @@ final class Branch implements Revision
     public function __construct(string $branch)
     {
         if (!Str::of($branch)->matches('~\w+~')) {
-            throw new DomainException;
+            throw new DomainException($branch);
         }
 
         $this->value = $branch;

@@ -23,7 +23,7 @@ final class Url
             BaseUrl::of($url);
         } catch (UrlDomainException $e) {
             if (!Str::of($url)->matches('~^\S+@\S+(\.\S+)?:\S+(/\S+)?\.git$~')) {
-                throw new DomainException;
+                throw new DomainException($url);
             }
         }
 

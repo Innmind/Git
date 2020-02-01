@@ -13,7 +13,7 @@ final class Name
     public function __construct(string $remote)
     {
         if (!Str::of($remote)->matches('~\w+~')) {
-            throw new DomainException;
+            throw new DomainException($remote);
         }
 
         $this->value = $remote;

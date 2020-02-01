@@ -24,7 +24,7 @@ final class Hash implements Revision
                 $hash->length() !== 40
             )
         ) {
-            throw new DomainException;
+            throw new DomainException($hash->toString());
         }
 
         $this->value = $hash->toString();
