@@ -34,6 +34,7 @@ final class Remotes
                 ->withArgument('remote')
         )->toString());
 
+        /** @var Set<Remote> */
         return $remotes
             ->split("\n")
             ->toSetOf(

@@ -35,6 +35,7 @@ final class Branches
                 ->withOption('no-color'),
         )->toString());
 
+        /** @var Set<Branch> */
         return $branches
             ->split("\n")
             ->filter(static function(Str $line): bool {
@@ -62,6 +63,7 @@ final class Branches
                 ->withOption('no-color'),
         )->toString());
 
+        /** @var Set<Branch> */
         return $branches
             ->split("\n")
             ->filter(static function(Str $line): bool {

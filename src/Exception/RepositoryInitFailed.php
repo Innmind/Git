@@ -7,7 +7,7 @@ use Innmind\Server\Control\Server\Process\Output;
 
 final class RepositoryInitFailed extends RuntimeException
 {
-    private $output;
+    private Output $output;
 
     public function __construct(Output $output)
     {

@@ -26,7 +26,6 @@ final class Repository
 {
     private Binary $binary;
     private Clock $clock;
-    private Path $path;
     private ?Branches $branches = null;
     private ?Remotes $remotes = null;
     private ?Checkout $checkout = null;

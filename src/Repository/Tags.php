@@ -90,6 +90,7 @@ final class Tags
         );
         $output = Str::of($output->toString());
 
+        /** @var Set<Tag> */
         return $output
             ->split("\n")
             ->filter(static function(Str $line): bool {
