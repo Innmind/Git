@@ -7,7 +7,7 @@ use Innmind\Git\{
     Binary,
     Repository\Remote\Name,
     Repository\Remote\Url,
-    Revision\Branch
+    Revision\Branch,
 };
 
 final class Remote
@@ -34,7 +34,7 @@ final class Remote
                 ->command()
                 ->withArgument('remote')
                 ->withArgument('prune')
-                ->withArgument($this->name->toString())
+                ->withArgument($this->name->toString()),
         );
     }
 
@@ -47,7 +47,7 @@ final class Remote
                 ->withArgument('remote')
                 ->withArgument('set-url')
                 ->withArgument($this->name->toString())
-                ->withArgument($url->toString())
+                ->withArgument($url->toString()),
         );
     }
 
@@ -61,7 +61,7 @@ final class Remote
                 ->withArgument('set-url')
                 ->withOption('add')
                 ->withArgument($this->name->toString())
-                ->withArgument($url->toString())
+                ->withArgument($url->toString()),
         );
     }
 
@@ -88,7 +88,7 @@ final class Remote
                 ->withArgument('push')
                 ->withShortOption('u')
                 ->withArgument($this->name->toString())
-                ->withArgument($branch->toString())
+                ->withArgument($branch->toString()),
         );
     }
 
@@ -100,7 +100,7 @@ final class Remote
                 ->command()
                 ->withArgument('push')
                 ->withArgument($this->name->toString())
-                ->withArgument(':'.$branch->toString())
+                ->withArgument(':'.$branch->toString()),
         );
     }
 }

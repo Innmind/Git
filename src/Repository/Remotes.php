@@ -6,7 +6,7 @@ namespace Innmind\Git\Repository;
 use Innmind\Git\{
     Binary,
     Repository\Remote\Name,
-    Repository\Remote\Url
+    Repository\Remote\Url,
 };
 use Innmind\Immutable\{
     Set,
@@ -36,13 +36,9 @@ final class Remotes
 
         return $remotes
             ->split("\n")
-            ->reduce(
-                Set::of(Remote::class),
-                function(Set $remotes, Str $remote): Set {
-                    return $remotes->add(
-                        $this->get(new Name($remote->toString()))
-                    );
-                }
+            ->toSetOf(
+                Remote::class,
+                fn(Str $remote): \Generator => yield $this->get(new Name($remote->toString())),
             );
     }
 
@@ -50,7 +46,7 @@ final class Remotes
     {
         return new Remote(
             $this->binary,
-            $name
+            $name,
         );
     }
 
@@ -63,7 +59,7 @@ final class Remotes
                 ->withArgument('remote')
                 ->withArgument('add')
                 ->withArgument($name->toString())
-                ->withArgument($url->toString())
+                ->withArgument($url->toString()),
         );
 
         return $this->get($name);
@@ -77,7 +73,7 @@ final class Remotes
                 ->command()
                 ->withArgument('remote')
                 ->withArgument('remove')
-                ->withArgument($name->toString())
+                ->withArgument($name->toString()),
         );
     }
 }

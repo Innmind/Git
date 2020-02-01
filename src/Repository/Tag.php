@@ -5,7 +5,7 @@ namespace Innmind\Git\Repository;
 
 use Innmind\Git\{
     Repository\Tag\Name,
-    Message
+    Message,
 };
 use Innmind\TimeContinuum\PointInTime;
 

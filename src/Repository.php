@@ -12,11 +12,11 @@ use Innmind\Git\{
     Repository\Tags,
     Exception\RepositoryInitFailed,
     Exception\PathNotUsable,
-    Exception\DomainException
+    Exception\DomainException,
 };
 use Innmind\Server\Control\{
     Server,
-    Server\Command
+    Server\Command,
 };
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
@@ -45,7 +45,7 @@ final class Repository
             ->execute(
                 Command::foreground('mkdir')
                     ->withShortOption('p')
-                    ->withArgument($path->toString())
+                    ->withArgument($path->toString()),
             );
         $process->wait();
         $code = $process->exitCode();
@@ -61,7 +61,7 @@ final class Repository
             $this
                 ->binary
                 ->command()
-                ->withArgument('init')
+                ->withArgument('init'),
         );
         $outputStr = Str::of($output->toString());
 
@@ -82,7 +82,7 @@ final class Repository
                 ->binary
                 ->command()
                 ->withArgument('branch')
-                ->withOption('no-color')
+                ->withOption('no-color'),
         )->toString());
         $revision = $output
             ->split("\n")
@@ -114,7 +114,7 @@ final class Repository
             $this
                 ->binary
                 ->command()
-                ->withArgument('push')
+                ->withArgument('push'),
         );
     }
 
@@ -124,7 +124,7 @@ final class Repository
             $this
                 ->binary
                 ->command()
-                ->withArgument('pull')
+                ->withArgument('pull'),
         );
     }
 
@@ -150,7 +150,7 @@ final class Repository
                 ->binary
                 ->command()
                 ->withArgument('add')
-                ->withArgument($file->toString())
+                ->withArgument($file->toString()),
         );
     }
 
@@ -162,7 +162,7 @@ final class Repository
                 ->command()
                 ->withArgument('commit')
                 ->withShortOption('m')
-                ->withArgument($message->toString())
+                ->withArgument($message->toString()),
         );
     }
 
@@ -173,7 +173,7 @@ final class Repository
                 ->binary
                 ->command()
                 ->withArgument('merge')
-                ->withArgument($branch->toString())
+                ->withArgument($branch->toString()),
         );
     }
 }

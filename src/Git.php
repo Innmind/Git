@@ -6,7 +6,7 @@ namespace Innmind\Git;
 use Innmind\Git\Exception\CommandFailed;
 use Innmind\Server\Control\{
     Server,
-    Server\Command
+    Server\Command,
 };
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
@@ -35,7 +35,7 @@ final class Git
             ->processes()
             ->execute(
                 $command = Command::foreground('git')
-                    ->withOption('version')
+                    ->withOption('version'),
             );
         $process->wait();
 
@@ -44,7 +44,7 @@ final class Git
         }
 
         $parts = Str::of($process->output()->toString())->capture(
-            '~version (?<major>\d+)\.(?<minor>\d+)\.(?<bugfix>\d+)~'
+            '~version (?<major>\d+)\.(?<minor>\d+)\.(?<bugfix>\d+)~',
         );
 
         return new Version(

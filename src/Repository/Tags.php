@@ -8,9 +8,8 @@ use Innmind\Git\{
     Revision,
     Message,
     Repository\Tag\Name,
-    Exception\DomainException
+    Exception\DomainException,
 };
-use Innmind\Url\PathInterface;
 use Innmind\TimeContinuum\{
     Clock,
     Earth\Format\RFC2822,
@@ -39,7 +38,7 @@ final class Tags
                 ->binary
                 ->command()
                 ->withArgument('push')
-                ->withOption('tags')
+                ->withOption('tags'),
         );
     }
 
@@ -72,7 +71,7 @@ final class Tags
                 ->withShortOption('a')
                 ->withArgument($name->toString())
                 ->withShortOption('m')
-                ->withArgument($message->toString())
+                ->withArgument($message->toString()),
         );
     }
 
@@ -96,20 +95,20 @@ final class Tags
             ->filter(static function(Str $line): bool {
                 return !$line->trim()->empty();
             })
-            ->reduce(
-                Set::of(Tag::class),
-                function(Set $tags, Str $line): Set {
+            ->toSetOf(
+                Tag::class,
+                function(Str $line): \Generator {
                     [$name, $message, $time] = unwrap($line->split('|||'));
 
-                    return $tags->add(new Tag(
+                    yield new Tag(
                         new Name($name->toString()),
                         new Message($message->toString()),
                         $this->clock->at(
                             $time->toString(),
-                            new RFC2822
-                        )
-                    ));
-                }
+                            new RFC2822,
+                        ),
+                    );
+                },
             );
     }
 }

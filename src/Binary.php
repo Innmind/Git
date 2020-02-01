@@ -7,7 +7,7 @@ use Innmind\Git\Exception\CommandFailed;
 use Innmind\Server\Control\{
     Server,
     Server\Command,
-    Server\Process\Output
+    Server\Process\Output,
 };
 use Innmind\Url\Path;
 

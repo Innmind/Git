@@ -5,7 +5,7 @@ namespace Innmind\Git\Revision;
 
 use Innmind\Git\{
     Revision,
-    Exception\DomainException
+    Exception\DomainException,
 };
 use Innmind\Immutable\Str;
 

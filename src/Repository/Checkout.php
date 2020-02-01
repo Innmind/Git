@@ -5,7 +5,7 @@ namespace Innmind\Git\Repository;
 
 use Innmind\Git\{
     Binary,
-    Revision
+    Revision,
 };
 use Innmind\Url\Path;
 
@@ -37,7 +37,7 @@ final class Checkout
                 ->binary
                 ->command()
                 ->withArgument('checkout')
-                ->withArgument($revision->toString())
+                ->withArgument($revision->toString()),
         );
     }
 }

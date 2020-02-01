@@ -6,7 +6,7 @@ namespace Innmind\Git\Repository;
 use Innmind\Git\{
     Binary,
     Revision,
-    Revision\Branch
+    Revision\Branch,
 };
 use Innmind\Immutable\{
     Set,
@@ -40,13 +40,11 @@ final class Branches
             ->filter(static function(Str $line): bool {
                 return !$line->matches('~HEAD detached~');
             })
-            ->reduce(
-                Set::of(Branch::class),
-                static function(Set $branches, Str $branch): Set {
-                    return $branches->add(new Branch(
-                        $branch->substring(2)->toString(),
-                    ));
-                }
+            ->toSetOf(
+                Branch::class,
+                static fn(Str $branch): \Generator => yield new Branch(
+                    $branch->substring(2)->toString(),
+                ),
             );
     }
 
@@ -61,7 +59,7 @@ final class Branches
                 ->command()
                 ->withArgument('branch')
                 ->withShortOption('r')
-                ->withOption('no-color')
+                ->withOption('no-color'),
         )->toString());
 
         return $branches
@@ -69,13 +67,11 @@ final class Branches
             ->filter(static function(Str $line): bool {
                 return !$line->matches('~-> origin/~');
             })
-            ->reduce(
-                Set::of(Branch::class),
-                static function(Set $branches, Str $branch): Set {
-                    return $branches->add(new Branch(
-                        $branch->substring(2)->toString(),
-                    ));
-                }
+            ->toSetOf(
+                Branch::class,
+                static fn(Str $branch): \Generator => yield new Branch(
+                    $branch->substring(2)->toString(),
+                ),
             );
     }
 
@@ -112,7 +108,7 @@ final class Branches
                 ->command()
                 ->withArgument('branch')
                 ->withShortOption('d')
-                ->withArgument($name->toString())
+                ->withArgument($name->toString()),
         );
     }
 
@@ -124,7 +120,7 @@ final class Branches
                 ->command()
                 ->withArgument('branch')
                 ->withShortOption('D')
-                ->withArgument($name->toString())
+                ->withArgument($name->toString()),
         );
     }
 }
