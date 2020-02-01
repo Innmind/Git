@@ -15,13 +15,11 @@ final class Branch implements Revision
 
     public function __construct(string $branch)
     {
-        $branch = new Str($branch);
-
-        if (!$branch->matches('~\w+~')) {
+        if (!Str::of($branch)->matches('~\w+~')) {
             throw new DomainException;
         }
 
-        $this->value = (string) $branch;
+        $this->value = $branch;
     }
 
     public function __toString(): string

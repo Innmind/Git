@@ -9,9 +9,8 @@ use Innmind\Git\{
     Repository\Remote\Url
 };
 use Innmind\Immutable\{
-    SetInterface,
     Set,
-    Str
+    Str,
 };
 
 final class Remotes
@@ -24,24 +23,24 @@ final class Remotes
     }
 
     /**
-     * @return SetInterface<Remote>
+     * @return Set<Remote>
      */
-    public function all(): SetInterface
+    public function all(): Set
     {
-        $remotes = new Str((string) ($this->binary)(
+        $remotes = Str::of(($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('remote')
-        ));
+        )->toString());
 
         return $remotes
             ->split("\n")
             ->reduce(
-                new Set(Remote::class),
+                Set::of(Remote::class),
                 function(Set $remotes, Str $remote): Set {
                     return $remotes->add(
-                        $this->get(new Name((string) $remote))
+                        $this->get(new Name($remote->toString()))
                     );
                 }
             );

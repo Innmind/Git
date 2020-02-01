@@ -9,9 +9,8 @@ use Innmind\Git\{
     Revision\Branch
 };
 use Innmind\Immutable\{
-    SetInterface,
     Set,
-    Str
+    Str,
 };
 
 final class Branches
@@ -24,17 +23,17 @@ final class Branches
     }
 
     /**
-     * @return SetInterface<Branch>
+     * @return Set<Branch>
      */
-    public function local(): SetInterface
+    public function local(): Set
     {
-        $branches = new Str((string) ($this->binary)(
+        $branches = Str::of(($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('branch')
-                ->withOption('no-color')
-        ));
+                ->withOption('no-color'),
+        )->toString());
 
         return $branches
             ->split("\n")
@@ -42,28 +41,28 @@ final class Branches
                 return !$line->matches('~HEAD detached~');
             })
             ->reduce(
-                new Set(Branch::class),
+                Set::of(Branch::class),
                 static function(Set $branches, Str $branch): Set {
                     return $branches->add(new Branch(
-                        (string) $branch->substring(2)
+                        $branch->substring(2)->toString(),
                     ));
                 }
             );
     }
 
     /**
-     * @return SetInterface<Branch>
+     * @return Set<Branch>
      */
-    public function remote(): SetInterface
+    public function remote(): Set
     {
-        $branches = new Str((string) ($this->binary)(
+        $branches = Str::of(($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('branch')
                 ->withShortOption('r')
                 ->withOption('no-color')
-        ));
+        )->toString());
 
         return $branches
             ->split("\n")
@@ -71,19 +70,19 @@ final class Branches
                 return !$line->matches('~-> origin/~');
             })
             ->reduce(
-                new Set(Branch::class),
+                Set::of(Branch::class),
                 static function(Set $branches, Str $branch): Set {
                     return $branches->add(new Branch(
-                        (string) $branch->substring(2)
+                        $branch->substring(2)->toString(),
                     ));
                 }
             );
     }
 
     /**
-     * @return SetInterface<Branch>
+     * @return Set<Branch>
      */
-    public function all(): SetInterface
+    public function all(): Set
     {
         return $this
             ->local()

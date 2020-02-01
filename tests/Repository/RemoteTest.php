@@ -28,7 +28,7 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $this->createMock(Server::class),
-                new Path('/tmp/foo')
+                Path::of('/tmp/foo')
             ),
             $expected = new Name('origin')
         );
@@ -47,14 +47,13 @@ class RemoteTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'remote' 'prune' 'origin'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'remote' 'prune' 'origin'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -65,7 +64,7 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $server,
-                new Path('/tmp/foo')
+                Path::of('/tmp/foo')
             ),
             new Name('origin')
         );
@@ -84,14 +83,13 @@ class RemoteTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'remote' 'set-url' 'origin' '/local/remote'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'remote' 'set-url' 'origin' '/local/remote'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -102,7 +100,7 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $server,
-                new Path('/tmp/foo')
+                Path::of('/tmp/foo')
             ),
             new Name('origin')
         );
@@ -121,14 +119,13 @@ class RemoteTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'remote' 'set-url' '--add' 'origin' '/local/remote'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'remote' 'set-url' '--add' 'origin' '/local/remote'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -139,7 +136,7 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $server,
-                new Path('/tmp/foo')
+                Path::of('/tmp/foo')
             ),
             new Name('origin')
         );
@@ -158,14 +155,13 @@ class RemoteTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'remote' 'set-url' '--delete' 'origin' '/local/remote'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'remote' 'set-url' '--delete' 'origin' '/local/remote'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -176,7 +172,7 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $server,
-                new Path('/tmp/foo')
+                Path::of('/tmp/foo')
             ),
             new Name('origin')
         );
@@ -195,14 +191,13 @@ class RemoteTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'push' '-u' 'origin' 'develop'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'push' '-u' 'origin' 'develop'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -210,7 +205,7 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $server,
-                new Path('/tmp/foo')
+                Path::of('/tmp/foo')
             ),
             new Name('origin')
         );
@@ -229,14 +224,13 @@ class RemoteTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'push' 'origin' ':develop'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'push' 'origin' ':develop'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -244,7 +238,7 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $server,
-                new Path('/tmp/foo')
+                Path::of('/tmp/foo')
             ),
             new Name('origin')
         );

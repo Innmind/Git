@@ -15,7 +15,7 @@ final class CommandFailed extends RuntimeException
 
     public function __construct(Command $command, Process $process)
     {
-        parent::__construct((string) $command);
+        parent::__construct($command->toString());
         $this->command = $command;
         $this->process = $process;
     }

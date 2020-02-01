@@ -8,22 +8,22 @@ use Innmind\Server\Control\{
     Server,
     Server\Command
 };
-use Innmind\Url\PathInterface;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\Url\Path;
+use Innmind\TimeContinuum\Clock;
 use Innmind\Immutable\Str;
 
 final class Git
 {
     private Server $server;
-    private TimeContinuumInterface $clock;
+    private Clock $clock;
 
-    public function __construct(Server $server, TimeContinuumInterface $clock)
+    public function __construct(Server $server, Clock $clock)
     {
         $this->server = $server;
         $this->clock = $clock;
     }
 
-    public function repository(PathInterface $path): Repository
+    public function repository(Path $path): Repository
     {
         return new Repository($this->server, $path, $this->clock);
     }
@@ -36,21 +36,21 @@ final class Git
             ->execute(
                 $command = Command::foreground('git')
                     ->withOption('version')
-            )
-            ->wait();
+            );
+        $process->wait();
 
         if (!$process->exitCode()->isSuccessful()) {
             throw new CommandFailed($command, $process);
         }
 
-        $parts = (new Str((string) $process->output()))->capture(
+        $parts = Str::of($process->output()->toString())->capture(
             '~version (?<major>\d+)\.(?<minor>\d+)\.(?<bugfix>\d+)~'
         );
 
         return new Version(
-            (int) (string) $parts->get('major'),
-            (int) (string) $parts->get('minor'),
-            (int) (string) $parts->get('bugfix')
+            (int) $parts->get('major')->toString(),
+            (int) $parts->get('minor')->toString(),
+            (int) $parts->get('bugfix')->toString(),
         );
     }
 }

@@ -12,7 +12,7 @@ final class Message
 
     public function __construct(string $message)
     {
-        if ((new Str($message))->trim()->length() === 0) {
+        if (Str::of($message)->trim()->empty()) {
             throw new DomainException;
         }
 

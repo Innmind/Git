@@ -12,21 +12,21 @@ use Innmind\Git\{
 };
 use Innmind\Url\PathInterface;
 use Innmind\TimeContinuum\{
-    TimeContinuumInterface,
-    Format\RFC2822
+    Clock,
+    Earth\Format\RFC2822,
 };
 use Innmind\Immutable\{
-    SetInterface,
     Set,
-    Str
+    Str,
 };
+use function Innmind\Immutable\unwrap;
 
 final class Tags
 {
     private Binary $binary;
-    private TimeContinuumInterface $clock;
+    private Clock $clock;
 
-    public function __construct(Binary $binary, TimeContinuumInterface $clock)
+    public function __construct(Binary $binary, Clock $clock)
     {
         $this->binary = $binary;
         $this->clock = $clock;
@@ -83,9 +83,9 @@ final class Tags
     }
 
     /**
-     * @return SetInterface<Tag>
+     * @return Set<Tag>
      */
-    public function all(): SetInterface
+    public function all(): Set
     {
         $output = ($this->binary)(
             $this
@@ -95,7 +95,7 @@ final class Tags
                 ->withOption('list')
                 ->withOption('format', '%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)')
         );
-        $output = new Str((string) $output);
+        $output = Str::of($output->toString());
 
         return $output
             ->split("\n")
@@ -103,15 +103,15 @@ final class Tags
                 return !$line->trim()->empty();
             })
             ->reduce(
-                new Set(Tag::class),
-                function(SetInterface $tags, Str $line): SetInterface {
-                    [$name, $message, $time] = $line->split('|||');
+                Set::of(Tag::class),
+                function(Set $tags, Str $line): Set {
+                    [$name, $message, $time] = unwrap($line->split('|||'));
 
                     return $tags->add(new Tag(
-                        new Name((string) $name),
-                        new Message((string) $message),
+                        new Name($name->toString()),
+                        new Message($message->toString()),
                         $this->clock->at(
-                            (string) $time,
+                            $time->toString(),
                             new RFC2822
                         )
                     ));

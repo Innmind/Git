@@ -7,7 +7,7 @@ use Innmind\Git\{
     Binary,
     Revision
 };
-use Innmind\Url\PathInterface;
+use Innmind\Url\Path;
 
 final class Checkout
 {
@@ -18,7 +18,7 @@ final class Checkout
         $this->binary = $binary;
     }
 
-    public function file(PathInterface $path): self
+    public function file(Path $path): self
     {
         ($this->binary)(
             $this
@@ -26,7 +26,7 @@ final class Checkout
                 ->command()
                 ->withArgument('checkout')
                 ->withArgument('--')
-                ->withArgument((string) $path)
+                ->withArgument($path->toString()),
         );
 
         return $this;

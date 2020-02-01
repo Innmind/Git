@@ -18,18 +18,15 @@ use Innmind\Server\Control\{
     Server,
     Server\Command
 };
-use Innmind\Url\{
-    PathInterface,
-    Path
-};
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\Url\Path;
+use Innmind\TimeContinuum\Clock;
 use Innmind\Immutable\Str;
 
 final class Repository
 {
     private Binary $binary;
-    private TimeContinuumInterface $clock;
-    private PathInterface $path;
+    private Clock $clock;
+    private Path $path;
     private ?Branches $branches = null;
     private ?Remotes $remotes = null;
     private ?Checkout $checkout = null;
@@ -37,24 +34,24 @@ final class Repository
 
     public function __construct(
         Server $server,
-        PathInterface $path,
-        TimeContinuumInterface $clock
+        Path $path,
+        Clock $clock
     ) {
         $this->binary = new Binary($server, $path);
         $this->clock = $clock;
 
-        $code = $server
+        $process = $server
             ->processes()
             ->execute(
                 Command::foreground('mkdir')
                     ->withShortOption('p')
-                    ->withArgument((string) $path)
-            )
-            ->wait()
-            ->exitCode();
+                    ->withArgument($path->toString())
+            );
+        $process->wait();
+        $code = $process->exitCode();
 
         if (!$code->isSuccessful()) {
-            throw new PathNotUsable((string) $path);
+            throw new PathNotUsable($path->toString());
         }
     }
 
@@ -66,7 +63,7 @@ final class Repository
                 ->command()
                 ->withArgument('init')
         );
-        $outputStr = new Str((string) $output);
+        $outputStr = Str::of($output->toString());
 
         if (
             $outputStr->contains('Initialized empty Git repository') ||
@@ -80,13 +77,13 @@ final class Repository
 
     public function head(): Revision
     {
-        $output = new Str((string) ($this->binary)(
+        $output = Str::of(($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('branch')
                 ->withOption('no-color')
-        ));
+        )->toString());
         $revision = $output
             ->split("\n")
             ->filter(static function(Str $line): bool {
@@ -96,13 +93,14 @@ final class Repository
 
         if ($revision->matches('~\(HEAD detached at [a-z0-9]{7,40}\)~')) {
             return new Hash(
-                (string) $revision
+                $revision
                     ->capture('~\(HEAD detached at (?P<hash>[a-z0-9]{7,40})\)~')
                     ->get('hash')
+                    ->toString(),
             );
         }
 
-        return new Branch((string) $revision->substring(2));
+        return new Branch($revision->substring(2)->toString());
     }
 
     public function branches(): Branches
@@ -149,14 +147,14 @@ final class Repository
         return $this->tags ??= new Tags($this->binary, $this->clock);
     }
 
-    public function add(PathInterface $file): self
+    public function add(Path $file): self
     {
         ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('add')
-                ->withArgument((string) $file)
+                ->withArgument($file->toString())
         );
 
         return $this;

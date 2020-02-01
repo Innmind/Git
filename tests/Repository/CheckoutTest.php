@@ -36,14 +36,13 @@ class CheckoutTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command) use ($path): bool {
-                return (string) $command === "git 'checkout' '--' '$path'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'checkout' '--' '$path'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -51,11 +50,11 @@ class CheckoutTest extends TestCase
         $checkout = new Checkout(
             new Binary(
                 $server,
-                new Path('/tmp/foo')
+                Path::of('/tmp/foo')
             )
         );
 
-        $this->assertSame($checkout, $checkout->file(new Path($path)));
+        $this->assertSame($checkout, $checkout->file(Path::of($path)));
     }
 
     /**
@@ -72,14 +71,13 @@ class CheckoutTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command) use ($revision): bool {
-                return (string) $command === "git 'checkout' '$revision'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'checkout' '$revision'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -87,7 +85,7 @@ class CheckoutTest extends TestCase
         $checkout = new Checkout(
             new Binary(
                 $server,
-                new Path('/tmp/foo')
+                Path::of('/tmp/foo')
             )
         );
 

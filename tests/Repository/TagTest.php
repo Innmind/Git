@@ -8,7 +8,7 @@ use Innmind\Git\{
     Repository\Tag\Name,
     Message
 };
-use Innmind\TimeContinuum\PointInTimeInterface;
+use Innmind\TimeContinuum\PointInTime;
 use PHPUnit\Framework\TestCase;
 
 class TagTest extends TestCase
@@ -18,7 +18,7 @@ class TagTest extends TestCase
         $tag = new Tag(
             $name = new Name('1.0.0'),
             $message = new Message('watev'),
-            $date = $this->createMock(PointInTimeInterface::class)
+            $date = $this->createMock(PointInTime::class)
         );
 
         $this->assertSame($name, $tag->name());

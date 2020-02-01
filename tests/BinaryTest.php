@@ -31,15 +31,14 @@ class BinaryTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'watev'" &&
-                    $command->workingDirectory() === '/tmp/foo' &&
+                return $command->toString() === "git 'watev'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo' &&
                     $command->toBeRunInBackground() === false;
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->expects($this->once())
             ->method('exitCode')
@@ -51,12 +50,12 @@ class BinaryTest extends TestCase
 
         $bin = new Binary(
             $server,
-            new Path('/tmp/foo')
+            Path::of('/tmp/foo')
         );
 
         $this->assertInstanceOf(Command::class, $bin->command());
-        $this->assertSame('git', (string) $bin->command());
-        $this->assertSame('/tmp/foo', $bin->command()->workingDirectory());
+        $this->assertSame('git', $bin->command()->toString());
+        $this->assertSame('/tmp/foo', $bin->command()->workingDirectory()->toString());
         $this->assertSame($output, $bin($bin->command()->withArgument('watev')));
     }
 
@@ -71,14 +70,13 @@ class BinaryTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'watev'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'watev'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->expects($this->once())
             ->method('exitCode')
@@ -86,7 +84,7 @@ class BinaryTest extends TestCase
 
         $bin = new Binary(
             $server,
-            new Path('/tmp/foo')
+            Path::of('/tmp/foo')
         );
 
         try {
@@ -94,7 +92,7 @@ class BinaryTest extends TestCase
             $this->fail('it should throw');
         } catch (CommandFailed $e) {
             $this->assertInstanceOf(Command::class, $e->command());
-            $this->assertSame("git 'watev'", (string) $e->command());
+            $this->assertSame("git 'watev'", $e->command()->toString());
             $this->assertSame($process, $e->process());
         }
     }

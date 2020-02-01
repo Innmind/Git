@@ -12,7 +12,7 @@ final class Name
 
     public function __construct(string $name)
     {
-        if ((new Str($name))->trim()->length() === 0) {
+        if (Str::of($name)->trim()->empty()) {
             throw new DomainException;
         }
 

@@ -15,7 +15,7 @@ final class Hash implements Revision
 
     public function __construct(string $hash)
     {
-        $hash = new Str($hash);
+        $hash = Str::of($hash);
 
         if (
             !$hash->matches('~[a-z0-9]~') ||
@@ -27,7 +27,7 @@ final class Hash implements Revision
             throw new DomainException;
         }
 
-        $this->value = (string) $hash;
+        $this->value = $hash->toString();
     }
 
     public function __toString(): string

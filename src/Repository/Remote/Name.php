@@ -12,13 +12,11 @@ final class Name
 
     public function __construct(string $remote)
     {
-        $remote = new Str($remote);
-
-        if (!$remote->matches('~\w+~')) {
+        if (!Str::of($remote)->matches('~\w+~')) {
             throw new DomainException;
         }
 
-        $this->value = (string) $remote;
+        $this->value = $remote;
     }
 
     public function __toString(): string
