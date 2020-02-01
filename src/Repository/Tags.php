@@ -51,13 +51,13 @@ final class Tags
             ->binary
             ->command()
             ->withArgument('tag')
-            ->withArgument((string) $name);
+            ->withArgument($name->toString());
 
         if (null !== $message) {
             $command = $command
                 ->withShortOption('a')
                 ->withShortOption('m')
-                ->withArgument((string) $message);
+                ->withArgument($message->toString());
         }
 
         ($this->binary)($command);
@@ -74,9 +74,9 @@ final class Tags
                 ->withArgument('tag')
                 ->withShortOption('s')
                 ->withShortOption('a')
-                ->withArgument((string) $name)
+                ->withArgument($name->toString())
                 ->withShortOption('m')
-                ->withArgument((string) $message)
+                ->withArgument($message->toString())
         );
 
         return $this;

@@ -62,8 +62,8 @@ final class Remotes
                 ->command()
                 ->withArgument('remote')
                 ->withArgument('add')
-                ->withArgument((string) $name)
-                ->withArgument((string) $url)
+                ->withArgument($name->toString())
+                ->withArgument($url->toString())
         );
 
         return $this->get($name);
@@ -77,7 +77,7 @@ final class Remotes
                 ->command()
                 ->withArgument('remote')
                 ->withArgument('remove')
-                ->withArgument((string) $name)
+                ->withArgument($name->toString())
         );
 
         return $this;

@@ -71,7 +71,7 @@ class CheckoutTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command) use ($revision): bool {
-                return $command->toString() === "git 'checkout' '$revision'" &&
+                return $command->toString() === "git 'checkout' '{$revision->toString()}'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));

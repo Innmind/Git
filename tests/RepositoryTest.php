@@ -238,7 +238,7 @@ class RepositoryTest extends TestCase
         $head = $repo->head();
 
         $this->assertInstanceOf($class, $head);
-        $this->assertSame($expected, (string) $head);
+        $this->assertSame($expected, $head->toString());
     }
 
     public function testBranches()

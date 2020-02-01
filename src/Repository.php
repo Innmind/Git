@@ -168,7 +168,7 @@ final class Repository
                 ->command()
                 ->withArgument('commit')
                 ->withShortOption('m')
-                ->withArgument((string) $message)
+                ->withArgument($message->toString())
         );
 
         return $this;
@@ -181,7 +181,7 @@ final class Repository
                 ->binary
                 ->command()
                 ->withArgument('merge')
-                ->withArgument((string) $branch)
+                ->withArgument($branch->toString())
         );
 
         return $this;

@@ -19,7 +19,7 @@ final class Message
         $this->value = $message;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

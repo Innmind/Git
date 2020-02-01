@@ -30,7 +30,7 @@ final class Url
         $this->value = $url;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

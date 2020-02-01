@@ -212,15 +212,15 @@ class TagsTest extends TestCase
         $this->assertSame(Tag::class, (string) $all->type());
         $this->assertCount(2, $all);
         $all = unwrap($all);
-        $this->assertSame('1.0.0', (string) \current($all)->name());
-        $this->assertSame('first release', (string) \current($all)->message());
+        $this->assertSame('1.0.0', \current($all)->name()->toString());
+        $this->assertSame('first release', \current($all)->message()->toString());
         $this->assertSame(
             '2019-03-16T11:09:24+00:00',
             \current($all)->date()->format(new ISO8601)
         );
         \next($all);
-        $this->assertSame('1.0.1', (string) \current($all)->name());
-        $this->assertSame('fix eris dependency', (string) \current($all)->message());
+        $this->assertSame('1.0.1', \current($all)->name()->toString());
+        $this->assertSame('fix eris dependency', \current($all)->message()->toString());
         $this->assertSame(
             '2019-03-30T11:30:35+00:00',
             \current($all)->date()->format(new ISO8601)

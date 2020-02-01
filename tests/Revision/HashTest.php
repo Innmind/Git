@@ -45,8 +45,8 @@ class HashTest extends TestCase
                 $hash = sha1($string);
                 $short = substr($hash, 0, 7);
 
-                $this->assertSame($hash, (string) new Hash($hash));
-                $this->assertSame($short, (string) new Hash($short));
+                $this->assertSame($hash, (new Hash($hash))->toString());
+                $this->assertSame($short, (new Hash($short))->toString());
             });
     }
 }

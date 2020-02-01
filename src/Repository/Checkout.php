@@ -39,7 +39,7 @@ final class Checkout
                 ->binary
                 ->command()
                 ->withArgument('checkout')
-                ->withArgument((string) $revision)
+                ->withArgument($revision->toString())
         );
 
         return $this;

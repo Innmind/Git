@@ -5,5 +5,5 @@ namespace Innmind\Git;
 
 interface Revision
 {
-    public function __toString(): string;
+    public function toString(): string;
 }

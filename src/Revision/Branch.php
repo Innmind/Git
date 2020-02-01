@@ -22,7 +22,7 @@ final class Branch implements Revision
         $this->value = $branch;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

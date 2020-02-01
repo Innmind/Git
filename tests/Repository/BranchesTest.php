@@ -69,11 +69,11 @@ BRANCHES
         $this->assertSame(Branch::class, (string) $local->type());
         $this->assertCount(3, $local);
         $local = unwrap($local);
-        $this->assertSame('develop', (string) \current($local));
+        $this->assertSame('develop', \current($local)->toString());
         \next($local);
-        $this->assertSame('foo-bar-baz', (string) \current($local));
+        $this->assertSame('foo-bar-baz', \current($local)->toString());
         \next($local);
-        $this->assertSame('master', (string) \current($local));
+        $this->assertSame('master', \current($local)->toString());
     }
 
     public function testRemote()
@@ -123,11 +123,11 @@ BRANCHES
         $this->assertSame(Branch::class, (string) $remote->type());
         $this->assertCount(3, $remote);
         $remote = unwrap($remote);
-        $this->assertSame('origin/develop', (string) \current($remote));
+        $this->assertSame('origin/develop', \current($remote)->toString());
         \next($remote);
-        $this->assertSame('origin/foo-bar-baz', (string) \current($remote));
+        $this->assertSame('origin/foo-bar-baz', \current($remote)->toString());
         \next($remote);
-        $this->assertSame('origin/master', (string) \current($remote));
+        $this->assertSame('origin/master', \current($remote)->toString());
     }
 
     public function testAll()
@@ -205,17 +205,17 @@ BRANCHES
         $this->assertSame(Branch::class, (string) $all->type());
         $this->assertCount(6, $all);
         $all = unwrap($all);
-        $this->assertSame('develop', (string) \current($all));
+        $this->assertSame('develop', \current($all)->toString());
         \next($all);
-        $this->assertSame('foo-bar-baz', (string) \current($all));
+        $this->assertSame('foo-bar-baz', \current($all)->toString());
         \next($all);
-        $this->assertSame('master', (string) \current($all));
+        $this->assertSame('master', \current($all)->toString());
         \next($all);
-        $this->assertSame('origin/develop', (string) \current($all));
+        $this->assertSame('origin/develop', \current($all)->toString());
         \next($all);
-        $this->assertSame('origin/foo-bar-baz', (string) \current($all));
+        $this->assertSame('origin/foo-bar-baz', \current($all)->toString());
         \next($all);
-        $this->assertSame('origin/master', (string) \current($all));
+        $this->assertSame('origin/master', \current($all)->toString());
     }
 
     public function testNew()

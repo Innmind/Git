@@ -25,7 +25,7 @@ class MessageTest extends TestCase
                 return strlen($message) > 0;
             })
             ->then(function(string $message): void {
-                $this->assertSame($message, (string) new Message($message));
+                $this->assertSame($message, (new Message($message))->toString());
             });
     }
 

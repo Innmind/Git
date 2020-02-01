@@ -95,10 +95,10 @@ final class Branches
             ->binary
             ->command()
             ->withArgument('branch')
-            ->withArgument((string) $name);
+            ->withArgument($name->toString());
 
         if ($off) {
-            $command = $command->withArgument((string) $off);
+            $command = $command->withArgument($off->toString());
         }
 
         ($this->binary)($command);
@@ -114,7 +114,7 @@ final class Branches
                 ->command()
                 ->withArgument('branch')
                 ->withShortOption('d')
-                ->withArgument((string) $name)
+                ->withArgument($name->toString())
         );
 
         return $this;
@@ -128,7 +128,7 @@ final class Branches
                 ->command()
                 ->withArgument('branch')
                 ->withShortOption('D')
-                ->withArgument((string) $name)
+                ->withArgument($name->toString())
         );
 
         return $this;

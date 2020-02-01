@@ -68,11 +68,11 @@ REMOTES
         $this->assertSame(Remote::class, (string) $all->type());
         $this->assertCount(3, $all);
         $all = unwrap($all);
-        $this->assertSame('origin', (string) \current($all)->name());
+        $this->assertSame('origin', \current($all)->name()->toString());
         \next($all);
-        $this->assertSame('gitlab', (string) \current($all)->name());
+        $this->assertSame('gitlab', \current($all)->name()->toString());
         \next($all);
-        $this->assertSame('local', (string) \current($all)->name());
+        $this->assertSame('local', \current($all)->name()->toString());
     }
 
     public function testGet()
