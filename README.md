@@ -1,10 +1,9 @@
 # Git
 
-| `master` | `develop` |
-|----------|-----------|
-| [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/Git/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Innmind/Git/?branch=master) | [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/Git/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Git/?branch=develop) |
-| [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/Git/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Innmind/Git/?branch=master) | [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/Git/badges/coverage.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Git/?branch=develop) |
-| [![Build Status](https://scrutinizer-ci.com/g/Innmind/Git/badges/build.png?b=master)](https://scrutinizer-ci.com/g/Innmind/Git/build-status/master) | [![Build Status](https://scrutinizer-ci.com/g/Innmind/Git/badges/build.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Git/build-status/develop) |
+| `develop` |
+|-----------|
+| [![codecov](https://codecov.io/gh/Innmind/Git/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/Git) |
+| [![Build Status](https://github.com/Innmind/Git/workflows/CI/badge.svg)](https://github.com/Innmind/Git/actions?query=workflow%3ACI) |
 
 Abstraction layer to manipulate local git repositories.
 
