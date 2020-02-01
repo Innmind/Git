@@ -159,6 +159,6 @@ REMOTES
             )
         );
 
-        $this->assertSame($remotes, $remotes->remove(new Name('origin')));
+        $this->assertNull($remotes->remove(new Name('origin')));
     }
 }

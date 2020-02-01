@@ -32,7 +32,7 @@ final class Tags
         $this->clock = $clock;
     }
 
-    public function push(): self
+    public function push(): void
     {
         ($this->binary)(
             $this
@@ -41,11 +41,9 @@ final class Tags
                 ->withArgument('push')
                 ->withOption('tags')
         );
-
-        return $this;
     }
 
-    public function add(Name $name, Message $message = null): self
+    public function add(Name $name, Message $message = null): void
     {
         $command = $this
             ->binary
@@ -61,11 +59,9 @@ final class Tags
         }
 
         ($this->binary)($command);
-
-        return $this;
     }
 
-    public function sign(Name $name, Message $message): self
+    public function sign(Name $name, Message $message): void
     {
         ($this->binary)(
             $this
@@ -78,8 +74,6 @@ final class Tags
                 ->withShortOption('m')
                 ->withArgument($message->toString())
         );
-
-        return $this;
     }
 
     /**

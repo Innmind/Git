@@ -69,7 +69,7 @@ class RemoteTest extends TestCase
             new Name('origin')
         );
 
-        $this->assertSame($remote, $remote->prune());
+        $this->assertNull($remote->prune());
     }
 
     public function testSetUrl()
@@ -105,7 +105,7 @@ class RemoteTest extends TestCase
             new Name('origin')
         );
 
-        $this->assertSame($remote, $remote->setUrl(new Url('/local/remote')));
+        $this->assertNull($remote->setUrl(new Url('/local/remote')));
     }
 
     public function testAddUrl()
@@ -141,7 +141,7 @@ class RemoteTest extends TestCase
             new Name('origin')
         );
 
-        $this->assertSame($remote, $remote->addUrl(new Url('/local/remote')));
+        $this->assertNull($remote->addUrl(new Url('/local/remote')));
     }
 
     public function testDeleteUrl()
@@ -177,7 +177,7 @@ class RemoteTest extends TestCase
             new Name('origin')
         );
 
-        $this->assertSame($remote, $remote->deleteUrl(new Url('/local/remote')));
+        $this->assertNull($remote->deleteUrl(new Url('/local/remote')));
     }
 
     public function testPush()
@@ -210,7 +210,7 @@ class RemoteTest extends TestCase
             new Name('origin')
         );
 
-        $this->assertSame($remote, $remote->push(new Branch('develop')));
+        $this->assertNull($remote->push(new Branch('develop')));
     }
 
     public function testDelete()
@@ -243,6 +243,6 @@ class RemoteTest extends TestCase
             new Name('origin')
         );
 
-        $this->assertSame($remote, $remote->delete(new Branch('develop')));
+        $this->assertNull($remote->delete(new Branch('develop')));
     }
 }

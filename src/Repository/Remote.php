@@ -26,7 +26,7 @@ final class Remote
         return $this->name;
     }
 
-    public function prune(): self
+    public function prune(): void
     {
         ($this->binary)(
             $this
@@ -36,11 +36,9 @@ final class Remote
                 ->withArgument('prune')
                 ->withArgument($this->name->toString())
         );
-
-        return $this;
     }
 
-    public function setUrl(Url $url): self
+    public function setUrl(Url $url): void
     {
         ($this->binary)(
             $this
@@ -51,11 +49,9 @@ final class Remote
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString())
         );
-
-        return $this;
     }
 
-    public function addUrl(Url $url): self
+    public function addUrl(Url $url): void
     {
         ($this->binary)(
             $this
@@ -67,11 +63,9 @@ final class Remote
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString())
         );
-
-        return $this;
     }
 
-    public function deleteUrl(Url $url): self
+    public function deleteUrl(Url $url): void
     {
         ($this->binary)(
             $this
@@ -83,11 +77,9 @@ final class Remote
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString())
         );
-
-        return $this;
     }
 
-    public function push(Branch $branch): self
+    public function push(Branch $branch): void
     {
         ($this->binary)(
             $this
@@ -98,11 +90,9 @@ final class Remote
                 ->withArgument($this->name->toString())
                 ->withArgument($branch->toString())
         );
-
-        return $this;
     }
 
-    public function delete(Branch $branch): self
+    public function delete(Branch $branch): void
     {
         ($this->binary)(
             $this
@@ -112,7 +102,5 @@ final class Remote
                 ->withArgument($this->name->toString())
                 ->withArgument(':'.$branch->toString())
         );
-
-        return $this;
     }
 }

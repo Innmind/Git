@@ -59,7 +59,7 @@ class TagsTest extends TestCase
             new Clock(new UTC)
         );
 
-        $this->assertSame($tags, $tags->push());
+        $this->assertNull($tags->push());
     }
 
     public function testAdd()
@@ -92,8 +92,7 @@ class TagsTest extends TestCase
             new Clock(new UTC)
         );
 
-        $this->assertSame(
-            $tags,
+        $this->assertNull(
             $tags->add(new Name('1.0.0'), new Message('first release'))
         );
     }
@@ -128,8 +127,7 @@ class TagsTest extends TestCase
             new Clock(new UTC)
         );
 
-        $this->assertSame(
-            $tags,
+        $this->assertNull(
             $tags->add(new Name('1.0.0'))
         );
     }
@@ -164,8 +162,7 @@ class TagsTest extends TestCase
             new Clock(new UTC)
         );
 
-        $this->assertSame(
-            $tags,
+        $this->assertNull(
             $tags->sign(new Name('1.0.0'), new Message('first release'))
         );
     }

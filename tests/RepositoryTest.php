@@ -181,8 +181,8 @@ class RepositoryTest extends TestCase
         );
 
         $this->assertFalse(is_dir('/tmp/foo/.git'));
-        $this->assertSame($repo, $repo->init());
-        $this->assertSame($repo, $repo->init()); //validate reinit doesn't throw
+        $this->assertNull($repo->init());
+        $this->assertNull($repo->init()); //validate reinit doesn't throw
         $this->assertTrue(is_dir('/tmp/foo/.git'));
     }
 
@@ -294,7 +294,7 @@ class RepositoryTest extends TestCase
             $this->createMock(Clock::class)
         );
 
-        $this->assertSame($repo, $repo->push());
+        $this->assertNull($repo->push());
     }
 
     public function testPull()
@@ -339,7 +339,7 @@ class RepositoryTest extends TestCase
             $this->createMock(Clock::class)
         );
 
-        $this->assertSame($repo, $repo->pull());
+        $this->assertNull($repo->pull());
     }
 
     public function testRemotes()
@@ -417,7 +417,7 @@ class RepositoryTest extends TestCase
             $this->createMock(Clock::class)
         );
 
-        $this->assertSame($repo, $repo->add(Path::of('foo')));
+        $this->assertNull($repo->add(Path::of('foo')));
     }
 
     public function testCommit()
@@ -470,7 +470,7 @@ class RepositoryTest extends TestCase
                     $this->createMock(Clock::class)
                 );
 
-                $this->assertSame($repo, $repo->commit(new Message($message)));
+                $this->assertNull($repo->commit(new Message($message)));
             });
     }
 
@@ -516,7 +516,7 @@ class RepositoryTest extends TestCase
             $this->createMock(Clock::class)
         );
 
-        $this->assertSame($repo, $repo->merge(new Branch('develop')));
+        $this->assertNull($repo->merge(new Branch('develop')));
     }
 
     public function heads(): array

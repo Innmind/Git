@@ -89,7 +89,7 @@ final class Branches
             ->merge($this->remote());
     }
 
-    public function new(Branch $name, Revision $off = null): self
+    public function new(Branch $name, Revision $off = null): void
     {
         $command = $this
             ->binary
@@ -102,11 +102,9 @@ final class Branches
         }
 
         ($this->binary)($command);
-
-        return $this;
     }
 
-    public function delete(Branch $name): self
+    public function delete(Branch $name): void
     {
         ($this->binary)(
             $this
@@ -116,11 +114,9 @@ final class Branches
                 ->withShortOption('d')
                 ->withArgument($name->toString())
         );
-
-        return $this;
     }
 
-    public function forceDelete(Branch $name): self
+    public function forceDelete(Branch $name): void
     {
         ($this->binary)(
             $this
@@ -130,7 +126,5 @@ final class Branches
                 ->withShortOption('D')
                 ->withArgument($name->toString())
         );
-
-        return $this;
     }
 }

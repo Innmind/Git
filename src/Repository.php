@@ -55,7 +55,7 @@ final class Repository
         }
     }
 
-    public function init(): self
+    public function init(): void
     {
         $output = ($this->binary)(
             $this
@@ -69,7 +69,7 @@ final class Repository
             $outputStr->contains('Initialized empty Git repository') ||
             $outputStr->contains('Reinitialized existing Git repository')
         ) {
-            return $this;
+            return;
         }
 
         throw new RepositoryInitFailed($output);
@@ -108,7 +108,7 @@ final class Repository
         return $this->branches ??= new Branches($this->binary);
     }
 
-    public function push(): self
+    public function push(): void
     {
         ($this->binary)(
             $this
@@ -116,11 +116,9 @@ final class Repository
                 ->command()
                 ->withArgument('push')
         );
-
-        return $this;
     }
 
-    public function pull(): self
+    public function pull(): void
     {
         ($this->binary)(
             $this
@@ -128,8 +126,6 @@ final class Repository
                 ->command()
                 ->withArgument('pull')
         );
-
-        return $this;
     }
 
     public function remotes(): Remotes
@@ -147,7 +143,7 @@ final class Repository
         return $this->tags ??= new Tags($this->binary, $this->clock);
     }
 
-    public function add(Path $file): self
+    public function add(Path $file): void
     {
         ($this->binary)(
             $this
@@ -156,11 +152,9 @@ final class Repository
                 ->withArgument('add')
                 ->withArgument($file->toString())
         );
-
-        return $this;
     }
 
-    public function commit(Message $message): self
+    public function commit(Message $message): void
     {
         ($this->binary)(
             $this
@@ -170,11 +164,9 @@ final class Repository
                 ->withShortOption('m')
                 ->withArgument($message->toString())
         );
-
-        return $this;
     }
 
-    public function merge(Branch $branch): self
+    public function merge(Branch $branch): void
     {
         ($this->binary)(
             $this
@@ -183,7 +175,5 @@ final class Repository
                 ->withArgument('merge')
                 ->withArgument($branch->toString())
         );
-
-        return $this;
     }
 }

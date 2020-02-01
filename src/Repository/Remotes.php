@@ -69,7 +69,7 @@ final class Remotes
         return $this->get($name);
     }
 
-    public function remove(Name $name): self
+    public function remove(Name $name): void
     {
         ($this->binary)(
             $this
@@ -79,7 +79,5 @@ final class Remotes
                 ->withArgument('remove')
                 ->withArgument($name->toString())
         );
-
-        return $this;
     }
 }

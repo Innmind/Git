@@ -250,7 +250,7 @@ BRANCHES
             )
         );
 
-        $this->assertSame($branches, $branches->new(new Branch('bar')));
+        $this->assertNull($branches->new(new Branch('bar')));
     }
 
     public function testNewOff()
@@ -285,7 +285,7 @@ BRANCHES
             )
         );
 
-        $this->assertSame($branches, $branches->new(new Branch('bar'), new Branch('develop')));
+        $this->assertNull($branches->new(new Branch('bar'), new Branch('develop')));
     }
 
     public function testDelete()
@@ -320,7 +320,7 @@ BRANCHES
             )
         );
 
-        $this->assertSame($branches, $branches->delete(new Branch('bar')));
+        $this->assertNull($branches->delete(new Branch('bar')));
     }
 
     public function testForceDelete()
@@ -355,6 +355,6 @@ BRANCHES
             )
         );
 
-        $this->assertSame($branches, $branches->forceDelete(new Branch('bar')));
+        $this->assertNull($branches->forceDelete(new Branch('bar')));
     }
 }

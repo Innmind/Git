@@ -18,7 +18,7 @@ final class Checkout
         $this->binary = $binary;
     }
 
-    public function file(Path $path): self
+    public function file(Path $path): void
     {
         ($this->binary)(
             $this
@@ -28,11 +28,9 @@ final class Checkout
                 ->withArgument('--')
                 ->withArgument($path->toString()),
         );
-
-        return $this;
     }
 
-    public function revision(Revision $revision): self
+    public function revision(Revision $revision): void
     {
         ($this->binary)(
             $this
@@ -41,7 +39,5 @@ final class Checkout
                 ->withArgument('checkout')
                 ->withArgument($revision->toString())
         );
-
-        return $this;
     }
 }

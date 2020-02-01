@@ -54,7 +54,7 @@ class CheckoutTest extends TestCase
             )
         );
 
-        $this->assertSame($checkout, $checkout->file(Path::of($path)));
+        $this->assertNull($checkout->file(Path::of($path)));
     }
 
     /**
@@ -89,7 +89,7 @@ class CheckoutTest extends TestCase
             )
         );
 
-        $this->assertSame($checkout, $checkout->revision($revision));
+        $this->assertNull($checkout->revision($revision));
     }
 
     public function paths(): array
