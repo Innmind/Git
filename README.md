@@ -22,18 +22,16 @@ use Innmind\Git\{
     Git,
     Repository\Remote\Name,
     Repository\Remote\Url,
-    Revision\Branch
+    Revision\Branch,
 };
 use Innmind\Server\Control\ServerFactory;
 use Innmind\Url\Path;
 
-$git = new Git((new ServerFactory)->make());
-$repository = $git->repository(new Path('/somewhere/on/the/local/machine'));
-$repository
-    ->init()
-    ->remotes()
-    ->add(new Name('origin'), new Url('git@github.com:Vendor/Repo.git'))
-    ->push(new Branch('master'));
+$git = new Git(ServerFactory::build());
+$repository = $git->repository(Path::of('/somewhere/on/the/local/machine'));
+$remotes = $repository->init()->remotes();
+$remotes->add(new Name('origin'), new Url('git@github.com:Vendor/Repo.git'))
+$remotes->push(new Branch('master'));
 $repository
     ->branches()
     ->new(new Branch('develop'));
