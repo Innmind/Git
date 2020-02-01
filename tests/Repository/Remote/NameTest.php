@@ -39,9 +39,9 @@ class BranchTest extends TestCase
                 return strlen($first) > 1;
             })
             ->then(function($first, $second): void {
-                $this->assertSame($first, (string) new Name($first));
-                $this->assertSame($first.'-'.$second, (string) new Name($first.'-'.$second));
-                $this->assertSame($first.'/'.$second, (string) new Name($first.'/'.$second));
+                $this->assertSame($first, (new Name($first))->toString());
+                $this->assertSame($first.'-'.$second, (new Name($first.'-'.$second))->toString());
+                $this->assertSame($first.'/'.$second, (new Name($first.'/'.$second))->toString());
             });
     }
 }

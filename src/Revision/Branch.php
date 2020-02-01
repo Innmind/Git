@@ -5,26 +5,24 @@ namespace Innmind\Git\Revision;
 
 use Innmind\Git\{
     Revision,
-    Exception\DomainException
+    Exception\DomainException,
 };
 use Innmind\Immutable\Str;
 
 final class Branch implements Revision
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $branch)
     {
-        $branch = new Str($branch);
-
-        if (!$branch->matches('~\w+~')) {
-            throw new DomainException;
+        if (!Str::of($branch)->matches('~\w+~')) {
+            throw new DomainException($branch);
         }
 
-        $this->value = (string) $branch;
+        $this->value = $branch;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

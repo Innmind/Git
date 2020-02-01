@@ -33,7 +33,7 @@ class UrlTest extends TestCase
      */
     public function testInterface(string $format)
     {
-        $this->assertSame($format, (string) new Url($format));
+        $this->assertSame($format, (new Url($format))->toString());
     }
 
     public function formats(): array

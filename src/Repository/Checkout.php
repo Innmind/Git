@@ -5,20 +5,20 @@ namespace Innmind\Git\Repository;
 
 use Innmind\Git\{
     Binary,
-    Revision
+    Revision,
 };
-use Innmind\Url\PathInterface;
+use Innmind\Url\Path;
 
 final class Checkout
 {
-    private $binary;
+    private Binary $binary;
 
     public function __construct(Binary $binary)
     {
         $this->binary = $binary;
     }
 
-    public function file(PathInterface $path): self
+    public function file(Path $path): void
     {
         ($this->binary)(
             $this
@@ -26,22 +26,18 @@ final class Checkout
                 ->command()
                 ->withArgument('checkout')
                 ->withArgument('--')
-                ->withArgument((string) $path)
+                ->withArgument($path->toString()),
         );
-
-        return $this;
     }
 
-    public function revision(Revision $revision): self
+    public function revision(Revision $revision): void
     {
         ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('checkout')
-                ->withArgument((string) $revision)
+                ->withArgument($revision->toString()),
         );
-
-        return $this;
     }
 }

@@ -10,12 +10,12 @@ use Innmind\Server\Control\Server\{
 
 final class CommandFailed extends RuntimeException
 {
-    private $command;
-    private $process;
+    private Command $command;
+    private Process $process;
 
     public function __construct(Command $command, Process $process)
     {
-        parent::__construct((string) $command);
+        parent::__construct($command->toString());
         $this->command = $command;
         $this->process = $process;
     }

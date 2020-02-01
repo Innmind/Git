@@ -6,7 +6,7 @@ namespace Innmind\Git\Repository\Remote;
 use Innmind\Git\Exception\DomainException;
 use Innmind\Url\{
     Url as BaseUrl,
-    Exception\InvalidArgumentException
+    Exception\DomainException as UrlDomainException,
 };
 use Innmind\Immutable\Str;
 
@@ -15,22 +15,22 @@ use Innmind\Immutable\Str;
  */
 final class Url
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $url)
     {
         try {
-            BaseUrl::fromString($url);
-        } catch (InvalidArgumentException $e) {
-            if (!(new Str($url))->matches('~^\S+@\S+(\.\S+)?:\S+(/\S+)?\.git$~')) {
-                throw new DomainException;
+            BaseUrl::of($url);
+        } catch (UrlDomainException $e) {
+            if (!Str::of($url)->matches('~^\S+@\S+(\.\S+)?:\S+(/\S+)?\.git$~')) {
+                throw new DomainException($url);
             }
         }
 
         $this->value = $url;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

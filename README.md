@@ -1,10 +1,9 @@
 # Git
 
-| `master` | `develop` |
-|----------|-----------|
-| [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/Git/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/Innmind/Git/?branch=master) | [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/Innmind/Git/badges/quality-score.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Git/?branch=develop) |
-| [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/Git/badges/coverage.png?b=master)](https://scrutinizer-ci.com/g/Innmind/Git/?branch=master) | [![Code Coverage](https://scrutinizer-ci.com/g/Innmind/Git/badges/coverage.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Git/?branch=develop) |
-| [![Build Status](https://scrutinizer-ci.com/g/Innmind/Git/badges/build.png?b=master)](https://scrutinizer-ci.com/g/Innmind/Git/build-status/master) | [![Build Status](https://scrutinizer-ci.com/g/Innmind/Git/badges/build.png?b=develop)](https://scrutinizer-ci.com/g/Innmind/Git/build-status/develop) |
+| `develop` |
+|-----------|
+| [![codecov](https://codecov.io/gh/Innmind/Git/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/Git) |
+| [![Build Status](https://github.com/Innmind/Git/workflows/CI/badge.svg)](https://github.com/Innmind/Git/actions?query=workflow%3ACI) |
 
 Abstraction layer to manipulate local git repositories.
 
@@ -23,18 +22,16 @@ use Innmind\Git\{
     Git,
     Repository\Remote\Name,
     Repository\Remote\Url,
-    Revision\Branch
+    Revision\Branch,
 };
 use Innmind\Server\Control\ServerFactory;
 use Innmind\Url\Path;
 
-$git = new Git((new ServerFactory)->make());
-$repository = $git->repository(new Path('/somewhere/on/the/local/machine'));
-$repository
-    ->init()
-    ->remotes()
-    ->add(new Name('origin'), new Url('git@github.com:Vendor/Repo.git'))
-    ->push(new Branch('master'));
+$git = new Git(ServerFactory::build());
+$repository = $git->repository(Path::of('/somewhere/on/the/local/machine'));
+$remotes = $repository->init()->remotes();
+$remotes->add(new Name('origin'), new Url('git@github.com:Vendor/Repo.git'))
+$remotes->push(new Branch('master'));
 $repository
     ->branches()
     ->new(new Branch('develop'));

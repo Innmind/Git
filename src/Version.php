@@ -7,14 +7,14 @@ use Innmind\Git\Exception\DomainException;
 
 final class Version
 {
-    private $major;
-    private $minor;
-    private $bugfix;
+    private int $major;
+    private int $minor;
+    private int $bugfix;
 
     public function __construct(int $major, int $minor, int $bugfix)
     {
-        if (min($major, $minor, $bugfix) < 0) {
-            throw new DomainException;
+        if (\min($major, $minor, $bugfix) < 0) {
+            throw new DomainException("$major.$minor.$bugfix");
         }
 
         $this->major = $major;

@@ -6,17 +6,16 @@ namespace Innmind\Git\Repository;
 use Innmind\Git\{
     Binary,
     Repository\Remote\Name,
-    Repository\Remote\Url
+    Repository\Remote\Url,
 };
 use Innmind\Immutable\{
-    SetInterface,
     Set,
-    Str
+    Str,
 };
 
 final class Remotes
 {
-    private $binary;
+    private Binary $binary;
 
     public function __construct(Binary $binary)
     {
@@ -24,26 +23,23 @@ final class Remotes
     }
 
     /**
-     * @return SetInterface<Remote>
+     * @return Set<Remote>
      */
-    public function all(): SetInterface
+    public function all(): Set
     {
-        $remotes = new Str((string) ($this->binary)(
+        $remotes = Str::of(($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('remote')
-        ));
+        )->toString());
 
+        /** @var Set<Remote> */
         return $remotes
             ->split("\n")
-            ->reduce(
-                new Set(Remote::class),
-                function(Set $remotes, Str $remote): Set {
-                    return $remotes->add(
-                        $this->get(new Name((string) $remote))
-                    );
-                }
+            ->toSetOf(
+                Remote::class,
+                fn(Str $remote): \Generator => yield $this->get(new Name($remote->toString())),
             );
     }
 
@@ -51,7 +47,7 @@ final class Remotes
     {
         return new Remote(
             $this->binary,
-            $name
+            $name,
         );
     }
 
@@ -63,14 +59,14 @@ final class Remotes
                 ->command()
                 ->withArgument('remote')
                 ->withArgument('add')
-                ->withArgument((string) $name)
-                ->withArgument((string) $url)
+                ->withArgument($name->toString())
+                ->withArgument($url->toString()),
         );
 
         return $this->get($name);
     }
 
-    public function remove(Name $name): self
+    public function remove(Name $name): void
     {
         ($this->binary)(
             $this
@@ -78,9 +74,7 @@ final class Remotes
                 ->command()
                 ->withArgument('remote')
                 ->withArgument('remove')
-                ->withArgument((string) $name)
+                ->withArgument($name->toString()),
         );
-
-        return $this;
     }
 }

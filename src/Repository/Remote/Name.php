@@ -8,20 +8,18 @@ use Innmind\Immutable\Str;
 
 final class Name
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $remote)
     {
-        $remote = new Str($remote);
-
-        if (!$remote->matches('~\w+~')) {
-            throw new DomainException;
+        if (!Str::of($remote)->matches('~\w+~')) {
+            throw new DomainException($remote);
         }
 
-        $this->value = (string) $remote;
+        $this->value = $remote;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

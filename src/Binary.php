@@ -7,20 +7,20 @@ use Innmind\Git\Exception\CommandFailed;
 use Innmind\Server\Control\{
     Server,
     Server\Command,
-    Server\Process\Output
+    Server\Process\Output,
 };
-use Innmind\Url\PathInterface;
+use Innmind\Url\Path;
 
 final class Binary
 {
-    private $server;
-    private $command;
+    private Server $server;
+    private Command $command;
 
-    public function __construct(Server $server, PathInterface $path)
+    public function __construct(Server $server, Path $path)
     {
         $this->server = $server;
         $this->command = Command::foreground('git')
-            ->withWorkingDirectory((string) $path);
+            ->withWorkingDirectory($path);
     }
 
     public function command(): Command
@@ -33,8 +33,8 @@ final class Binary
         $process = $this
             ->server
             ->processes()
-            ->execute($command)
-            ->wait();
+            ->execute($command);
+        $process->wait();
 
         if (!$process->exitCode()->isSuccessful()) {
             throw new CommandFailed($command, $process);

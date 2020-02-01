@@ -6,18 +6,16 @@ namespace Innmind\Git\Repository;
 use Innmind\Git\{
     Binary,
     Revision,
-    Revision\Branch
+    Revision\Branch,
 };
 use Innmind\Immutable\{
-    SetInterface,
     Set,
-    Str
+    Str,
 };
 
 final class Branches
 {
-    private $binary;
-    private $path;
+    private Binary $binary;
 
     public function __construct(Binary $binary)
     {
@@ -25,90 +23,86 @@ final class Branches
     }
 
     /**
-     * @return SetInterface<Branch>
+     * @return Set<Branch>
      */
-    public function local(): SetInterface
+    public function local(): Set
     {
-        $branches = new Str((string) ($this->binary)(
+        $branches = Str::of(($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('branch')
-                ->withOption('no-color')
-        ));
+                ->withOption('no-color'),
+        )->toString());
 
+        /** @var Set<Branch> */
         return $branches
             ->split("\n")
             ->filter(static function(Str $line): bool {
                 return !$line->matches('~HEAD detached~');
             })
-            ->reduce(
-                new Set(Branch::class),
-                static function(Set $branches, Str $branch): Set {
-                    return $branches->add(new Branch(
-                        (string) $branch->substring(2)
-                    ));
-                }
+            ->toSetOf(
+                Branch::class,
+                static fn(Str $branch): \Generator => yield new Branch(
+                    $branch->substring(2)->toString(),
+                ),
             );
     }
 
     /**
-     * @return SetInterface<Branch>
+     * @return Set<Branch>
      */
-    public function remote(): SetInterface
+    public function remote(): Set
     {
-        $branches = new Str((string) ($this->binary)(
+        $branches = Str::of(($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('branch')
                 ->withShortOption('r')
-                ->withOption('no-color')
-        ));
+                ->withOption('no-color'),
+        )->toString());
 
+        /** @var Set<Branch> */
         return $branches
             ->split("\n")
             ->filter(static function(Str $line): bool {
                 return !$line->matches('~-> origin/~');
             })
-            ->reduce(
-                new Set(Branch::class),
-                static function(Set $branches, Str $branch): Set {
-                    return $branches->add(new Branch(
-                        (string) $branch->substring(2)
-                    ));
-                }
+            ->toSetOf(
+                Branch::class,
+                static fn(Str $branch): \Generator => yield new Branch(
+                    $branch->substring(2)->toString(),
+                ),
             );
     }
 
     /**
-     * @return SetInterface<Branch>
+     * @return Set<Branch>
      */
-    public function all(): SetInterface
+    public function all(): Set
     {
         return $this
             ->local()
             ->merge($this->remote());
     }
 
-    public function new(Branch $name, Revision $off = null): self
+    public function new(Branch $name, Revision $off = null): void
     {
         $command = $this
             ->binary
             ->command()
             ->withArgument('branch')
-            ->withArgument((string) $name);
+            ->withArgument($name->toString());
 
         if ($off) {
-            $command = $command->withArgument((string) $off);
+            $command = $command->withArgument($off->toString());
         }
 
         ($this->binary)($command);
-
-        return $this;
     }
 
-    public function delete(Branch $name): self
+    public function delete(Branch $name): void
     {
         ($this->binary)(
             $this
@@ -116,13 +110,11 @@ final class Branches
                 ->command()
                 ->withArgument('branch')
                 ->withShortOption('d')
-                ->withArgument((string) $name)
+                ->withArgument($name->toString()),
         );
-
-        return $this;
     }
 
-    public function forceDelete(Branch $name): self
+    public function forceDelete(Branch $name): void
     {
         ($this->binary)(
             $this
@@ -130,9 +122,7 @@ final class Branches
                 ->command()
                 ->withArgument('branch')
                 ->withShortOption('D')
-                ->withArgument((string) $name)
+                ->withArgument($name->toString()),
         );
-
-        return $this;
     }
 }

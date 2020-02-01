@@ -8,18 +8,18 @@ use Innmind\Immutable\Str;
 
 final class Name
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $name)
     {
-        if ((new Str($name))->trim()->length() === 0) {
+        if (Str::of($name)->trim()->empty()) {
             throw new DomainException;
         }
 
         $this->value = $name;
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

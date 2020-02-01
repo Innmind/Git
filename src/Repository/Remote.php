@@ -7,13 +7,13 @@ use Innmind\Git\{
     Binary,
     Repository\Remote\Name,
     Repository\Remote\Url,
-    Revision\Branch
+    Revision\Branch,
 };
 
 final class Remote
 {
-    private $binary;
-    private $name;
+    private Binary $binary;
+    private Name $name;
 
     public function __construct(Binary $binary, Name $name)
     {
@@ -26,7 +26,7 @@ final class Remote
         return $this->name;
     }
 
-    public function prune(): self
+    public function prune(): void
     {
         ($this->binary)(
             $this
@@ -34,13 +34,11 @@ final class Remote
                 ->command()
                 ->withArgument('remote')
                 ->withArgument('prune')
-                ->withArgument((string) $this->name)
+                ->withArgument($this->name->toString()),
         );
-
-        return $this;
     }
 
-    public function setUrl(Url $url): self
+    public function setUrl(Url $url): void
     {
         ($this->binary)(
             $this
@@ -48,14 +46,12 @@ final class Remote
                 ->command()
                 ->withArgument('remote')
                 ->withArgument('set-url')
-                ->withArgument((string) $this->name)
-                ->withArgument((string) $url)
+                ->withArgument($this->name->toString())
+                ->withArgument($url->toString()),
         );
-
-        return $this;
     }
 
-    public function addUrl(Url $url): self
+    public function addUrl(Url $url): void
     {
         ($this->binary)(
             $this
@@ -64,14 +60,12 @@ final class Remote
                 ->withArgument('remote')
                 ->withArgument('set-url')
                 ->withOption('add')
-                ->withArgument((string) $this->name)
-                ->withArgument((string) $url)
+                ->withArgument($this->name->toString())
+                ->withArgument($url->toString()),
         );
-
-        return $this;
     }
 
-    public function deleteUrl(Url $url): self
+    public function deleteUrl(Url $url): void
     {
         ($this->binary)(
             $this
@@ -80,14 +74,12 @@ final class Remote
                 ->withArgument('remote')
                 ->withArgument('set-url')
                 ->withOption('delete')
-                ->withArgument((string) $this->name)
-                ->withArgument((string) $url)
+                ->withArgument($this->name->toString())
+                ->withArgument($url->toString())
         );
-
-        return $this;
     }
 
-    public function push(Branch $branch): self
+    public function push(Branch $branch): void
     {
         ($this->binary)(
             $this
@@ -95,24 +87,20 @@ final class Remote
                 ->command()
                 ->withArgument('push')
                 ->withShortOption('u')
-                ->withArgument((string) $this->name)
-                ->withArgument((string) $branch)
+                ->withArgument($this->name->toString())
+                ->withArgument($branch->toString()),
         );
-
-        return $this;
     }
 
-    public function delete(Branch $branch): self
+    public function delete(Branch $branch): void
     {
         ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('push')
-                ->withArgument((string) $this->name)
-                ->withArgument(':'.$branch)
+                ->withArgument($this->name->toString())
+                ->withArgument(':'.$branch->toString()),
         );
-
-        return $this;
     }
 }

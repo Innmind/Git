@@ -12,67 +12,63 @@ use Innmind\Git\{
     Repository\Tags,
     Exception\RepositoryInitFailed,
     Exception\PathNotUsable,
-    Exception\DomainException
+    Exception\DomainException,
 };
 use Innmind\Server\Control\{
     Server,
-    Server\Command
+    Server\Command,
 };
-use Innmind\Url\{
-    PathInterface,
-    Path
-};
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\Url\Path;
+use Innmind\TimeContinuum\Clock;
 use Innmind\Immutable\Str;
 
 final class Repository
 {
-    private $binary;
-    private $clock;
-    private $path;
-    private $branches;
-    private $remotes;
-    private $checkout;
-    private $tags;
+    private Binary $binary;
+    private Clock $clock;
+    private ?Branches $branches = null;
+    private ?Remotes $remotes = null;
+    private ?Checkout $checkout = null;
+    private ?Tags $tags = null;
 
     public function __construct(
         Server $server,
-        PathInterface $path,
-        TimeContinuumInterface $clock
+        Path $path,
+        Clock $clock
     ) {
         $this->binary = new Binary($server, $path);
         $this->clock = $clock;
 
-        $code = $server
+        $process = $server
             ->processes()
             ->execute(
                 Command::foreground('mkdir')
                     ->withShortOption('p')
-                    ->withArgument((string) $path)
-            )
-            ->wait()
-            ->exitCode();
+                    ->withArgument($path->toString()),
+            );
+        $process->wait();
+        $code = $process->exitCode();
 
         if (!$code->isSuccessful()) {
-            throw new PathNotUsable((string) $path);
+            throw new PathNotUsable($path->toString());
         }
     }
 
-    public function init(): self
+    public function init(): void
     {
         $output = ($this->binary)(
             $this
                 ->binary
                 ->command()
-                ->withArgument('init')
+                ->withArgument('init'),
         );
-        $outputStr = new Str((string) $output);
+        $outputStr = Str::of($output->toString());
 
         if (
             $outputStr->contains('Initialized empty Git repository') ||
             $outputStr->contains('Reinitialized existing Git repository')
         ) {
-            return $this;
+            return;
         }
 
         throw new RepositoryInitFailed($output);
@@ -80,13 +76,13 @@ final class Repository
 
     public function head(): Revision
     {
-        $output = new Str((string) ($this->binary)(
+        $output = Str::of(($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('branch')
-                ->withOption('no-color')
-        ));
+                ->withOption('no-color'),
+        )->toString());
         $revision = $output
             ->split("\n")
             ->filter(static function(Str $line): bool {
@@ -96,73 +92,68 @@ final class Repository
 
         if ($revision->matches('~\(HEAD detached at [a-z0-9]{7,40}\)~')) {
             return new Hash(
-                (string) $revision
+                $revision
                     ->capture('~\(HEAD detached at (?P<hash>[a-z0-9]{7,40})\)~')
                     ->get('hash')
+                    ->toString(),
             );
         }
 
-        return new Branch((string) $revision->substring(2));
+        return new Branch($revision->substring(2)->toString());
     }
 
     public function branches(): Branches
     {
-        return $this->branches ?? $this->branches = new Branches($this->binary);
+        return $this->branches ??= new Branches($this->binary);
     }
 
-    public function push(): self
+    public function push(): void
     {
         ($this->binary)(
             $this
                 ->binary
                 ->command()
-                ->withArgument('push')
+                ->withArgument('push'),
         );
-
-        return $this;
     }
 
-    public function pull(): self
+    public function pull(): void
     {
         ($this->binary)(
             $this
                 ->binary
                 ->command()
-                ->withArgument('pull')
+                ->withArgument('pull'),
         );
-
-        return $this;
     }
 
     public function remotes(): Remotes
     {
-        return $this->remotes ?? $this->remotes = new Remotes($this->binary);
+        return $this->remotes ??= new Remotes($this->binary);
     }
 
     public function checkout(): Checkout
     {
-        return $this->checkout ?? $this->checkout = new Checkout($this->binary);
+        return $this->checkout ??= new Checkout($this->binary);
     }
 
     public function tags(): Tags
     {
-        return $this->tags ?? $this->tags = new Tags($this->binary, $this->clock);
+        return $this->tags ??= new Tags($this->binary, $this->clock);
     }
 
-    public function add(PathInterface $file): self
+    public function add(Path $file): void
     {
         ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('add')
-                ->withArgument((string) $file)
+                ->withArgument($file->toString()),
         );
-
-        return $this;
     }
 
-    public function commit(Message $message): self
+    public function commit(Message $message): void
     {
         ($this->binary)(
             $this
@@ -170,22 +161,18 @@ final class Repository
                 ->command()
                 ->withArgument('commit')
                 ->withShortOption('m')
-                ->withArgument((string) $message)
+                ->withArgument($message->toString()),
         );
-
-        return $this;
     }
 
-    public function merge(Branch $branch): self
+    public function merge(Branch $branch): void
     {
         ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('merge')
-                ->withArgument((string) $branch)
+                ->withArgument($branch->toString()),
         );
-
-        return $this;
     }
 }

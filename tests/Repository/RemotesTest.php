@@ -18,7 +18,8 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\SetInterface;
+use Innmind\Immutable\Set;
+use function Innmind\Immutable\unwrap;
 use PHPUnit\Framework\TestCase;
 
 class RemotesTest extends TestCase
@@ -46,7 +47,7 @@ class RemotesTest extends TestCase
             ->willReturn($output = $this->createMock(Output::class));
         $output
             ->expects($this->once())
-            ->method('__toString')
+            ->method('toString')
             ->willReturn(<<<REMOTES
 origin
 gitlab
@@ -57,21 +58,21 @@ REMOTES
         $remotes = new Remotes(
             new Binary(
                 $server,
-                new Path('/tmp/foo')
+                Path::of('/tmp/foo')
             )
         );
 
         $all = $remotes->all();
 
-        $this->assertInstanceOf(SetInterface::class, $all);
+        $this->assertInstanceOf(Set::class, $all);
         $this->assertSame(Remote::class, (string) $all->type());
         $this->assertCount(3, $all);
-        $this->assertSame('origin', (string) $all->current()->name());
-        $all->next();
-        $this->assertSame('gitlab', (string) $all->current()->name());
-        $all->next();
-        $this->assertSame('local', (string) $all->current()->name());
-        $all->next();
+        $all = unwrap($all);
+        $this->assertSame('origin', \current($all)->name()->toString());
+        \next($all);
+        $this->assertSame('gitlab', \current($all)->name()->toString());
+        \next($all);
+        $this->assertSame('local', \current($all)->name()->toString());
     }
 
     public function testGet()
@@ -79,7 +80,7 @@ REMOTES
         $remotes = new Remotes(
             new Binary(
                 $this->createMock(Server::class),
-                new Path('watev')
+                Path::of('watev')
             )
         );
 
@@ -100,8 +101,8 @@ REMOTES
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'remote' 'add' 'origin' 'git@github.com:Innmind/Git.git'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'remote' 'add' 'origin' 'git@github.com:Innmind/Git.git'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
@@ -115,7 +116,7 @@ REMOTES
         $remotes = new Remotes(
             new Binary(
                 $server,
-                new Path('/tmp/foo')
+                Path::of('/tmp/foo')
             )
         );
 
@@ -139,8 +140,8 @@ REMOTES
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'remote' 'remove' 'origin'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'remote' 'remove' 'origin'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
@@ -154,10 +155,10 @@ REMOTES
         $remotes = new Remotes(
             new Binary(
                 $server,
-                new Path('/tmp/foo')
+                Path::of('/tmp/foo')
             )
         );
 
-        $this->assertSame($remotes, $remotes->remove(new Name('origin')));
+        $this->assertNull($remotes->remove(new Name('origin')));
     }
 }

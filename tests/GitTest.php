@@ -17,7 +17,7 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode
 };
 use Innmind\Url\Path;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 
@@ -31,18 +31,18 @@ class GitTest extends TestCase
     public function testRepository()
     {
         $git = new Git(
-            (new ServerFactory)->make(),
-            $this->createMock(TimeContinuumInterface::class)
+            ServerFactory::build(),
+            $this->createMock(Clock::class)
         );
 
-        $this->assertInstanceOf(Repository::class, $git->repository(new Path('/tmp/foo')));
+        $this->assertInstanceOf(Repository::class, $git->repository(Path::of('/tmp/foo')));
     }
 
     public function testVersion()
     {
         $git = new Git(
-            (new ServerFactory)->make(),
-            $this->createMock(TimeContinuumInterface::class)
+            ServerFactory::build(),
+            $this->createMock(Clock::class)
         );
 
         $this->assertInstanceOf(Version::class, $git->version());
@@ -52,7 +52,7 @@ class GitTest extends TestCase
     {
         $git = new Git(
             $server = $this->createMock(Server::class),
-            $this->createMock(TimeContinuumInterface::class)
+            $this->createMock(Clock::class)
         );
         $server
             ->expects($this->once())
@@ -62,12 +62,9 @@ class GitTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git '--version'";
+                return $command->toString() === "git '--version'";
             }))
             ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->method('wait')
-            ->will($this->returnSelf());
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(1));

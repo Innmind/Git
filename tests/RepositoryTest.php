@@ -26,7 +26,7 @@ use Innmind\Server\Control\{
     ServerFactory
 };
 use Innmind\Url\Path;
-use Innmind\TimeContinuum\TimeContinuumInterface;
+use Innmind\TimeContinuum\Clock;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 use Eris\{
@@ -54,13 +54,12 @@ class RepositoryTest extends TestCase
             ->expects($this->once())
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "mkdir '-p' '/tmp/foo'";
+                return $command->toString() === "mkdir '-p' '/tmp/foo'";
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(1));
@@ -70,8 +69,8 @@ class RepositoryTest extends TestCase
 
         new Repository(
             $server,
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
     }
 
@@ -88,8 +87,7 @@ class RepositoryTest extends TestCase
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -98,29 +96,28 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'init'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'init'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(1));
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
 
         try {
             $repo->init();
             $this->fail('it should throw');
         } catch (CommandFailed $e) {
-            $this->assertSame("git 'init'", (string) $e->command());
+            $this->assertSame("git 'init'", $e->command()->toString());
             $this->assertSame($process, $e->process());
         }
     }
@@ -138,8 +135,7 @@ class RepositoryTest extends TestCase
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -148,14 +144,13 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'init'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'init'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -165,8 +160,8 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
 
         try {
@@ -180,14 +175,14 @@ class RepositoryTest extends TestCase
     public function testInit()
     {
         $repo = new Repository(
-            (new ServerFactory)->make(),
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            ServerFactory::build(),
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
 
         $this->assertFalse(is_dir('/tmp/foo/.git'));
-        $this->assertSame($repo, $repo->init());
-        $this->assertSame($repo, $repo->init()); //validate reinit doesn't throw
+        $this->assertNull($repo->init());
+        $this->assertNull($repo->init()); //validate reinit doesn't throw
         $this->assertTrue(is_dir('/tmp/foo/.git'));
     }
 
@@ -207,8 +202,7 @@ class RepositoryTest extends TestCase
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -217,14 +211,13 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'branch' '--no-color'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'branch' '--no-color'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -233,27 +226,27 @@ class RepositoryTest extends TestCase
             ->willReturn($output = $this->createMock(Output::class));
         $output
             ->expects($this->once())
-            ->method('__toString')
+            ->method('toString')
             ->willReturn($list);
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
 
         $head = $repo->head();
 
         $this->assertInstanceOf($class, $head);
-        $this->assertSame($expected, (string) $head);
+        $this->assertSame($expected, $head->toString());
     }
 
     public function testBranches()
     {
         $repo = new Repository(
-            (new ServerFactory)->make(),
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            ServerFactory::build(),
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
 
         $this->assertInstanceOf(Branches::class, $repo->branches());
@@ -272,8 +265,7 @@ class RepositoryTest extends TestCase
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -282,14 +274,13 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'push'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'push'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -299,11 +290,11 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
 
-        $this->assertSame($repo, $repo->push());
+        $this->assertNull($repo->push());
     }
 
     public function testPull()
@@ -319,8 +310,7 @@ class RepositoryTest extends TestCase
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -329,14 +319,13 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'pull'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'pull'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -346,19 +335,19 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
 
-        $this->assertSame($repo, $repo->pull());
+        $this->assertNull($repo->pull());
     }
 
     public function testRemotes()
     {
         $repo = new Repository(
-            (new ServerFactory)->make(),
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            ServerFactory::build(),
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
 
         $this->assertInstanceOf(Remotes::class, $repo->remotes());
@@ -367,9 +356,9 @@ class RepositoryTest extends TestCase
     public function testCheckout()
     {
         $repo = new Repository(
-            (new ServerFactory)->make(),
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            ServerFactory::build(),
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
 
         $this->assertInstanceOf(Checkout::class, $repo->checkout());
@@ -378,9 +367,9 @@ class RepositoryTest extends TestCase
     public function testTags()
     {
         $repo = new Repository(
-            (new ServerFactory)->make(),
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            ServerFactory::build(),
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
 
         $this->assertInstanceOf(Tags::class, $repo->tags());
@@ -399,8 +388,7 @@ class RepositoryTest extends TestCase
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -409,14 +397,13 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'add' 'foo'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'add' 'foo'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -426,11 +413,11 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
 
-        $this->assertSame($repo, $repo->add(new Path('foo')));
+        $this->assertNull($repo->add(Path::of('foo')));
     }
 
     public function testCommit()
@@ -452,8 +439,7 @@ class RepositoryTest extends TestCase
                     ->willReturn($process = $this->createMock(Process::class));
                 $process
                     ->expects($this->once())
-                    ->method('wait')
-                    ->will($this->returnSelf());
+                    ->method('wait');
                 $process
                     ->method('exitCode')
                     ->willReturn(new ExitCode(0));
@@ -462,16 +448,15 @@ class RepositoryTest extends TestCase
                     ->expects($this->at(1))
                     ->method('execute')
                     ->with($this->callback(function($command) use ($message): bool {
-                        $message = (string) new Str($message);
+                        $message = (new Str($message))->toString();
 
-                        return (string) $command === "git 'commit' '-m' $message" &&
-                            $command->workingDirectory() === '/tmp/foo';
+                        return $command->toString() === "git 'commit' '-m' $message" &&
+                            $command->workingDirectory()->toString() === '/tmp/foo';
                     }))
                     ->willReturn($process = $this->createMock(Process::class));
                 $process
                     ->expects($this->once())
-                    ->method('wait')
-                    ->will($this->returnSelf());
+                    ->method('wait');
                 $process
                     ->method('exitCode')
                     ->willReturn(new ExitCode(0));
@@ -481,11 +466,11 @@ class RepositoryTest extends TestCase
 
                 $repo = new Repository(
                     $server,
-                    new Path('/tmp/foo'),
-                    $this->createMock(TimeContinuumInterface::class)
+                    Path::of('/tmp/foo'),
+                    $this->createMock(Clock::class)
                 );
 
-                $this->assertSame($repo, $repo->commit(new Message($message)));
+                $this->assertNull($repo->commit(new Message($message)));
             });
     }
 
@@ -502,8 +487,7 @@ class RepositoryTest extends TestCase
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -512,14 +496,13 @@ class RepositoryTest extends TestCase
             ->expects($this->at(1))
             ->method('execute')
             ->with($this->callback(function($command): bool {
-                return (string) $command === "git 'merge' 'develop'" &&
-                    $command->workingDirectory() === '/tmp/foo';
+                return $command->toString() === "git 'merge' 'develop'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait')
-            ->will($this->returnSelf());
+            ->method('wait');
         $process
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
@@ -529,11 +512,11 @@ class RepositoryTest extends TestCase
 
         $repo = new Repository(
             $server,
-            new Path('/tmp/foo'),
-            $this->createMock(TimeContinuumInterface::class)
+            Path::of('/tmp/foo'),
+            $this->createMock(Clock::class)
         );
 
-        $this->assertSame($repo, $repo->merge(new Branch('develop')));
+        $this->assertNull($repo->merge(new Branch('develop')));
     }
 
     public function heads(): array

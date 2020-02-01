@@ -5,17 +5,17 @@ namespace Innmind\Git\Revision;
 
 use Innmind\Git\{
     Revision,
-    Exception\DomainException
+    Exception\DomainException,
 };
 use Innmind\Immutable\Str;
 
 final class Hash implements Revision
 {
-    private $value;
+    private string $value;
 
     public function __construct(string $hash)
     {
-        $hash = new Str($hash);
+        $hash = Str::of($hash);
 
         if (
             !$hash->matches('~[a-z0-9]~') ||
@@ -24,13 +24,13 @@ final class Hash implements Revision
                 $hash->length() !== 40
             )
         ) {
-            throw new DomainException;
+            throw new DomainException($hash->toString());
         }
 
-        $this->value = (string) $hash;
+        $this->value = $hash->toString();
     }
 
-    public function __toString(): string
+    public function toString(): string
     {
         return $this->value;
     }

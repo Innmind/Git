@@ -8,64 +8,59 @@ use Innmind\Git\{
     Revision,
     Message,
     Repository\Tag\Name,
-    Exception\DomainException
+    Exception\DomainException,
 };
-use Innmind\Url\PathInterface;
 use Innmind\TimeContinuum\{
-    TimeContinuumInterface,
-    Format\RFC2822
+    Clock,
+    Earth\Format\RFC2822,
 };
 use Innmind\Immutable\{
-    SetInterface,
     Set,
-    Str
+    Str,
 };
+use function Innmind\Immutable\unwrap;
 
 final class Tags
 {
-    private $binary;
-    private $clock;
+    private Binary $binary;
+    private Clock $clock;
 
-    public function __construct(Binary $binary, TimeContinuumInterface $clock)
+    public function __construct(Binary $binary, Clock $clock)
     {
         $this->binary = $binary;
         $this->clock = $clock;
     }
 
-    public function push(): self
+    public function push(): void
     {
         ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('push')
-                ->withOption('tags')
+                ->withOption('tags'),
         );
-
-        return $this;
     }
 
-    public function add(Name $name, Message $message = null): self
+    public function add(Name $name, Message $message = null): void
     {
         $command = $this
             ->binary
             ->command()
             ->withArgument('tag')
-            ->withArgument((string) $name);
+            ->withArgument($name->toString());
 
         if (null !== $message) {
             $command = $command
                 ->withShortOption('a')
                 ->withShortOption('m')
-                ->withArgument((string) $message);
+                ->withArgument($message->toString());
         }
 
         ($this->binary)($command);
-
-        return $this;
     }
 
-    public function sign(Name $name, Message $message): self
+    public function sign(Name $name, Message $message): void
     {
         ($this->binary)(
             $this
@@ -74,18 +69,16 @@ final class Tags
                 ->withArgument('tag')
                 ->withShortOption('s')
                 ->withShortOption('a')
-                ->withArgument((string) $name)
+                ->withArgument($name->toString())
                 ->withShortOption('m')
-                ->withArgument((string) $message)
+                ->withArgument($message->toString()),
         );
-
-        return $this;
     }
 
     /**
-     * @return SetInterface<Tag>
+     * @return Set<Tag>
      */
-    public function all(): SetInterface
+    public function all(): Set
     {
         $output = ($this->binary)(
             $this
@@ -95,27 +88,28 @@ final class Tags
                 ->withOption('list')
                 ->withOption('format', '%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)')
         );
-        $output = new Str((string) $output);
+        $output = Str::of($output->toString());
 
+        /** @var Set<Tag> */
         return $output
             ->split("\n")
             ->filter(static function(Str $line): bool {
                 return !$line->trim()->empty();
             })
-            ->reduce(
-                new Set(Tag::class),
-                function(SetInterface $tags, Str $line): SetInterface {
-                    [$name, $message, $time] = $line->split('|||');
+            ->toSetOf(
+                Tag::class,
+                function(Str $line): \Generator {
+                    [$name, $message, $time] = unwrap($line->split('|||'));
 
-                    return $tags->add(new Tag(
-                        new Name((string) $name),
-                        new Message((string) $message),
+                    yield new Tag(
+                        new Name($name->toString()),
+                        new Message($message->toString()),
                         $this->clock->at(
-                            (string) $time,
-                            new RFC2822
-                        )
-                    ));
-                }
+                            $time->toString(),
+                            new RFC2822,
+                        ),
+                    );
+                },
             );
     }
 }
