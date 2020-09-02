@@ -13,7 +13,7 @@ use Eris\{
     TestTrait
 };
 
-class BranchTest extends TestCase
+class NameTest extends TestCase
 {
     use TestTrait;
 
