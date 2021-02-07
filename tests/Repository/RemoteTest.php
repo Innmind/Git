@@ -46,7 +46,7 @@ class RemoteTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'remote' 'prune' 'origin'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -82,7 +82,7 @@ class RemoteTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'remote' 'set-url' 'origin' '/local/remote'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -118,7 +118,7 @@ class RemoteTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'remote' 'set-url' '--add' 'origin' '/local/remote'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -154,7 +154,7 @@ class RemoteTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'remote' 'set-url' '--delete' 'origin' '/local/remote'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -190,7 +190,7 @@ class RemoteTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'push' '-u' 'origin' 'develop'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -223,7 +223,7 @@ class RemoteTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'push' 'origin' ':develop'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))

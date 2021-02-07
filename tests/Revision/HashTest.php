@@ -42,8 +42,8 @@ class HashTest extends TestCase
         $this
             ->forAll(Set\Strings::any())
             ->then(function($string): void {
-                $hash = sha1($string);
-                $short = substr($hash, 0, 7);
+                $hash = \sha1($string);
+                $short = \substr($hash, 0, 7);
 
                 $this->assertSame($hash, (new Hash($hash))->toString());
                 $this->assertSame($short, (new Hash($short))->toString());

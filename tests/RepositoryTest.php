@@ -53,7 +53,7 @@ class RepositoryTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "mkdir '-p' '/tmp/foo'";
             }))
             ->willReturn($process = $this->createMock(Process::class));
@@ -86,7 +86,7 @@ class RepositoryTest extends TestCase
             ->method('execute')
             ->withConsecutive(
                 [],
-                [$this->callback(function($command): bool {
+                [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'init'" &&
                         $command->workingDirectory()->toString() === '/tmp/foo';
                 })],
@@ -135,7 +135,7 @@ class RepositoryTest extends TestCase
             ->method('execute')
             ->withConsecutive(
                 [],
-                [$this->callback(function($command): bool {
+                [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'init'" &&
                         $command->workingDirectory()->toString() === '/tmp/foo';
                 })],
@@ -182,10 +182,10 @@ class RepositoryTest extends TestCase
             $this->createMock(Clock::class)
         );
 
-        $this->assertFalse(is_dir('/tmp/foo/.git'));
+        $this->assertFalse(\is_dir('/tmp/foo/.git'));
         $this->assertNull($repo->init());
         $this->assertNull($repo->init()); //validate reinit doesn't throw
-        $this->assertTrue(is_dir('/tmp/foo/.git'));
+        $this->assertTrue(\is_dir('/tmp/foo/.git'));
     }
 
     /**
@@ -203,7 +203,7 @@ class RepositoryTest extends TestCase
             ->method('execute')
             ->withConsecutive(
                 [],
-                [$this->callback(function($command): bool {
+                [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'branch' '--no-color'" &&
                         $command->workingDirectory()->toString() === '/tmp/foo';
                 })],
@@ -267,7 +267,7 @@ class RepositoryTest extends TestCase
             ->method('execute')
             ->withConsecutive(
                 [],
-                [$this->callback(function($command): bool {
+                [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'push'" &&
                         $command->workingDirectory()->toString() === '/tmp/foo';
                 })],
@@ -310,7 +310,7 @@ class RepositoryTest extends TestCase
             ->method('execute')
             ->withConsecutive(
                 [],
-                [$this->callback(function($command): bool {
+                [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'pull'" &&
                         $command->workingDirectory()->toString() === '/tmp/foo';
                 })],
@@ -386,7 +386,7 @@ class RepositoryTest extends TestCase
             ->method('execute')
             ->withConsecutive(
                 [],
-                [$this->callback(function($command): bool {
+                [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'add' 'foo'" &&
                         $command->workingDirectory()->toString() === '/tmp/foo';
                 })],
@@ -432,7 +432,7 @@ class RepositoryTest extends TestCase
                     ->method('execute')
                     ->withConsecutive(
                         [],
-                        [$this->callback(function($command) use ($message): bool {
+                        [$this->callback(static function($command) use ($message): bool {
                             $message = (new Str($message))->toString();
 
                             return $command->toString() === "git 'commit' '-m' $message" &&
@@ -478,7 +478,7 @@ class RepositoryTest extends TestCase
             ->method('execute')
             ->withConsecutive(
                 [],
-                [$this->callback(function($command): bool {
+                [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'merge' 'develop'" &&
                         $command->workingDirectory()->toString() === '/tmp/foo';
                 })],

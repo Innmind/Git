@@ -32,7 +32,7 @@ class BranchesTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' '--no-color'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -86,7 +86,7 @@ BRANCHES
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' '-r' '--no-color'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -141,11 +141,11 @@ BRANCHES
             ->expects($this->exactly(2))
             ->method('execute')
             ->withConsecutive(
-                [$this->callback(function($command): bool {
+                [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'branch' '--no-color'" &&
                         $command->workingDirectory()->toString() === '/tmp/foo';
                 })],
-                [$this->callback(function($command): bool {
+                [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'branch' '-r' '--no-color'" &&
                         $command->workingDirectory()->toString() === '/tmp/foo';
                 })],
@@ -228,7 +228,7 @@ BRANCHES
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' 'bar'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -263,7 +263,7 @@ BRANCHES
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' 'bar' 'develop'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -298,7 +298,7 @@ BRANCHES
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' '-d' 'bar'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -333,7 +333,7 @@ BRANCHES
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' '-D' 'bar'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))

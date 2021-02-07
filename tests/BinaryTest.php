@@ -30,7 +30,7 @@ class BinaryTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'watev'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo' &&
                     $command->toBeRunInBackground() === false;
@@ -69,7 +69,7 @@ class BinaryTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'watev'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))

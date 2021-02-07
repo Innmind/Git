@@ -39,7 +39,7 @@ class TagsTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'push' '--tags'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -72,7 +72,7 @@ class TagsTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'tag' '1.0.0' '-a' '-m' 'first release'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -107,7 +107,7 @@ class TagsTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'tag' '1.0.0'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -142,7 +142,7 @@ class TagsTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'tag' '-s' '-a' '1.0.0' '-m' 'first release'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -183,7 +183,7 @@ class TagsTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'tag' '--list' '--format=%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -240,7 +240,7 @@ class TagsTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'tag' '--list' '--format=%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
