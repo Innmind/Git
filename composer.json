@@ -35,8 +35,5 @@
         "symfony/filesystem": "~5.0",
         "giorgiosironi/eris": "^0.11.0",
         "vimeo/psalm": "~3.7.0"
-    },
-    "scripts": {
-        "test": "vendor/bin/phpunit --colors=always"
     }
 }
