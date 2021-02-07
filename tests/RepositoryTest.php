@@ -29,14 +29,14 @@ use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
-use Eris\{
-    Generator,
-    TestTrait
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set,
 };
 
 class RepositoryTest extends TestCase
 {
-    use TestTrait;
+    use BlackBox;
 
     public function setUp(): void
     {
@@ -423,10 +423,7 @@ class RepositoryTest extends TestCase
     public function testCommit()
     {
         $this
-            ->forAll(Generator\string())
-            ->when(static function(string $message): bool {
-                return strlen($message) > 0;
-            })
+            ->forAll(Set\Strings::atLeast(1))
             ->then(function(string $message): void {
                 $server = $this->createMock(Server::class);
                 $server

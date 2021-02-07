@@ -8,22 +8,19 @@ use Innmind\Git\{
     Exception\DomainException,
 };
 use PHPUnit\Framework\TestCase;
-use Eris\{
-    Generator,
-    TestTrait
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set,
 };
 
 class MessageTest extends TestCase
 {
-    use TestTrait;
+    use BlackBox;
 
     public function testAcceptAnyNonEmptyString()
     {
         $this
-            ->forAll(Generator\string())
-            ->when(static function(string $message): bool {
-                return strlen($message) > 0;
-            })
+            ->forAll(Set\Strings::atLeast(1))
             ->then(function(string $message): void {
                 $this->assertSame($message, (new Message($message))->toString());
             });

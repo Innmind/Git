@@ -8,19 +8,19 @@ use Innmind\Git\{
     Exception\DomainException
 };
 use PHPUnit\Framework\TestCase;
-use Eris\{
-    Generator,
-    TestTrait
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set,
 };
 
 class UrlTest extends TestCase
 {
-    use TestTrait;
+    use BlackBox;
 
     public function testThrowWhenGivenAnyRandomString()
     {
         $this
-            ->forAll(Generator\string())
+            ->forAll(Set\Strings::any())
             ->then(function(string $string): void {
                 $this->expectException(DomainException::class);
 
