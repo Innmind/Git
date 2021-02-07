@@ -39,7 +39,7 @@ final class Git
             );
         $process->wait();
 
-        if (!$process->exitCode()->isSuccessful()) {
+        if (!$process->exitCode()->successful()) {
             throw new CommandFailed($command, $process);
         }
 
