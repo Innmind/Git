@@ -100,7 +100,7 @@ REMOTES
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'remote' 'add' 'origin' 'git@github.com:Innmind/Git.git'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -139,7 +139,7 @@ REMOTES
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'remote' 'remove' 'origin'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))

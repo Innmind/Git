@@ -1,9 +1,8 @@
 # Git
 
-| `develop` |
-|-----------|
-| [![codecov](https://codecov.io/gh/Innmind/Git/branch/develop/graph/badge.svg)](https://codecov.io/gh/Innmind/Git) |
-| [![Build Status](https://github.com/Innmind/Git/workflows/CI/badge.svg)](https://github.com/Innmind/Git/actions?query=workflow%3ACI) |
+[![Build Status](https://github.com/innmind/git/workflows/CI/badge.svg?branch=master)](https://github.com/innmind/git/actions?query=workflow%3ACI)
+[![codecov](https://codecov.io/gh/innmind/git/branch/develop/graph/badge.svg)](https://codecov.io/gh/innmind/git)
+[![Type Coverage](https://shepherd.dev/github/innmind/git/coverage.svg)](https://shepherd.dev/github/innmind/git)
 
 Abstraction layer to manipulate local git repositories.
 

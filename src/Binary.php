@@ -23,11 +23,6 @@ final class Binary
             ->withWorkingDirectory($path);
     }
 
-    public function command(): Command
-    {
-        return $this->command;
-    }
-
     public function __invoke(Command $command): Output
     {
         $process = $this
@@ -36,10 +31,15 @@ final class Binary
             ->execute($command);
         $process->wait();
 
-        if (!$process->exitCode()->isSuccessful()) {
+        if (!$process->exitCode()->successful()) {
             throw new CommandFailed($command, $process);
         }
 
         return $process->output();
+    }
+
+    public function command(): Command
+    {
+        return $this->command;
     }
 }

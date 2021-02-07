@@ -35,7 +35,7 @@ class CheckoutTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command) use ($path): bool {
+            ->with($this->callback(static function($command) use ($path): bool {
                 return $command->toString() === "git 'checkout' '--' '$path'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -70,7 +70,7 @@ class CheckoutTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command) use ($revision): bool {
+            ->with($this->callback(static function($command) use ($revision): bool {
                 return $command->toString() === "git 'checkout' '{$revision->toString()}'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))

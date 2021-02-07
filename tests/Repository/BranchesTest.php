@@ -32,7 +32,7 @@ class BranchesTest extends TestCase
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' '--no-color'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -86,7 +86,7 @@ BRANCHES
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' '-r' '--no-color'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -138,23 +138,32 @@ BRANCHES
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
         $processes
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->with($this->callback(function($command): bool {
-                return $command->toString() === "git 'branch' '--no-color'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+            ->withConsecutive(
+                [$this->callback(static function($command): bool {
+                    return $command->toString() === "git 'branch' '--no-color'" &&
+                        $command->workingDirectory()->toString() === '/tmp/foo';
+                })],
+                [$this->callback(static function($command): bool {
+                    return $command->toString() === "git 'branch' '-r' '--no-color'" &&
+                        $command->workingDirectory()->toString() === '/tmp/foo';
+                })],
+            )
+            ->will($this->onConsecutiveCalls(
+                $process1 = $this->createMock(Process::class),
+                $process2 = $this->createMock(Process::class),
+            ));
+        $process1
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process1
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-        $process
+        $process1
             ->method('output')
-            ->willReturn($output = $this->createMock(Output::class));
-        $output
+            ->willReturn($output1 = $this->createMock(Output::class));
+        $output1
             ->expects($this->once())
             ->method('toString')
             ->willReturn(<<<BRANCHES
@@ -164,25 +173,16 @@ BRANCHES
   master
 BRANCHES
         );
-
-        $processes
-            ->expects($this->at(1))
-            ->method('execute')
-            ->with($this->callback(function($command): bool {
-                return $command->toString() === "git 'branch' '-r' '--no-color'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+        $process2
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process2
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-        $process
+        $process2
             ->method('output')
-            ->willReturn($output = $this->createMock(Output::class));
-        $output
+            ->willReturn($output2 = $this->createMock(Output::class));
+        $output2
             ->expects($this->once())
             ->method('toString')
             ->willReturn(<<<BRANCHES
@@ -228,7 +228,7 @@ BRANCHES
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' 'bar'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -263,7 +263,7 @@ BRANCHES
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' 'bar' 'develop'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -298,7 +298,7 @@ BRANCHES
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' '-d' 'bar'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))
@@ -333,7 +333,7 @@ BRANCHES
         $processes
             ->expects($this->once())
             ->method('execute')
-            ->with($this->callback(function($command): bool {
+            ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' '-D' 'bar'" &&
                     $command->workingDirectory()->toString() === '/tmp/foo';
             }))

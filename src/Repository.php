@@ -49,7 +49,7 @@ final class Repository
         $process->wait();
         $code = $process->exitCode();
 
-        if (!$code->isSuccessful()) {
+        if (!$code->successful()) {
             throw new PathNotUsable($path->toString());
         }
     }

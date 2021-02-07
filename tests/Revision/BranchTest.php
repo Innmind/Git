@@ -9,14 +9,14 @@ use Innmind\Git\{
     Exception\DomainException
 };
 use PHPUnit\Framework\TestCase;
-use Eris\{
-    Generator,
-    TestTrait
+use Innmind\BlackBox\{
+    PHPUnit\BlackBox,
+    Set,
 };
 
 class BranchTest extends TestCase
 {
-    use TestTrait;
+    use BlackBox;
 
     public function testInterface()
     {
@@ -29,7 +29,7 @@ class BranchTest extends TestCase
     public function testThrowWhenInvalidBranchName()
     {
         $this
-            ->forAll(Generator\string())
+            ->forAll(Set\Strings::any())
             ->then(function($string): void {
                 $this->expectException(DomainException::class);
 
@@ -39,14 +39,25 @@ class BranchTest extends TestCase
 
     public function testNamesAreAccepted()
     {
+        $names = static fn($min = 0) => Set\Decorate::immutable(
+            static fn($chars) => \implode('', $chars),
+            Set\Sequence::of(
+                Set\Decorate::immutable(
+                    static fn($ord) => \chr($ord),
+                    new Set\Either(
+                        Set\Integers::between(65, 90), // A-Z
+                        Set\Integers::between(97, 122), // a-z
+                    ),
+                ),
+                Set\Integers::between($min, 20),
+            ),
+        );
+
         $this
             ->forAll(
-                Generator\names(),
-                Generator\names()
+                $names(1),
+                $names()
             )
-            ->when(static function($first): bool {
-                return strlen($first) > 1;
-            })
             ->then(function($first, $second): void {
                 $this->assertSame($first, (new Branch($first))->toString());
                 $this->assertSame($first.'-'.$second, (new Branch($first.'-'.$second))->toString());
