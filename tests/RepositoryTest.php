@@ -182,10 +182,10 @@ class RepositoryTest extends TestCase
             $this->createMock(Clock::class)
         );
 
-        $this->assertFalse(\is_dir('/tmp/foo/.git'));
+        $this->assertDirectoryDoesNotExist('/tmp/foo/.git');
         $this->assertNull($repo->init());
         $this->assertNull($repo->init()); //validate reinit doesn't throw
-        $this->assertTrue(\is_dir('/tmp/foo/.git'));
+        $this->assertDirectoryExists('/tmp/foo/.git');
     }
 
     /**
