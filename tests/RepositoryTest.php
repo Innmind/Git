@@ -82,28 +82,29 @@ class RepositoryTest extends TestCase
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
         $processes
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+            ->withConsecutive(
+                [],
+                [$this->callback(function($command): bool {
+                    return $command->toString() === "git 'init'" &&
+                        $command->workingDirectory()->toString() === '/tmp/foo';
+                })],
+            )
+            ->will($this->onConsecutiveCalls(
+                $process1 = $this->createMock(Process::class),
+                $process2 = $this->createMock(Process::class),
+            ));
+        $process1
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process1
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-
-        $processes
-            ->expects($this->at(1))
-            ->method('execute')
-            ->with($this->callback(function($command): bool {
-                return $command->toString() === "git 'init'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+        $process2
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process2
             ->method('exitCode')
             ->willReturn(new ExitCode(1));
 
@@ -118,7 +119,7 @@ class RepositoryTest extends TestCase
             $this->fail('it should throw');
         } catch (CommandFailed $e) {
             $this->assertSame("git 'init'", $e->command()->toString());
-            $this->assertSame($process, $e->process());
+            $this->assertSame($process2, $e->process());
         }
     }
 
@@ -130,31 +131,32 @@ class RepositoryTest extends TestCase
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
         $processes
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+            ->withConsecutive(
+                [],
+                [$this->callback(function($command): bool {
+                    return $command->toString() === "git 'init'" &&
+                        $command->workingDirectory()->toString() === '/tmp/foo';
+                })],
+            )
+            ->will($this->onConsecutiveCalls(
+                $process1 = $this->createMock(Process::class),
+                $process2 = $this->createMock(Process::class),
+            ));
+        $process1
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process1
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-
-        $processes
-            ->expects($this->at(1))
-            ->method('execute')
-            ->with($this->callback(function($command): bool {
-                return $command->toString() === "git 'init'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+        $process2
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process2
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-        $process
+        $process2
             ->method('output')
             ->willReturn($output = $this->createMock(Output::class));
 
@@ -197,31 +199,32 @@ class RepositoryTest extends TestCase
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
         $processes
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+            ->withConsecutive(
+                [],
+                [$this->callback(function($command): bool {
+                    return $command->toString() === "git 'branch' '--no-color'" &&
+                        $command->workingDirectory()->toString() === '/tmp/foo';
+                })],
+            )
+            ->will($this->onConsecutiveCalls(
+                $process1 = $this->createMock(Process::class),
+                $process2 = $this->createMock(Process::class),
+            ));
+        $process1
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process1
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-
-        $processes
-            ->expects($this->at(1))
-            ->method('execute')
-            ->with($this->callback(function($command): bool {
-                return $command->toString() === "git 'branch' '--no-color'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+        $process2
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process2
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-        $process
+        $process2
             ->method('output')
             ->willReturn($output = $this->createMock(Output::class));
         $output
@@ -260,33 +263,31 @@ class RepositoryTest extends TestCase
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
         $processes
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+            ->withConsecutive(
+                [],
+                [$this->callback(function($command): bool {
+                    return $command->toString() === "git 'push'" &&
+                        $command->workingDirectory()->toString() === '/tmp/foo';
+                })],
+            )
+            ->will($this->onConsecutiveCalls(
+                $process1 = $this->createMock(Process::class),
+                $process2 = $this->createMock(Process::class),
+            ));
+        $process1
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process1
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-
-        $processes
-            ->expects($this->at(1))
-            ->method('execute')
-            ->with($this->callback(function($command): bool {
-                return $command->toString() === "git 'push'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+        $process2
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process2
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-        $process
-            ->method('output')
-            ->willReturn($this->createMock(Output::class));
 
         $repo = new Repository(
             $server,
@@ -305,33 +306,31 @@ class RepositoryTest extends TestCase
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
         $processes
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+            ->withConsecutive(
+                [],
+                [$this->callback(function($command): bool {
+                    return $command->toString() === "git 'pull'" &&
+                        $command->workingDirectory()->toString() === '/tmp/foo';
+                })],
+            )
+            ->will($this->onConsecutiveCalls(
+                $process1 = $this->createMock(Process::class),
+                $process2 = $this->createMock(Process::class),
+            ));
+        $process1
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process1
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-
-        $processes
-            ->expects($this->at(1))
-            ->method('execute')
-            ->with($this->callback(function($command): bool {
-                return $command->toString() === "git 'pull'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+        $process2
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process2
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-        $process
-            ->method('output')
-            ->willReturn($this->createMock(Output::class));
 
         $repo = new Repository(
             $server,
@@ -383,33 +382,31 @@ class RepositoryTest extends TestCase
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
         $processes
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+            ->withConsecutive(
+                [],
+                [$this->callback(function($command): bool {
+                    return $command->toString() === "git 'add' 'foo'" &&
+                        $command->workingDirectory()->toString() === '/tmp/foo';
+                })],
+            )
+            ->will($this->onConsecutiveCalls(
+                $process1 = $this->createMock(Process::class),
+                $process2 = $this->createMock(Process::class),
+            ));
+        $process1
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process1
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-
-        $processes
-            ->expects($this->at(1))
-            ->method('execute')
-            ->with($this->callback(function($command): bool {
-                return $command->toString() === "git 'add' 'foo'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+        $process2
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process2
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-        $process
-            ->method('output')
-            ->willReturn($this->createMock(Output::class));
 
         $repo = new Repository(
             $server,
@@ -431,35 +428,33 @@ class RepositoryTest extends TestCase
                     ->method('processes')
                     ->willReturn($processes = $this->createMock(Processes::class));
                 $processes
-                    ->expects($this->at(0))
+                    ->expects($this->exactly(2))
                     ->method('execute')
-                    ->willReturn($process = $this->createMock(Process::class));
-                $process
+                    ->withConsecutive(
+                        [],
+                        [$this->callback(function($command) use ($message): bool {
+                            $message = (new Str($message))->toString();
+
+                            return $command->toString() === "git 'commit' '-m' $message" &&
+                                $command->workingDirectory()->toString() === '/tmp/foo';
+                        })],
+                    )
+                    ->will($this->onConsecutiveCalls(
+                        $process1 = $this->createMock(Process::class),
+                        $process2 = $this->createMock(Process::class),
+                    ));
+                $process1
                     ->expects($this->once())
                     ->method('wait');
-                $process
+                $process1
                     ->method('exitCode')
                     ->willReturn(new ExitCode(0));
-
-                $processes
-                    ->expects($this->at(1))
-                    ->method('execute')
-                    ->with($this->callback(function($command) use ($message): bool {
-                        $message = (new Str($message))->toString();
-
-                        return $command->toString() === "git 'commit' '-m' $message" &&
-                            $command->workingDirectory()->toString() === '/tmp/foo';
-                    }))
-                    ->willReturn($process = $this->createMock(Process::class));
-                $process
+                $process2
                     ->expects($this->once())
                     ->method('wait');
-                $process
+                $process2
                     ->method('exitCode')
                     ->willReturn(new ExitCode(0));
-                $process
-                    ->method('output')
-                    ->willReturn($this->createMock(Output::class));
 
                 $repo = new Repository(
                     $server,
@@ -479,33 +474,31 @@ class RepositoryTest extends TestCase
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
         $processes
-            ->expects($this->at(0))
+            ->expects($this->exactly(2))
             ->method('execute')
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+            ->withConsecutive(
+                [],
+                [$this->callback(function($command): bool {
+                    return $command->toString() === "git 'merge' 'develop'" &&
+                        $command->workingDirectory()->toString() === '/tmp/foo';
+                })],
+            )
+            ->will($this->onConsecutiveCalls(
+                $process1 = $this->createMock(Process::class),
+                $process2 = $this->createMock(Process::class)
+            ));
+        $process1
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process1
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-
-        $processes
-            ->expects($this->at(1))
-            ->method('execute')
-            ->with($this->callback(function($command): bool {
-                return $command->toString() === "git 'merge' 'develop'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
+        $process2
             ->expects($this->once())
             ->method('wait');
-        $process
+        $process2
             ->method('exitCode')
             ->willReturn(new ExitCode(0));
-        $process
-            ->method('output')
-            ->willReturn($this->createMock(Output::class));
 
         $repo = new Repository(
             $server,

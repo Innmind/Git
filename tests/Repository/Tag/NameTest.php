@@ -20,7 +20,7 @@ class NameTest extends TestCase
     public function testAcceptAnyNonEmptyString()
     {
         $this
-            ->forAll(Set\Strings::atLeast(1))
+            ->forAll(Set\Strings::atLeast(1)->filter(static fn($name) => $name === \trim($name)))
             ->then(function(string $name): void {
                 $this->assertSame($name, (new Name($name))->toString());
             });

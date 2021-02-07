@@ -13,7 +13,7 @@ use Innmind\BlackBox\{
     Set,
 };
 
-class BranchTest extends TestCase
+class NameTest extends TestCase
 {
     use BlackBox;
 
