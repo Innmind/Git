@@ -20,7 +20,7 @@ class NameTest extends TestCase
     public function testThrowWhenInvalidRemoteName()
     {
         $this
-            ->forAll(Set\Strings::any())
+            ->forAll(Set\Unicode::strings())
             ->then(function($string): void {
                 $this->expectException(DomainException::class);
 

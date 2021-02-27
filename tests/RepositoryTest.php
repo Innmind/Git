@@ -420,7 +420,9 @@ class RepositoryTest extends TestCase
     public function testCommit()
     {
         $this
-            ->forAll(Set\Strings::atLeast(1))
+            ->forAll(Set\Strings::atLeast(1)->filter(
+                static fn($string) => $string === \trim($string)
+            ))
             ->then(function(string $message): void {
                 $server = $this->createMock(Server::class);
                 $server
