@@ -20,7 +20,9 @@ class MessageTest extends TestCase
     public function testAcceptAnyNonEmptyString()
     {
         $this
-            ->forAll(Set\Strings::atLeast(1))
+            ->forAll(Set\Strings::atLeast(1)->filter(
+                static fn($string) => $string === \trim($string)
+            ))
             ->then(function(string $message): void {
                 $this->assertSame($message, (new Message($message))->toString());
             });
