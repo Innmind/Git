@@ -102,6 +102,18 @@ final class Branches
         ($this->binary)($command);
     }
 
+    public function newOrphan(Branch $name): void
+    {
+        $command = $this
+            ->binary
+            ->command()
+            ->withArgument('checkout')
+            ->withOption('orphan')
+            ->withArgument($name->toString());
+
+        ($this->binary)($command);
+    }
+
     public function delete(Branch $name): void
     {
         ($this->binary)(

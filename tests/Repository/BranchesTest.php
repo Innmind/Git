@@ -288,6 +288,38 @@ BRANCHES
         $this->assertNull($branches->new(new Branch('bar'), new Branch('develop')));
     }
 
+    public function testNewOrphan()
+    {
+        $server = $this->createMock(Server::class);
+        $server
+            ->expects($this->once())
+            ->method('processes')
+            ->willReturn($processes = $this->createMock(Processes::class));
+        $processes
+            ->expects($this->once())
+            ->method('execute')
+            ->with($this->callback(static function($command): bool {
+                return $command->toString() === "git 'checkout' '--orphan' 'bar'" &&
+                    $command->workingDirectory()->toString() === '/tmp/foo';
+            }))
+            ->willReturn($process = $this->createMock(Process::class));
+        $process
+            ->expects($this->once())
+            ->method('wait');
+        $process
+            ->method('exitCode')
+            ->willReturn(new ExitCode(0));
+
+        $branches = new Branches(
+            new Binary(
+                $server,
+                Path::of('/tmp/foo')
+            )
+        );
+
+        $this->assertNull($branches->newOrphan(new Branch('bar')));
+    }
+
     public function testDelete()
     {
         $server = $this->createMock(Server::class);
