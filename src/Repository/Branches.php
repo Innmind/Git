@@ -41,6 +41,7 @@ final class Branches
             ->filter(static function(Str $line): bool {
                 return !$line->matches('~HEAD detached~');
             })
+            ->filter(static fn(Str $line): bool => !$line->trim()->empty())
             ->toSetOf(
                 Branch::class,
                 static fn(Str $branch): \Generator => yield new Branch(
@@ -69,6 +70,7 @@ final class Branches
             ->filter(static function(Str $line): bool {
                 return !$line->matches('~-> origin/~');
             })
+            ->filter(static fn(Str $line): bool => !$line->trim()->empty())
             ->toSetOf(
                 Branch::class,
                 static fn(Str $branch): \Generator => yield new Branch(
