@@ -24,9 +24,10 @@ use Innmind\Git\{
     Revision\Branch,
 };
 use Innmind\Server\Control\ServerFactory;
+use Innmind\TimeContinuum\Earth\Clock;
 use Innmind\Url\Path;
 
-$git = new Git(ServerFactory::build());
+$git = new Git(ServerFactory::build(), new Clock);
 $repository = $git->repository(Path::of('/somewhere/on/the/local/machine'));
 $remotes = $repository->init()->remotes();
 $remotes->add(new Name('origin'), new Url('git@github.com:Vendor/Repo.git'))
