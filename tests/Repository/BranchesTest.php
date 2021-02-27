@@ -54,6 +54,7 @@ class BranchesTest extends TestCase
   develop
   foo-bar-baz
   master
+
 BRANCHES
         );
 
@@ -108,6 +109,7 @@ BRANCHES
   origin/develop
   origin/foo-bar-baz
   origin/master
+
 BRANCHES
         );
 
