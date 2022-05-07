@@ -13,6 +13,7 @@ use Innmind\Git\{
     Exception\RepositoryInitFailed,
     Exception\PathNotUsable,
     Exception\DomainException,
+    Exception\RuntimeException,
 };
 use Innmind\Server\Control\{
     Server,
@@ -39,19 +40,18 @@ final class Repository
         $this->binary = new Binary($server, $path);
         $this->clock = $clock;
 
-        $process = $server
+        $_ = $server
             ->processes()
             ->execute(
                 Command::foreground('mkdir')
                     ->withShortOption('p')
                     ->withArgument($path->toString()),
+            )
+            ->wait()
+            ->match(
+                static fn() => null,
+                static fn() => throw new PathNotUsable($path->toString()),
             );
-        $process->wait();
-        $code = $process->exitCode();
-
-        if (!$code->successful()) {
-            throw new PathNotUsable($path->toString());
-        }
     }
 
     public function init(): void
@@ -88,18 +88,19 @@ final class Repository
             ->filter(static function(Str $line): bool {
                 return $line->matches('~^\* .+~');
             })
-            ->first();
-
-        if ($revision->matches('~\(HEAD detached at [a-z0-9]{7,40}\)~')) {
-            return new Hash(
-                $revision
-                    ->capture('~\(HEAD detached at (?P<hash>[a-z0-9]{7,40})\)~')
-                    ->get('hash')
-                    ->toString(),
+            ->first()
+            ->match(
+                static fn($revision) => $revision,
+                static fn() => throw new RuntimeException('Head not found'),
             );
-        }
 
-        return new Branch($revision->substring(2)->toString());
+        return $revision
+            ->capture('~\(HEAD detached at (?P<hash>[a-z0-9]{7,40})\)~')
+            ->get('hash')
+            ->match(
+                static fn($hash) => new Hash($hash->toString()),
+                static fn() => new Branch($revision->drop(2)->toString()),
+            );
     }
 
     public function branches(): Branches

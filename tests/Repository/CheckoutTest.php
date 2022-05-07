@@ -18,6 +18,10 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
+};
 use PHPUnit\Framework\TestCase;
 
 class CheckoutTest extends TestCase
@@ -37,15 +41,16 @@ class CheckoutTest extends TestCase
             ->method('execute')
             ->with($this->callback(static function($command) use ($path): bool {
                 return $command->toString() === "git 'checkout' '--' '$path'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
 
         $checkout = new Checkout(
             new Binary(
@@ -72,15 +77,16 @@ class CheckoutTest extends TestCase
             ->method('execute')
             ->with($this->callback(static function($command) use ($revision): bool {
                 return $command->toString() === "git 'checkout' '{$revision->toString()}'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
 
         $checkout = new Checkout(
             new Binary(

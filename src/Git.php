@@ -3,14 +3,20 @@ declare(strict_types = 1);
 
 namespace Innmind\Git;
 
-use Innmind\Git\Exception\CommandFailed;
+use Innmind\Git\Exception\{
+    CommandFailed,
+    RuntimeException,
+};
 use Innmind\Server\Control\{
     Server,
     Server\Command,
 };
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
-use Innmind\Immutable\Str;
+use Innmind\Immutable\{
+    Str,
+    Maybe,
+};
 
 final class Git
 {
@@ -37,20 +43,29 @@ final class Git
                 $command = Command::foreground('git')
                     ->withOption('version'),
             );
-        $process->wait();
+        $_ = $process
+            ->wait()
+            ->match(
+                static fn() => null,
+                static fn() => throw new CommandFailed($command, $process),
+            );
 
-        if (!$process->exitCode()->successful()) {
-            throw new CommandFailed($command, $process);
-        }
+        $parts = Str::of($process->output()->toString())
+            ->capture(
+                '~version (?<major>\d+)\.(?<minor>\d+)\.(?<bugfix>\d+)~',
+            )
+            ->map(static fn($_, $value) => $value->toString())
+            ->map(static fn($_, $value) => (int) $value);
 
-        $parts = Str::of($process->output()->toString())->capture(
-            '~version (?<major>\d+)\.(?<minor>\d+)\.(?<bugfix>\d+)~',
-        );
-
-        return new Version(
-            (int) $parts->get('major')->toString(),
-            (int) $parts->get('minor')->toString(),
-            (int) $parts->get('bugfix')->toString(),
-        );
+        return Maybe::all($parts->get('major'), $parts->get('minor'), $parts->get('bugfix'))
+            ->map(static fn(int $major, int $minor, int $bugfix) => new Version(
+                $major,
+                $minor,
+                $bugfix,
+            ))
+            ->match(
+                static fn($version) => $version,
+                static fn() => throw new RuntimeException('Invalid version'),
+            );
     }
 }

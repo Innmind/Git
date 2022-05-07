@@ -9,15 +9,16 @@ use Innmind\Git\{
     Version,
     Exception\CommandFailed,
 };
+use Innmind\OperatingSystem\Factory;
 use Innmind\Server\Control\{
-    ServerFactory,
     Server,
     Server\Processes,
     Server\Process,
-    Server\Process\ExitCode
+    Server\Process\ExitCode,
 };
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
+use Innmind\Immutable\Either;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 
@@ -31,7 +32,7 @@ class GitTest extends TestCase
     public function testRepository()
     {
         $git = new Git(
-            ServerFactory::build(),
+            Factory::build()->control(),
             $this->createMock(Clock::class),
         );
 
@@ -41,7 +42,7 @@ class GitTest extends TestCase
     public function testVersion()
     {
         $git = new Git(
-            ServerFactory::build(),
+            Factory::build()->control(),
             $this->createMock(Clock::class),
         );
 
@@ -66,8 +67,8 @@ class GitTest extends TestCase
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
 
         $this->expectException(CommandFailed::class);
 

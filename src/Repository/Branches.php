@@ -36,18 +36,20 @@ final class Branches
         )->toString());
 
         /** @var Set<Branch> */
-        return $branches
-            ->split("\n")
-            ->filter(static function(Str $line): bool {
-                return !$line->matches('~HEAD detached~');
-            })
-            ->filter(static fn(Str $line): bool => !$line->trim()->empty())
-            ->toSetOf(
-                Branch::class,
-                static fn(Str $branch): \Generator => yield new Branch(
-                    $branch->substring(2)->toString(),
-                ),
-            );
+        return Set::of(
+            ...$branches
+                ->split("\n")
+                ->filter(static function(Str $line): bool {
+                    return !$line->matches('~HEAD detached~');
+                })
+                ->filter(static fn(Str $line): bool => !$line->trim()->empty())
+                ->map(
+                    static fn(Str $branch) => new Branch(
+                        $branch->drop(2)->toString(),
+                    ),
+                )
+                ->toList(),
+        );
     }
 
     /**
@@ -65,18 +67,20 @@ final class Branches
         )->toString());
 
         /** @var Set<Branch> */
-        return $branches
-            ->split("\n")
-            ->filter(static function(Str $line): bool {
-                return !$line->matches('~-> origin/~');
-            })
-            ->filter(static fn(Str $line): bool => !$line->trim()->empty())
-            ->toSetOf(
-                Branch::class,
-                static fn(Str $branch): \Generator => yield new Branch(
-                    $branch->substring(2)->toString(),
-                ),
-            );
+        return Set::of(
+            ...$branches
+                ->split("\n")
+                ->filter(static function(Str $line): bool {
+                    return !$line->matches('~-> origin/~');
+                })
+                ->filter(static fn(Str $line): bool => !$line->trim()->empty())
+                ->map(
+                    static fn(Str $branch) => new Branch(
+                        $branch->drop(2)->toString(),
+                    ),
+                )
+                ->toList(),
+        );
     }
 
     /**

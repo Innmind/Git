@@ -29,13 +29,13 @@ final class Binary
             ->server
             ->processes()
             ->execute($command);
-        $process->wait();
 
-        if (!$process->exitCode()->successful()) {
-            throw new CommandFailed($command, $process);
-        }
-
-        return $process->output();
+        return $process
+            ->wait()
+            ->match(
+                static fn() => $process->output(),
+                static fn() => throw new CommandFailed($command, $process),
+            );
     }
 
     public function command(): Command

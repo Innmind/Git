@@ -35,12 +35,12 @@ final class Remotes
         )->toString());
 
         /** @var Set<Remote> */
-        return $remotes
-            ->split("\n")
-            ->toSetOf(
-                Remote::class,
-                fn(Str $remote): \Generator => yield $this->get(new Name($remote->toString())),
-            );
+        return Set::of(
+            ...$remotes
+                ->split("\n")
+                ->map(fn($remote) => $this->get(new Name($remote->toString())))
+                ->toList(),
+        );
     }
 
     public function get(Name $name): Remote

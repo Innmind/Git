@@ -18,7 +18,6 @@ use Innmind\Immutable\{
     Set,
     Str,
 };
-use function Innmind\Immutable\unwrap;
 
 final class Tags
 {
@@ -91,25 +90,29 @@ final class Tags
         $output = Str::of($output->toString());
 
         /** @var Set<Tag> */
-        return $output
-            ->split("\n")
-            ->filter(static function(Str $line): bool {
-                return !$line->trim()->empty();
-            })
-            ->toSetOf(
-                Tag::class,
-                function(Str $line): \Generator {
-                    [$name, $message, $time] = unwrap($line->split('|||'));
+        return Set::of(
+            ...$output
+                ->split("\n")
+                ->filter(static function(Str $line): bool {
+                    return !$line->trim()->empty();
+                })
+                ->map(function(Str $line): ?Tag {
+                    [$name, $message, $time] = $line->split('|||')->toList();
 
-                    yield new Tag(
-                        new Name($name->toString()),
-                        new Message($message->toString()),
-                        $this->clock->at(
-                            $time->toString(),
-                            new RFC2822,
-                        ),
-                    );
-                },
-            );
+                    return $this
+                        ->clock
+                        ->at($time->toString(), new RFC2822)
+                        ->match(
+                            static fn($date) => new Tag(
+                                new Name($name->toString()),
+                                new Message($message->toString()),
+                                $date,
+                            ),
+                            static fn() => null,
+                        );
+                })
+                ->filter(static fn($tag) => $tag !== null)
+                ->toList(),
+        );
     }
 }
