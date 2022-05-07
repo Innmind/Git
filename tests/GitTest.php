@@ -7,7 +7,6 @@ use Innmind\Git\{
     Git,
     Repository,
     Version,
-    Exception\CommandFailed,
 };
 use Innmind\OperatingSystem\Factory;
 use Innmind\Server\Control\{
@@ -46,10 +45,13 @@ class GitTest extends TestCase
             $this->createMock(Clock::class),
         );
 
-        $this->assertInstanceOf(Version::class, $git->version());
+        $this->assertInstanceOf(Version::class, $git->version()->match(
+            static fn($version) => $version,
+            static fn() => null,
+        ));
     }
 
-    public function testThrowWhenFailToDetermineVersion()
+    public function testReturnNothingWhenFailToDetermineVersion()
     {
         $git = new Git(
             $server = $this->createMock(Server::class),
@@ -70,8 +72,9 @@ class GitTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
 
-        $this->expectException(CommandFailed::class);
-
-        $git->version();
+        $this->assertNull($git->version()->match(
+            static fn($version) => $version,
+            static fn() => null,
+        ));
     }
 }
