@@ -27,10 +27,6 @@ final class Repository
 {
     private Binary $binary;
     private Clock $clock;
-    private ?Branches $branches = null;
-    private ?Remotes $remotes = null;
-    private ?Checkout $checkout = null;
-    private ?Tags $tags = null;
 
     public function __construct(
         Server $server,
@@ -105,7 +101,7 @@ final class Repository
 
     public function branches(): Branches
     {
-        return $this->branches ??= new Branches($this->binary);
+        return new Branches($this->binary);
     }
 
     public function push(): void
@@ -130,17 +126,17 @@ final class Repository
 
     public function remotes(): Remotes
     {
-        return $this->remotes ??= new Remotes($this->binary);
+        return new Remotes($this->binary);
     }
 
     public function checkout(): Checkout
     {
-        return $this->checkout ??= new Checkout($this->binary);
+        return new Checkout($this->binary);
     }
 
     public function tags(): Tags
     {
-        return $this->tags ??= new Tags($this->binary, $this->clock);
+        return new Tags($this->binary, $this->clock);
     }
 
     public function add(Path $file): void
