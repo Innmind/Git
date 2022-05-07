@@ -34,7 +34,7 @@ final class Repository
     public function __construct(
         Server $server,
         Path $path,
-        Clock $clock
+        Clock $clock,
     ) {
         $this->binary = new Binary($server, $path);
         $this->clock = $clock;

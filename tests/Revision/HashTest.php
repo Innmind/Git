@@ -22,7 +22,7 @@ class HashTest extends TestCase
     {
         $this->assertInstanceOf(
             Revision::class,
-            new Hash('0000000')
+            new Hash('0000000'),
         );
     }
 

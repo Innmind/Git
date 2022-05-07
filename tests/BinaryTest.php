@@ -50,7 +50,7 @@ class BinaryTest extends TestCase
 
         $bin = new Binary(
             $server,
-            Path::of('/tmp/foo')
+            Path::of('/tmp/foo'),
         );
 
         $this->assertInstanceOf(Command::class, $bin->command());
@@ -84,7 +84,7 @@ class BinaryTest extends TestCase
 
         $bin = new Binary(
             $server,
-            Path::of('/tmp/foo')
+            Path::of('/tmp/foo'),
         );
 
         try {

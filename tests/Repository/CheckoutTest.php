@@ -50,8 +50,8 @@ class CheckoutTest extends TestCase
         $checkout = new Checkout(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
         $this->assertNull($checkout->file(Path::of($path)));
@@ -85,8 +85,8 @@ class CheckoutTest extends TestCase
         $checkout = new Checkout(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
         $this->assertNull($checkout->revision($revision));

@@ -58,8 +58,8 @@ REMOTES
         $remotes = new Remotes(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
         $all = $remotes->all();
@@ -80,8 +80,8 @@ REMOTES
         $remotes = new Remotes(
             new Binary(
                 $this->createMock(Server::class),
-                Path::of('watev')
-            )
+                Path::of('watev'),
+            ),
         );
 
         $remote = $remotes->get($expected = new Name('origin'));
@@ -116,13 +116,13 @@ REMOTES
         $remotes = new Remotes(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
         $remote = $remotes->add(
             $expected = new Name('origin'),
-            new Url('git@github.com:Innmind/Git.git')
+            new Url('git@github.com:Innmind/Git.git'),
         );
 
         $this->assertInstanceOf(Remote::class, $remote);
@@ -155,8 +155,8 @@ REMOTES
         $remotes = new Remotes(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
         $this->assertNull($remotes->remove(new Name('origin')));

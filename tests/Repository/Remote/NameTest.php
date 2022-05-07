@@ -47,7 +47,7 @@ class NameTest extends TestCase
         $this
             ->forAll(
                 $names(1),
-                $names()
+                $names(),
             )
             ->then(function($first, $second): void {
                 $this->assertSame($first, (new Name($first))->toString());

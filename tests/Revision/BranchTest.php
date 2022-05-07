@@ -22,7 +22,7 @@ class BranchTest extends TestCase
     {
         $this->assertInstanceOf(
             Revision::class,
-            new Branch('master')
+            new Branch('master'),
         );
     }
 
@@ -56,7 +56,7 @@ class BranchTest extends TestCase
         $this
             ->forAll(
                 $names(1),
-                $names()
+                $names(),
             )
             ->then(function($first, $second): void {
                 $this->assertSame($first, (new Branch($first))->toString());

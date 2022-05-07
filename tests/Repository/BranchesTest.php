@@ -61,8 +61,8 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
         $local = $branches->local();
 
@@ -116,8 +116,8 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
         $remote = $branches->remote();
 
@@ -198,8 +198,8 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
         $all = $branches->all();
 
@@ -248,8 +248,8 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
         $this->assertNull($branches->new(new Branch('bar')));
@@ -283,8 +283,8 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
         $this->assertNull($branches->new(new Branch('bar'), new Branch('develop')));
@@ -315,8 +315,8 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
         $this->assertNull($branches->newOrphan(new Branch('bar')));
@@ -350,8 +350,8 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
         $this->assertNull($branches->delete(new Branch('bar')));
@@ -385,8 +385,8 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
         $this->assertNull($branches->forceDelete(new Branch('bar')));

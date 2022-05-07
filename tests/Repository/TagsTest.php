@@ -54,9 +54,9 @@ class TagsTest extends TestCase
         $tags = new Tags(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            new Clock(new UTC)
+            new Clock(new UTC),
         );
 
         $this->assertNull($tags->push());
@@ -87,13 +87,13 @@ class TagsTest extends TestCase
         $tags = new Tags(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            new Clock(new UTC)
+            new Clock(new UTC),
         );
 
         $this->assertNull(
-            $tags->add(new Name('1.0.0'), new Message('first release'))
+            $tags->add(new Name('1.0.0'), new Message('first release')),
         );
     }
 
@@ -122,13 +122,13 @@ class TagsTest extends TestCase
         $tags = new Tags(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            new Clock(new UTC)
+            new Clock(new UTC),
         );
 
         $this->assertNull(
-            $tags->add(new Name('1.0.0'))
+            $tags->add(new Name('1.0.0')),
         );
     }
 
@@ -157,13 +157,13 @@ class TagsTest extends TestCase
         $tags = new Tags(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            new Clock(new UTC)
+            new Clock(new UTC),
         );
 
         $this->assertNull(
-            $tags->sign(new Name('1.0.0'), new Message('first release'))
+            $tags->sign(new Name('1.0.0'), new Message('first release')),
         );
     }
 
@@ -172,9 +172,9 @@ class TagsTest extends TestCase
         $tags = new Tags(
             new Binary(
                 $server = $this->createMock(Server::class),
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            new Clock(new UTC)
+            new Clock(new UTC),
         );
         $server
             ->expects($this->once())
@@ -213,14 +213,14 @@ class TagsTest extends TestCase
         $this->assertSame('first release', \current($all)->message()->toString());
         $this->assertSame(
             '2019-03-16T11:09:24+00:00',
-            \current($all)->date()->format(new ISO8601)
+            \current($all)->date()->format(new ISO8601),
         );
         \next($all);
         $this->assertSame('1.0.1', \current($all)->name()->toString());
         $this->assertSame('fix eris dependency', \current($all)->message()->toString());
         $this->assertSame(
             '2019-03-30T11:30:35+00:00',
-            \current($all)->date()->format(new ISO8601)
+            \current($all)->date()->format(new ISO8601),
         );
     }
 
@@ -229,9 +229,9 @@ class TagsTest extends TestCase
         $tags = new Tags(
             new Binary(
                 $server = $this->createMock(Server::class),
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            new Clock(new UTC)
+            new Clock(new UTC),
         );
         $server
             ->expects($this->once())

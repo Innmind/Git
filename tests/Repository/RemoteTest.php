@@ -28,9 +28,9 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $this->createMock(Server::class),
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            $expected = new Name('origin')
+            $expected = new Name('origin'),
         );
 
         $this->assertSame($expected, $remote->name());
@@ -64,9 +64,9 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            new Name('origin')
+            new Name('origin'),
         );
 
         $this->assertNull($remote->prune());
@@ -100,9 +100,9 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            new Name('origin')
+            new Name('origin'),
         );
 
         $this->assertNull($remote->setUrl(new Url('/local/remote')));
@@ -136,9 +136,9 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            new Name('origin')
+            new Name('origin'),
         );
 
         $this->assertNull($remote->addUrl(new Url('/local/remote')));
@@ -172,9 +172,9 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            new Name('origin')
+            new Name('origin'),
         );
 
         $this->assertNull($remote->deleteUrl(new Url('/local/remote')));
@@ -205,9 +205,9 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            new Name('origin')
+            new Name('origin'),
         );
 
         $this->assertNull($remote->push(new Branch('develop')));
@@ -238,9 +238,9 @@ class RemoteTest extends TestCase
         $remote = new Remote(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
+                Path::of('/tmp/foo'),
             ),
-            new Name('origin')
+            new Name('origin'),
         );
 
         $this->assertNull($remote->delete(new Branch('develop')));

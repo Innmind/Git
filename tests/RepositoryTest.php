@@ -70,7 +70,7 @@ class RepositoryTest extends TestCase
         new Repository(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
     }
 
@@ -111,7 +111,7 @@ class RepositoryTest extends TestCase
         $repo = new Repository(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         try {
@@ -163,7 +163,7 @@ class RepositoryTest extends TestCase
         $repo = new Repository(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         try {
@@ -179,7 +179,7 @@ class RepositoryTest extends TestCase
         $repo = new Repository(
             ServerFactory::build(),
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertDirectoryDoesNotExist('/tmp/foo/.git');
@@ -235,7 +235,7 @@ class RepositoryTest extends TestCase
         $repo = new Repository(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $head = $repo->head();
@@ -249,7 +249,7 @@ class RepositoryTest extends TestCase
         $repo = new Repository(
             ServerFactory::build(),
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertInstanceOf(Branches::class, $repo->branches());
@@ -292,7 +292,7 @@ class RepositoryTest extends TestCase
         $repo = new Repository(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertNull($repo->push());
@@ -335,7 +335,7 @@ class RepositoryTest extends TestCase
         $repo = new Repository(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertNull($repo->pull());
@@ -346,7 +346,7 @@ class RepositoryTest extends TestCase
         $repo = new Repository(
             ServerFactory::build(),
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertInstanceOf(Remotes::class, $repo->remotes());
@@ -357,7 +357,7 @@ class RepositoryTest extends TestCase
         $repo = new Repository(
             ServerFactory::build(),
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertInstanceOf(Checkout::class, $repo->checkout());
@@ -368,7 +368,7 @@ class RepositoryTest extends TestCase
         $repo = new Repository(
             ServerFactory::build(),
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertInstanceOf(Tags::class, $repo->tags());
@@ -411,7 +411,7 @@ class RepositoryTest extends TestCase
         $repo = new Repository(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertNull($repo->add(Path::of('foo')));
@@ -421,7 +421,7 @@ class RepositoryTest extends TestCase
     {
         $this
             ->forAll(Set\Strings::atLeast(1)->filter(
-                static fn($string) => $string === \trim($string)
+                static fn($string) => $string === \trim($string),
             ))
             ->then(function(string $message): void {
                 $server = $this->createMock(Server::class);
@@ -461,7 +461,7 @@ class RepositoryTest extends TestCase
                 $repo = new Repository(
                     $server,
                     Path::of('/tmp/foo'),
-                    $this->createMock(Clock::class)
+                    $this->createMock(Clock::class),
                 );
 
                 $this->assertNull($repo->commit(new Message($message)));
@@ -487,7 +487,7 @@ class RepositoryTest extends TestCase
             )
             ->will($this->onConsecutiveCalls(
                 $process1 = $this->createMock(Process::class),
-                $process2 = $this->createMock(Process::class)
+                $process2 = $this->createMock(Process::class),
             ));
         $process1
             ->expects($this->once())
@@ -505,7 +505,7 @@ class RepositoryTest extends TestCase
         $repo = new Repository(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertNull($repo->merge(new Branch('develop')));

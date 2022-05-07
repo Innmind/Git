@@ -32,7 +32,7 @@ class GitTest extends TestCase
     {
         $git = new Git(
             ServerFactory::build(),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertInstanceOf(Repository::class, $git->repository(Path::of('/tmp/foo')));
@@ -42,7 +42,7 @@ class GitTest extends TestCase
     {
         $git = new Git(
             ServerFactory::build(),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
 
         $this->assertInstanceOf(Version::class, $git->version());
@@ -52,7 +52,7 @@ class GitTest extends TestCase
     {
         $git = new Git(
             $server = $this->createMock(Server::class),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
         $server
             ->expects($this->once())
