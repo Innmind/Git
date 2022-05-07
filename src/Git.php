@@ -63,7 +63,7 @@ final class Git
             )
             ->flatMap(
                 static fn($parts) => Maybe::all($parts->get('major'), $parts->get('minor'), $parts->get('bugfix'))
-                    ->map(static fn(int $major, int $minor, int $bugfix) => new Version(
+                    ->flatMap(static fn(int $major, int $minor, int $bugfix) => Version::of(
                         $major,
                         $minor,
                         $bugfix,
