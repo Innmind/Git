@@ -10,10 +10,6 @@ use Innmind\Git\{
     Repository\Remotes,
     Repository\Checkout,
     Repository\Tags,
-    Exception\RepositoryInitFailed,
-    Exception\PathNotUsable,
-    Exception\DomainException,
-    Exception\RuntimeException,
 };
 use Innmind\Server\Control\{
     Server,
@@ -21,22 +17,36 @@ use Innmind\Server\Control\{
 };
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
-use Innmind\Immutable\Str;
+use Innmind\Immutable\{
+    Str,
+    Maybe,
+    SideEffect,
+};
 
 final class Repository
 {
     private Binary $binary;
     private Clock $clock;
 
-    public function __construct(
+    private function __construct(
         Server $server,
         Path $path,
         Clock $clock,
     ) {
         $this->binary = new Binary($server, $path);
         $this->clock = $clock;
+    }
 
-        $_ = $server
+    /**
+     * @return Maybe<self>
+     */
+    public static function of(
+        Server $server,
+        Path $path,
+        Clock $clock,
+    ): Maybe {
+        /** @var Maybe<self> */
+        return $server
             ->processes()
             ->execute(
                 Command::foreground('mkdir')
@@ -45,58 +55,52 @@ final class Repository
             )
             ->wait()
             ->match(
-                static fn() => null,
-                static fn() => throw new PathNotUsable($path->toString()),
+                static fn() => Maybe::just(new self($server, $path, $clock)),
+                static fn() => Maybe::nothing(),
             );
     }
 
-    public function init(): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function init(): Maybe
     {
-        $output = ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('init'),
-        );
-        $outputStr = Str::of($output->toString());
-
-        if (
-            $outputStr->contains('Initialized empty Git repository') ||
-            $outputStr->contains('Reinitialized existing Git repository')
-        ) {
-            return;
-        }
-
-        throw new RepositoryInitFailed($output);
+        )
+            ->map(static fn($output) => Str::of($output->toString()))
+            ->filter(
+                static fn($output) => $output->contains('Initialized empty Git repository') || $output->contains('Reinitialized existing Git repository'),
+            )
+            ->map(static fn() => new SideEffect);
     }
 
-    public function head(): Revision
+    /**
+     * @return Maybe<Revision>
+     */
+    public function head(): Maybe
     {
-        $output = Str::of(($this->binary)(
+        /** @var Maybe<Revision> */
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('branch')
                 ->withOption('no-color'),
-        )->toString());
-        $revision = $output
+        )
+            ->match(
+                static fn($output) => Str::of($output->toString()),
+                static fn() => Str::of(''),
+            )
             ->split("\n")
             ->filter(static function(Str $line): bool {
                 return $line->matches('~^\* .+~');
             })
             ->first()
-            ->match(
-                static fn($revision) => $revision,
-                static fn() => throw new RuntimeException('Head not found'),
-            );
-
-        return $revision
-            ->capture('~\(HEAD detached at (?P<hash>[a-z0-9]{7,40})\)~')
-            ->get('hash')
-            ->match(
-                static fn($hash) => new Hash($hash->toString()),
-                static fn() => new Branch($revision->drop(2)->toString()),
-            );
+            ->flatMap(self::parseRevision(...));
     }
 
     public function branches(): Branches
@@ -171,5 +175,20 @@ final class Repository
                 ->withArgument('merge')
                 ->withArgument($branch->toString()),
         );
+    }
+
+    /**
+     * @return Maybe<Revision>
+     */
+    private static function parseRevision(Str $revision): Maybe
+    {
+        /** @var Maybe<Revision> */
+        return $revision
+            ->capture('~\(HEAD detached at (?P<hash>[a-z0-9]{7,40})\)~')
+            ->get('hash')
+            ->match(
+                static fn($hash) => Hash::maybe($hash->toString()),
+                static fn() => Branch::maybe($revision->drop(2)->toString()),
+            );
     }
 }

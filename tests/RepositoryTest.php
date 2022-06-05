@@ -12,9 +12,6 @@ use Innmind\Git\{
     Revision\Hash,
     Revision\Branch,
     Message,
-    Exception\CommandFailed,
-    Exception\RepositoryInitFailed,
-    Exception\PathNotUsable,
 };
 use Innmind\OperatingSystem\Factory;
 use Innmind\Server\Control\{
@@ -47,7 +44,7 @@ class RepositoryTest extends TestCase
         (new Filesystem)->remove('/tmp/foo');
     }
 
-    public function testThrowWhenDirectoryIsNotAccessible()
+    public function testReturnNothingWhenDirectoryIsNotAccessible()
     {
         $server = $this->createMock(Server::class);
         $server
@@ -66,17 +63,19 @@ class RepositoryTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
 
-        $this->expectException(PathNotUsable::class);
-        $this->expectExceptionMessage('/tmp/foo');
-
-        new Repository(
+        $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
         );
+
+        $this->assertNull($repo->match(
+            static fn($repo) => $repo,
+            static fn() => null,
+        ));
     }
 
-    public function testThrowWhenInitProcessFailed()
+    public function testReturnNothingWhenInitProcessFailed()
     {
         $server = $this->createMock(Server::class);
         $server
@@ -109,22 +108,22 @@ class RepositoryTest extends TestCase
             ->method('wait')
             ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
 
-        $repo = new Repository(
+        $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
+        )->match(
+            static fn($repo) => $repo,
+            static fn() => null,
         );
 
-        try {
-            $repo->init();
-            $this->fail('it should throw');
-        } catch (CommandFailed $e) {
-            $this->assertSame("git 'init'", $e->command()->toString());
-            $this->assertSame($process2, $e->process());
-        }
+        $this->assertNull($repo->init()->match(
+            static fn($sideEffect) => $sideEffect,
+            static fn() => null,
+        ));
     }
 
-    public function testThrowWhenInitOutputIsNotAsExpected()
+    public function testReturnNothingWhenInitOutputIsNotAsExpected()
     {
         $server = $this->createMock(Server::class);
         $server
@@ -160,31 +159,41 @@ class RepositoryTest extends TestCase
             ->method('output')
             ->willReturn($output = $this->createMock(Output::class));
 
-        $repo = new Repository(
+        $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
+        )->match(
+            static fn($repo) => $repo,
+            static fn() => null,
         );
 
-        try {
-            $repo->init();
-            $this->fail('it should throw');
-        } catch (RepositoryInitFailed $e) {
-            $this->assertSame($output, $e->output());
-        }
+        $this->assertNull($repo->init()->match(
+            static fn($sideEffect) => $sideEffect,
+            static fn() => null,
+        ));
     }
 
     public function testInit()
     {
-        $repo = new Repository(
+        $repo = Repository::of(
             Factory::build()->control(),
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
+        )->match(
+            static fn($repo) => $repo,
+            static fn() => null,
         );
 
         $this->assertDirectoryDoesNotExist('/tmp/foo/.git');
-        $this->assertNull($repo->init());
-        $this->assertNull($repo->init()); //validate reinit doesn't throw
+        $this->assertInstanceOf(SideEffect::class, $repo->init()->match(
+            static fn($sideEffect) => $sideEffect,
+            static fn() => null,
+        ));
+        $this->assertInstanceOf(SideEffect::class, $repo->init()->match(
+            static fn($sideEffect) => $sideEffect,
+            static fn() => null,
+        )); //validate reinit doesn't throw
         $this->assertDirectoryExists('/tmp/foo/.git');
     }
 
@@ -231,13 +240,19 @@ class RepositoryTest extends TestCase
             ->method('toString')
             ->willReturn($list);
 
-        $repo = new Repository(
+        $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
+        )->match(
+            static fn($repo) => $repo,
+            static fn() => null,
         );
 
-        $head = $repo->head();
+        $head = $repo->head()->match(
+            static fn($head) => $head,
+            static fn() => null,
+        );
 
         $this->assertInstanceOf($class, $head);
         $this->assertSame($expected, $head->toString());
@@ -245,10 +260,13 @@ class RepositoryTest extends TestCase
 
     public function testBranches()
     {
-        $repo = new Repository(
+        $repo = Repository::of(
             Factory::build()->control(),
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
+        )->match(
+            static fn($repo) => $repo,
+            static fn() => null,
         );
 
         $this->assertInstanceOf(Branches::class, $repo->branches());
@@ -287,10 +305,13 @@ class RepositoryTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
 
-        $repo = new Repository(
+        $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
+        )->match(
+            static fn($repo) => $repo,
+            static fn() => null,
         );
 
         $this->assertNull($repo->push());
@@ -329,10 +350,13 @@ class RepositoryTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
 
-        $repo = new Repository(
+        $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
+        )->match(
+            static fn($repo) => $repo,
+            static fn() => null,
         );
 
         $this->assertNull($repo->pull());
@@ -340,10 +364,13 @@ class RepositoryTest extends TestCase
 
     public function testRemotes()
     {
-        $repo = new Repository(
+        $repo = Repository::of(
             Factory::build()->control(),
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
+        )->match(
+            static fn($repo) => $repo,
+            static fn() => null,
         );
 
         $this->assertInstanceOf(Remotes::class, $repo->remotes());
@@ -351,10 +378,13 @@ class RepositoryTest extends TestCase
 
     public function testCheckout()
     {
-        $repo = new Repository(
+        $repo = Repository::of(
             Factory::build()->control(),
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
+        )->match(
+            static fn($repo) => $repo,
+            static fn() => null,
         );
 
         $this->assertInstanceOf(Checkout::class, $repo->checkout());
@@ -362,10 +392,13 @@ class RepositoryTest extends TestCase
 
     public function testTags()
     {
-        $repo = new Repository(
+        $repo = Repository::of(
             Factory::build()->control(),
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
+        )->match(
+            static fn($repo) => $repo,
+            static fn() => null,
         );
 
         $this->assertInstanceOf(Tags::class, $repo->tags());
@@ -404,10 +437,13 @@ class RepositoryTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
 
-        $repo = new Repository(
+        $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
+        )->match(
+            static fn($repo) => $repo,
+            static fn() => null,
         );
 
         $this->assertNull($repo->add(Path::of('foo')));
@@ -453,13 +489,16 @@ class RepositoryTest extends TestCase
                     ->method('wait')
                     ->willReturn(Either::right(new SideEffect));
 
-                $repo = new Repository(
+                $repo = Repository::of(
                     $server,
                     Path::of('/tmp/foo'),
                     $this->createMock(Clock::class),
+                )->match(
+                    static fn($repo) => $repo,
+                    static fn() => null,
                 );
 
-                $this->assertNull($repo->commit(new Message($message)));
+                $this->assertNull($repo->commit(Message::of($message)));
             });
     }
 
@@ -496,13 +535,16 @@ class RepositoryTest extends TestCase
             ->method('wait')
             ->willReturn(Either::right(new SideEffect));
 
-        $repo = new Repository(
+        $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
             $this->createMock(Clock::class),
+        )->match(
+            static fn($repo) => $repo,
+            static fn() => null,
         );
 
-        $this->assertNull($repo->merge(new Branch('develop')));
+        $this->assertNull($repo->merge(Branch::of('develop')));
     }
 
     public function heads(): array

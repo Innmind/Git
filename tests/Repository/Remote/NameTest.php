@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git\Repository\Remote;
 
-use Innmind\Git\{
-    Repository\Remote\Name,
-    Exception\DomainException
-};
+use Innmind\Git\Repository\Remote\Name;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -17,14 +14,15 @@ class NameTest extends TestCase
 {
     use BlackBox;
 
-    public function testThrowWhenInvalidRemoteName()
+    public function testReturnNothingWhenInvalidRemoteName()
     {
         $this
             ->forAll(Set\Unicode::strings())
             ->then(function($string): void {
-                $this->expectException(DomainException::class);
-
-                new Name($string);
+                $this->assertNull(Name::maybe($string)->match(
+                    static fn($name) => $name,
+                    static fn() => null,
+                ));
             });
     }
 
@@ -50,9 +48,22 @@ class NameTest extends TestCase
                 $names(),
             )
             ->then(function($first, $second): void {
-                $this->assertSame($first, (new Name($first))->toString());
-                $this->assertSame($first.'-'.$second, (new Name($first.'-'.$second))->toString());
-                $this->assertSame($first.'/'.$second, (new Name($first.'/'.$second))->toString());
+                $this->assertSame($first, Name::maybe($first)->match(
+                    static fn($name) => $name->toString(),
+                    static fn() => null,
+                ));
+                $this->assertSame($first.'-'.$second, Name::maybe($first.'-'.$second)->match(
+                    static fn($name) => $name->toString(),
+                    static fn() => null,
+                ));
+                $this->assertSame($first.'/'.$second, Name::maybe($first.'/'.$second)->match(
+                    static fn($name) => $name->toString(),
+                    static fn() => null,
+                ));
+                $this->assertSame($first.'.'.$second, Name::maybe($first.'.'.$second)->match(
+                    static fn($name) => $name->toString(),
+                    static fn() => null,
+                ));
             });
     }
 }

@@ -27,13 +27,17 @@ final class Branches
      */
     public function local(): Set
     {
-        $branches = Str::of(($this->binary)(
+        $branches = ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('branch')
                 ->withOption('no-color'),
-        )->toString());
+        )
+            ->match(
+                static fn($output) => Str::of($output->toString()),
+                static fn() => Str::of(''),
+            );
 
         /** @var Set<Branch> */
         return Set::of(
@@ -44,10 +48,14 @@ final class Branches
                 })
                 ->filter(static fn(Str $line): bool => !$line->trim()->empty())
                 ->map(
-                    static fn(Str $branch) => new Branch(
+                    static fn(Str $branch) => Branch::maybe(
                         $branch->drop(2)->toString(),
+                    )->match(
+                        static fn($branch) => $branch,
+                        static fn() => null,
                     ),
                 )
+                ->filter(static fn($branch) => $branch instanceof Branch)
                 ->toList(),
         );
     }
@@ -57,14 +65,18 @@ final class Branches
      */
     public function remote(): Set
     {
-        $branches = Str::of(($this->binary)(
+        $branches = ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('branch')
                 ->withShortOption('r')
                 ->withOption('no-color'),
-        )->toString());
+        )
+            ->match(
+                static fn($output) => Str::of($output->toString()),
+                static fn() => Str::of(''),
+            );
 
         /** @var Set<Branch> */
         return Set::of(
@@ -75,10 +87,14 @@ final class Branches
                 })
                 ->filter(static fn(Str $line): bool => !$line->trim()->empty())
                 ->map(
-                    static fn(Str $branch) => new Branch(
+                    static fn(Str $branch) => Branch::maybe(
                         $branch->drop(2)->toString(),
+                    )->match(
+                        static fn($branch) => $branch,
+                        static fn() => null,
                     ),
                 )
+                ->filter(static fn($branch) => $branch instanceof Branch)
                 ->toList(),
         );
     }

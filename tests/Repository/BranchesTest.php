@@ -257,7 +257,7 @@ BRANCHES
             ),
         );
 
-        $this->assertNull($branches->new(new Branch('bar')));
+        $this->assertNull($branches->new(Branch::of('bar')));
     }
 
     public function testNewOff()
@@ -293,7 +293,7 @@ BRANCHES
             ),
         );
 
-        $this->assertNull($branches->new(new Branch('bar'), new Branch('develop')));
+        $this->assertNull($branches->new(Branch::of('bar'), Branch::of('develop')));
     }
 
     public function testNewOrphan()
@@ -326,7 +326,7 @@ BRANCHES
             ),
         );
 
-        $this->assertNull($branches->newOrphan(new Branch('bar')));
+        $this->assertNull($branches->newOrphan(Branch::of('bar')));
     }
 
     public function testDelete()
@@ -362,7 +362,7 @@ BRANCHES
             ),
         );
 
-        $this->assertNull($branches->delete(new Branch('bar')));
+        $this->assertNull($branches->delete(Branch::of('bar')));
     }
 
     public function testForceDelete()
@@ -398,6 +398,6 @@ BRANCHES
             ),
         );
 
-        $this->assertNull($branches->forceDelete(new Branch('bar')));
+        $this->assertNull($branches->forceDelete(Branch::of('bar')));
     }
 }

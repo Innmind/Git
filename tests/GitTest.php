@@ -35,7 +35,13 @@ class GitTest extends TestCase
             $this->createMock(Clock::class),
         );
 
-        $this->assertInstanceOf(Repository::class, $git->repository(Path::of('/tmp/foo')));
+        $this->assertInstanceOf(
+            Repository::class,
+            $git->repository(Path::of('/tmp/foo'))->match(
+                static fn($repo) => $repo,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testVersion()

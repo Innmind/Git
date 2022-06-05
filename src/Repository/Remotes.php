@@ -27,18 +27,30 @@ final class Remotes
      */
     public function all(): Set
     {
-        $remotes = Str::of(($this->binary)(
+        $remotes = ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('remote')
-        )->toString());
+        )
+            ->match(
+                static fn($output) => Str::of($output->toString()),
+                static fn() => Str::of(''),
+            );
 
         /** @var Set<Remote> */
         return Set::of(
             ...$remotes
                 ->split("\n")
-                ->map(fn($remote) => $this->get(new Name($remote->toString())))
+                ->map(
+                    fn($remote) => Name::maybe($remote->toString())
+                        ->map($this->get(...))
+                        ->match(
+                            static fn($remote) => $remote,
+                            static fn() => null,
+                        ),
+                )
+                ->filter(static fn($remote) => $remote instanceof Remote)
                 ->toList(),
         );
     }

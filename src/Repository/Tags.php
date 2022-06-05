@@ -13,10 +13,12 @@ use Innmind\Git\{
 use Innmind\TimeContinuum\{
     Clock,
     Earth\Format\RFC2822,
+    PointInTime,
 };
 use Innmind\Immutable\{
     Set,
     Str,
+    Maybe,
 };
 
 final class Tags
@@ -87,7 +89,10 @@ final class Tags
                 ->withOption('list')
                 ->withOption('format', '%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)')
         );
-        $output = Str::of($output->toString());
+        $output = $output->match(
+            static fn($output) => Str::of($output->toString()),
+            static fn() => Str::of(''),
+        );
 
         /** @var Set<Tag> */
         return Set::of(
@@ -99,15 +104,14 @@ final class Tags
                 ->map(function(Str $line): ?Tag {
                     [$name, $message, $time] = $line->split('|||')->toList();
 
-                    return $this
-                        ->clock
-                        ->at($time->toString(), new RFC2822)
+                    return Maybe::all(
+                        Name::maybe($name->toString()),
+                        Message::maybe($message->toString()),
+                        $this->clock->at($time->toString(), new RFC2822),
+                    )
+                        ->map(static fn(Name $name, Message $message, PointInTime $date) => new Tag($name, $message, $date))
                         ->match(
-                            static fn($date) => new Tag(
-                                new Name($name->toString()),
-                                new Message($message->toString()),
-                                $date,
-                            ),
+                            static fn($tag) => $tag,
                             static fn() => null,
                         );
                 })

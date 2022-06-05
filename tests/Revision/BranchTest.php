@@ -6,7 +6,6 @@ namespace Tests\Innmind\Git\Revision;
 use Innmind\Git\{
     Revision\Branch,
     Revision,
-    Exception\DomainException
 };
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
@@ -22,18 +21,22 @@ class BranchTest extends TestCase
     {
         $this->assertInstanceOf(
             Revision::class,
-            new Branch('master'),
+            Branch::maybe('master')->match(
+                static fn($branch) => $branch,
+                static fn() => null,
+            ),
         );
     }
 
-    public function testThrowWhenInvalidBranchName()
+    public function testReturnNothingWhenInvalidBranchName()
     {
         $this
-            ->forAll(Set\Strings::any())
+            ->forAll(Set\Strings::any()->filter(static fn($string) => !\preg_match('~^\w+$~', $string)))
             ->then(function($string): void {
-                $this->expectException(DomainException::class);
-
-                new Branch($string);
+                $this->assertNull(Branch::maybe($string)->match(
+                    static fn($branch) => $branch,
+                    static fn() => null,
+                ));
             });
     }
 
@@ -59,9 +62,22 @@ class BranchTest extends TestCase
                 $names(),
             )
             ->then(function($first, $second): void {
-                $this->assertSame($first, (new Branch($first))->toString());
-                $this->assertSame($first.'-'.$second, (new Branch($first.'-'.$second))->toString());
-                $this->assertSame($first.'/'.$second, (new Branch($first.'/'.$second))->toString());
+                $this->assertSame($first, Branch::maybe($first)->match(
+                    static fn($branch) => $branch->toString(),
+                    static fn() => null,
+                ));
+                $this->assertSame($first.'-'.$second, Branch::maybe($first.'-'.$second)->match(
+                    static fn($branch) => $branch->toString(),
+                    static fn() => null,
+                ));
+                $this->assertSame($first.'/'.$second, Branch::maybe($first.'/'.$second)->match(
+                    static fn($branch) => $branch->toString(),
+                    static fn() => null,
+                ));
+                $this->assertSame($first.'.'.$second, Branch::maybe($first.'.'.$second)->match(
+                    static fn($branch) => $branch->toString(),
+                    static fn() => null,
+                ));
             });
     }
 }

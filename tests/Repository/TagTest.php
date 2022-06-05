@@ -16,8 +16,8 @@ class TagTest extends TestCase
     public function testInterface()
     {
         $tag = new Tag(
-            $name = new Name('1.0.0'),
-            $message = new Message('watev'),
+            $name = Name::of('1.0.0'),
+            $message = Message::of('watev'),
             $date = $this->createMock(PointInTime::class),
         );
 

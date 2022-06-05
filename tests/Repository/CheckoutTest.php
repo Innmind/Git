@@ -111,8 +111,11 @@ class CheckoutTest extends TestCase
     public function revisions(): array
     {
         return [
-            [new Branch('master')],
-            [new Hash('h2g2a42')],
+            [Branch::of('master')],
+            [Hash::maybe('h2g2a42')->match(
+                static fn($hash) => $hash,
+                static fn() => null,
+            )],
         ];
     }
 }

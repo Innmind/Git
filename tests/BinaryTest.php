@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git;
 
-use Innmind\Git\{
-    Binary,
-    Exception\CommandFailed
-};
+use Innmind\Git\Binary;
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
@@ -63,10 +60,13 @@ class BinaryTest extends TestCase
             static fn($path) => $path->toString(),
             static fn() => null,
         ));
-        $this->assertSame($output, $bin($bin->command()->withArgument('watev')));
+        $this->assertSame($output, $bin($bin->command()->withArgument('watev'))->match(
+            static fn($output) => $output,
+            static fn() => null,
+        ));
     }
 
-    public function testThrowWhenCommandFailed()
+    public function testReturnNothingWhenCommandFailed()
     {
         $server = $this->createMock(Server::class);
         $server
@@ -94,13 +94,9 @@ class BinaryTest extends TestCase
             Path::of('/tmp/foo'),
         );
 
-        try {
-            $bin($bin->command()->withArgument('watev'));
-            $this->fail('it should throw');
-        } catch (CommandFailed $e) {
-            $this->assertInstanceOf(Command::class, $e->command());
-            $this->assertSame("git 'watev'", $e->command()->toString());
-            $this->assertSame($process, $e->process());
-        }
+        $this->assertNull($bin($bin->command()->withArgument('watev'))->match(
+            static fn($output) => $output,
+            static fn() => null,
+        ));
     }
 }

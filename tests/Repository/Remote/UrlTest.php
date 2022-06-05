@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git\Repository\Remote;
 
-use Innmind\Git\{
-    Repository\Remote\Url,
-    Exception\DomainException
-};
+use Innmind\Git\Repository\Remote\Url;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -17,14 +14,15 @@ class UrlTest extends TestCase
 {
     use BlackBox;
 
-    public function testThrowWhenGivenAnyRandomString()
+    public function testReturnNothingWhenGivenAnyRandomString()
     {
         $this
-            ->forAll(Set\Strings::any())
+            ->forAll(Set\Elements::of("\x01", "\x02", "\x03"))
             ->then(function(string $string): void {
-                $this->expectException(DomainException::class);
-
-                new Url($string);
+                $this->assertNull(Url::maybe($string)->match(
+                    static fn($url) => $url,
+                    static fn() => null,
+                ));
             });
     }
 
@@ -33,7 +31,7 @@ class UrlTest extends TestCase
      */
     public function testInterface(string $format)
     {
-        $this->assertSame($format, (new Url($format))->toString());
+        $this->assertSame($format, Url::of($format)->toString());
     }
 
     public function formats(): array

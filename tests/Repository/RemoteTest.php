@@ -34,7 +34,7 @@ class RemoteTest extends TestCase
                 $this->createMock(Server::class),
                 Path::of('/tmp/foo'),
             ),
-            $expected = new Name('origin'),
+            $expected = Name::of('origin'),
         );
 
         $this->assertSame($expected, $remote->name());
@@ -71,7 +71,7 @@ class RemoteTest extends TestCase
                 $server,
                 Path::of('/tmp/foo'),
             ),
-            new Name('origin'),
+            Name::of('origin'),
         );
 
         $this->assertNull($remote->prune());
@@ -108,10 +108,10 @@ class RemoteTest extends TestCase
                 $server,
                 Path::of('/tmp/foo'),
             ),
-            new Name('origin'),
+            Name::of('origin'),
         );
 
-        $this->assertNull($remote->setUrl(new Url('/local/remote')));
+        $this->assertNull($remote->setUrl(Url::of('/local/remote')));
     }
 
     public function testAddUrl()
@@ -145,10 +145,10 @@ class RemoteTest extends TestCase
                 $server,
                 Path::of('/tmp/foo'),
             ),
-            new Name('origin'),
+            Name::of('origin'),
         );
 
-        $this->assertNull($remote->addUrl(new Url('/local/remote')));
+        $this->assertNull($remote->addUrl(Url::of('/local/remote')));
     }
 
     public function testDeleteUrl()
@@ -182,10 +182,10 @@ class RemoteTest extends TestCase
                 $server,
                 Path::of('/tmp/foo'),
             ),
-            new Name('origin'),
+            Name::of('origin'),
         );
 
-        $this->assertNull($remote->deleteUrl(new Url('/local/remote')));
+        $this->assertNull($remote->deleteUrl(Url::of('/local/remote')));
     }
 
     public function testPush()
@@ -216,10 +216,10 @@ class RemoteTest extends TestCase
                 $server,
                 Path::of('/tmp/foo'),
             ),
-            new Name('origin'),
+            Name::of('origin'),
         );
 
-        $this->assertNull($remote->push(new Branch('develop')));
+        $this->assertNull($remote->push(Branch::of('develop')));
     }
 
     public function testDelete()
@@ -250,9 +250,9 @@ class RemoteTest extends TestCase
                 $server,
                 Path::of('/tmp/foo'),
             ),
-            new Name('origin'),
+            Name::of('origin'),
         );
 
-        $this->assertNull($remote->delete(new Branch('develop')));
+        $this->assertNull($remote->delete(Branch::of('develop')));
     }
 }

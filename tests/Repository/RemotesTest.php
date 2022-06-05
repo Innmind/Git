@@ -83,7 +83,7 @@ REMOTES
             ),
         );
 
-        $remote = $remotes->get($expected = new Name('origin'));
+        $remote = $remotes->get($expected = Name::of('origin'));
 
         $this->assertInstanceOf(Remote::class, $remote);
         $this->assertSame($expected, $remote->name());
@@ -120,8 +120,8 @@ REMOTES
         );
 
         $remote = $remotes->add(
-            $expected = new Name('origin'),
-            new Url('git@github.com:Innmind/Git.git'),
+            $expected = Name::of('origin'),
+            Url::of('git@github.com:Innmind/Git.git'),
         );
 
         $this->assertInstanceOf(Remote::class, $remote);
@@ -158,6 +158,6 @@ REMOTES
             ),
         );
 
-        $this->assertNull($remotes->remove(new Name('origin')));
+        $this->assertNull($remotes->remove(Name::of('origin')));
     }
 }

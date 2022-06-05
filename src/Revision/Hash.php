@@ -3,31 +3,34 @@ declare(strict_types = 1);
 
 namespace Innmind\Git\Revision;
 
-use Innmind\Git\{
-    Revision,
-    Exception\DomainException,
+use Innmind\Git\Revision;
+use Innmind\Immutable\{
+    Str,
+    Maybe,
 };
-use Innmind\Immutable\Str;
 
 final class Hash implements Revision
 {
     private string $value;
 
-    public function __construct(string $hash)
+    private function __construct(string $hash)
+    {
+        $this->value = $hash;
+    }
+
+    /**
+     * @return Maybe<self>
+     */
+    public static function maybe(string $hash): Maybe
     {
         $hash = Str::of($hash);
 
-        if (
-            !$hash->matches('~[a-z0-9]~') ||
-            (
-                $hash->length() !== 7 &&
-                $hash->length() !== 40
-            )
-        ) {
-            throw new DomainException($hash->toString());
+        if (!$hash->matches('~^[a-z0-9]{7,40}$~')) {
+            /** @var Maybe<self> */
+            return Maybe::nothing();
         }
 
-        $this->value = $hash->toString();
+        return Maybe::just(new self($hash->toString()));
     }
 
     public function toString(): string

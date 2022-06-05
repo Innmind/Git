@@ -98,7 +98,7 @@ class TagsTest extends TestCase
         );
 
         $this->assertNull(
-            $tags->add(new Name('1.0.0'), new Message('first release')),
+            $tags->add(Name::of('1.0.0'), Message::of('first release')),
         );
     }
 
@@ -134,7 +134,7 @@ class TagsTest extends TestCase
         );
 
         $this->assertNull(
-            $tags->add(new Name('1.0.0')),
+            $tags->add(Name::of('1.0.0')),
         );
     }
 
@@ -170,7 +170,7 @@ class TagsTest extends TestCase
         );
 
         $this->assertNull(
-            $tags->sign(new Name('1.0.0'), new Message('first release')),
+            $tags->sign(Name::of('1.0.0'), Message::of('first release')),
         );
     }
 

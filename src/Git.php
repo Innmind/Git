@@ -26,9 +26,12 @@ final class Git
         $this->clock = $clock;
     }
 
-    public function repository(Path $path): Repository
+    /**
+     * @return Maybe<Repository>
+     */
+    public function repository(Path $path): Maybe
     {
-        return new Repository($this->server, $path, $this->clock);
+        return Repository::of($this->server, $path, $this->clock);
     }
 
     /**
