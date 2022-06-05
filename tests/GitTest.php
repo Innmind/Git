@@ -30,7 +30,7 @@ class GitTest extends TestCase
 
     public function testRepository()
     {
-        $git = new Git(
+        $git = Git::of(
             Factory::build()->control(),
             $this->createMock(Clock::class),
         );
@@ -46,7 +46,7 @@ class GitTest extends TestCase
 
     public function testVersion()
     {
-        $git = new Git(
+        $git = Git::of(
             Factory::build()->control(),
             $this->createMock(Clock::class),
         );
@@ -59,7 +59,7 @@ class GitTest extends TestCase
 
     public function testReturnNothingWhenFailToDetermineVersion()
     {
-        $git = new Git(
+        $git = Git::of(
             $server = $this->createMock(Server::class),
             $this->createMock(Clock::class),
         );

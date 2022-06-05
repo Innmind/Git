@@ -20,10 +20,15 @@ final class Git
     private Server $server;
     private Clock $clock;
 
-    public function __construct(Server $server, Clock $clock)
+    private function __construct(Server $server, Clock $clock)
     {
         $this->server = $server;
         $this->clock = $clock;
+    }
+
+    public static function of(Server $server, Clock $clock): self
+    {
+        return new self($server, $clock);
     }
 
     /**
