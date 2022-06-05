@@ -23,21 +23,28 @@ use Innmind\Git\{
     Repository\Remote\Url,
     Revision\Branch,
 };
-use Innmind\Server\Control\ServerFactory;
-use Innmind\TimeContinuum\Earth\Clock;
+use Innmind\OperatingSystem\Factory;
 use Innmind\Url\Path;
 
-$git = new Git(ServerFactory::build(), new Clock);
-$repository = $git->repository(Path::of('/somewhere/on/the/local/machine'));
-$remotes = $repository->init()->remotes();
-$remotes->add(new Name('origin'), new Url('git@github.com:Vendor/Repo.git'))
-$remotes->push(new Branch('master'));
+$os = Factory::build();
+$git = Git::of($os->control(), $os->clock());
+$repository = $git->repository(Path::of('/somewhere/on/the/local/machine'))->match(
+    static fn($repository) => $repository,
+    static fn() => throw new \RuntimeException('The path does not exist'),
+);
+$_ = $repository->init()->match(
+    static fn() => null, // pass
+    static fn() => throw new \RuntimeException('Failed to init the repository'),
+);
+$remotes = $repository->remotes();
+$remotes->add(Name::of('origin'), Url::of('git@github.com:Vendor/Repo.git'))
+$remotes->push(Branch::of('master'));
 $repository
     ->branches()
-    ->new(new Branch('develop'));
+    ->new(Branch::of('develop'));
 $repository
     ->checkout()
-    ->revision(new Branch('develop'));
+    ->revision(Branch::of('develop'));
 ```
 
 This example initialize a local git repository, declare a github repository as its remote and finally checkout the new branch `develop`.
