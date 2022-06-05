@@ -11,6 +11,9 @@ use Innmind\Server\Control\{
 use Innmind\Url\Path;
 use Innmind\Immutable\Maybe;
 
+/**
+ * @internal
+ */
 final class Binary
 {
     private Server $server;
