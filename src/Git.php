@@ -3,54 +3,79 @@ declare(strict_types = 1);
 
 namespace Innmind\Git;
 
-use Innmind\Git\Exception\CommandFailed;
 use Innmind\Server\Control\{
     Server,
     Server\Command,
+    Server\Process\Output,
 };
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
-use Innmind\Immutable\Str;
+use Innmind\Immutable\{
+    Str,
+    Maybe,
+};
 
 final class Git
 {
     private Server $server;
     private Clock $clock;
 
-    public function __construct(Server $server, Clock $clock)
+    private function __construct(Server $server, Clock $clock)
     {
         $this->server = $server;
         $this->clock = $clock;
     }
 
-    public function repository(Path $path): Repository
+    public static function of(Server $server, Clock $clock): self
     {
-        return new Repository($this->server, $path, $this->clock);
+        return new self($server, $clock);
     }
 
-    public function version(): Version
+    /**
+     * @return Maybe<Repository>
+     */
+    public function repository(Path $path): Maybe
+    {
+        return Repository::of($this->server, $path, $this->clock);
+    }
+
+    /**
+     * @return Maybe<Version>
+     */
+    public function version(): Maybe
     {
         $process = $this
             ->server
             ->processes()
             ->execute(
-                $command = Command::foreground('git')
+                Command::foreground('git')
                     ->withOption('version'),
             );
-        $process->wait();
+        /** @var Maybe<Output> */
+        $output = $process
+            ->wait()
+            ->match(
+                static fn() => Maybe::just($process->output()),
+                static fn() => Maybe::nothing(),
+            );
 
-        if (!$process->exitCode()->successful()) {
-            throw new CommandFailed($command, $process);
-        }
-
-        $parts = Str::of($process->output()->toString())->capture(
-            '~version (?<major>\d+)\.(?<minor>\d+)\.(?<bugfix>\d+)~',
-        );
-
-        return new Version(
-            (int) $parts->get('major')->toString(),
-            (int) $parts->get('minor')->toString(),
-            (int) $parts->get('bugfix')->toString(),
-        );
+        return $output
+            ->map(static fn($output) => Str::of($output->toString()))
+            ->map(static fn($output) => $output->capture(
+                '~version (?<major>\d+)\.(?<minor>\d+)\.(?<bugfix>\d+)~',
+            ))
+            ->map(
+                static fn($parts) => $parts
+                    ->map(static fn($_, $value) => $value->toString())
+                    ->map(static fn($_, $value) => (int) $value),
+            )
+            ->flatMap(
+                static fn($parts) => Maybe::all($parts->get('major'), $parts->get('minor'), $parts->get('bugfix'))
+                    ->flatMap(static fn(int $major, int $minor, int $bugfix) => Version::of(
+                        $major,
+                        $minor,
+                        $bugfix,
+                    )),
+            );
     }
 }

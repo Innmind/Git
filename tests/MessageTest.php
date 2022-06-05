@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git;
 
-use Innmind\Git\{
-    Message,
-    Exception\DomainException,
-};
+use Innmind\Git\Message;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -21,17 +18,21 @@ class MessageTest extends TestCase
     {
         $this
             ->forAll(Set\Strings::atLeast(1)->filter(
-                static fn($string) => $string === \trim($string)
+                static fn($string) => $string === \trim($string),
             ))
             ->then(function(string $message): void {
-                $this->assertSame($message, (new Message($message))->toString());
+                $this->assertSame($message, Message::maybe($message)->match(
+                    static fn($message) => $message->toString(),
+                    static fn() => null,
+                ));
             });
     }
 
-    public function testThrowWhenEmptyString()
+    public function testReturnNothingWhenEmptyString()
     {
-        $this->expectException(DomainException::class);
-
-        new Message(' ');
+        $this->assertNull(Message::maybe(' ')->match(
+            static fn($message) => $message,
+            static fn() => null,
+        ));
     }
 }

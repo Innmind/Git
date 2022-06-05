@@ -18,8 +18,11 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\unwrap;
+use Innmind\Immutable\{
+    Set,
+    Either,
+    SideEffect,
+};
 use PHPUnit\Framework\TestCase;
 
 class RemotesTest extends TestCase
@@ -38,10 +41,7 @@ class RemotesTest extends TestCase
         $process
             ->expects($this->once())
             ->method('wait')
-            ->will($this->returnSelf());
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->willReturn(Either::right(new SideEffect));
         $process
             ->method('output')
             ->willReturn($output = $this->createMock(Output::class));
@@ -58,16 +58,15 @@ REMOTES
         $remotes = new Remotes(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
         $all = $remotes->all();
 
         $this->assertInstanceOf(Set::class, $all);
-        $this->assertSame(Remote::class, (string) $all->type());
         $this->assertCount(3, $all);
-        $all = unwrap($all);
+        $all = $all->toList();
         $this->assertSame('origin', \current($all)->name()->toString());
         \next($all);
         $this->assertSame('gitlab', \current($all)->name()->toString());
@@ -80,11 +79,11 @@ REMOTES
         $remotes = new Remotes(
             new Binary(
                 $this->createMock(Server::class),
-                Path::of('watev')
-            )
+                Path::of('watev'),
+            ),
         );
 
-        $remote = $remotes->get($expected = new Name('origin'));
+        $remote = $remotes->get($expected = Name::of('origin'));
 
         $this->assertInstanceOf(Remote::class, $remote);
         $this->assertSame($expected, $remote->name());
@@ -102,27 +101,27 @@ REMOTES
             ->method('execute')
             ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'remote' 'add' 'origin' 'git@github.com:Innmind/Git.git'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
             ->method('wait')
-            ->will($this->returnSelf());
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->willReturn(Either::right(new SideEffect));
 
         $remotes = new Remotes(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
         $remote = $remotes->add(
-            $expected = new Name('origin'),
-            new Url('git@github.com:Innmind/Git.git')
+            $expected = Name::of('origin'),
+            Url::of('git@github.com:Innmind/Git.git'),
         );
 
         $this->assertInstanceOf(Remote::class, $remote);
@@ -141,24 +140,30 @@ REMOTES
             ->method('execute')
             ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'remote' 'remove' 'origin'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
             ->method('wait')
-            ->will($this->returnSelf());
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->willReturn(Either::right(new SideEffect));
 
         $remotes = new Remotes(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
-        $this->assertNull($remotes->remove(new Name('origin')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remotes->remove(Name::of('origin'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 }

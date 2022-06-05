@@ -3,14 +3,17 @@ declare(strict_types = 1);
 
 namespace Innmind\Git;
 
-use Innmind\Git\Exception\CommandFailed;
 use Innmind\Server\Control\{
     Server,
     Server\Command,
     Server\Process\Output,
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\Maybe;
 
+/**
+ * @internal
+ */
 final class Binary
 {
     private Server $server;
@@ -23,19 +26,23 @@ final class Binary
             ->withWorkingDirectory($path);
     }
 
-    public function __invoke(Command $command): Output
+    /**
+     * @return Maybe<Output>
+     */
+    public function __invoke(Command $command): Maybe
     {
         $process = $this
             ->server
             ->processes()
             ->execute($command);
-        $process->wait();
 
-        if (!$process->exitCode()->successful()) {
-            throw new CommandFailed($command, $process);
-        }
-
-        return $process->output();
+        /** @var Maybe<Output> */
+        return $process
+            ->wait()
+            ->match(
+                static fn() => Maybe::just($process->output()),
+                static fn() => Maybe::nothing(),
+            );
     }
 
     public function command(): Command

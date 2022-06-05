@@ -22,14 +22,18 @@ class NameTest extends TestCase
         $this
             ->forAll(Set\Strings::atLeast(1)->filter(static fn($name) => $name === \trim($name)))
             ->then(function(string $name): void {
-                $this->assertSame($name, (new Name($name))->toString());
+                $this->assertSame($name, Name::maybe($name)->match(
+                    static fn($name) => $name->toString(),
+                    static fn() => null,
+                ));
             });
     }
 
-    public function testThrowWhenEmptyString()
+    public function testReturnNothingWhenEmptyString()
     {
-        $this->expectException(DomainException::class);
-
-        new Name(' ');
+        $this->assertNull(Name::maybe(' ')->match(
+            static fn($name) => $name,
+            static fn() => null,
+        ));
     }
 }

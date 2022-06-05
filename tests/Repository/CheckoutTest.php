@@ -7,7 +7,6 @@ use Innmind\Git\{
     Repository\Checkout,
     Revision\Branch,
     Revision\Hash,
-    Revision,
     Binary
 };
 use Innmind\Server\Control\{
@@ -18,6 +17,10 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
+};
 use PHPUnit\Framework\TestCase;
 
 class CheckoutTest extends TestCase
@@ -37,30 +40,37 @@ class CheckoutTest extends TestCase
             ->method('execute')
             ->with($this->callback(static function($command) use ($path): bool {
                 return $command->toString() === "git 'checkout' '--' '$path'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
 
         $checkout = new Checkout(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
-        $this->assertNull($checkout->file(Path::of($path)));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $checkout->file(Path::of($path))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     /**
      * @dataProvider revisions
      */
-    public function testRevision(Revision $revision)
+    public function testRevision(Hash|Branch $revision)
     {
         $server = $this->createMock(Server::class);
         $server
@@ -72,24 +82,31 @@ class CheckoutTest extends TestCase
             ->method('execute')
             ->with($this->callback(static function($command) use ($revision): bool {
                 return $command->toString() === "git 'checkout' '{$revision->toString()}'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
 
         $checkout = new Checkout(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
-        $this->assertNull($checkout->revision($revision));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $checkout->revision($revision)->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function paths(): array
@@ -105,8 +122,11 @@ class CheckoutTest extends TestCase
     public function revisions(): array
     {
         return [
-            [new Branch('master')],
-            [new Hash('h2g2a42')],
+            [Branch::of('master')],
+            [Hash::maybe('h2g2a42')->match(
+                static fn($hash) => $hash,
+                static fn() => null,
+            )],
         ];
     }
 }

@@ -3,41 +3,44 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git;
 
-use Innmind\Git\{
-    Version,
-    Exception\DomainException,
-};
+use Innmind\Git\Version;
 use PHPUnit\Framework\TestCase;
 
 class VersionTest extends TestCase
 {
     public function testInterface()
     {
-        $version = new Version(1, 2, 3);
+        $version = Version::of(1, 2, 3)->match(
+            static fn($version) => $version,
+            static fn() => null,
+        );
 
         $this->assertSame(1, $version->major());
         $this->assertSame(2, $version->minor());
         $this->assertSame(3, $version->bugfix());
     }
 
-    public function testThrowWhenMajorTooLow()
+    public function testReturnNothingWhenMajorTooLow()
     {
-        $this->expectException(DomainException::class);
-
-        new Version(-1, 1, 1);
+        $this->assertNull(Version::of(-1, 1, 1)->match(
+            static fn($version) => $version,
+            static fn() => null,
+        ));
     }
 
-    public function testThrowWhenMinorTooLow()
+    public function testReturnNothingWhenMinorTooLow()
     {
-        $this->expectException(DomainException::class);
-
-        new Version(1, -1, 1);
+        $this->assertNull(Version::of(1, -1, 1)->match(
+            static fn($version) => $version,
+            static fn() => null,
+        ));
     }
 
-    public function testThrowWhenBugfixTooLow()
+    public function testReturnNothingWhenBugfixTooLow()
     {
-        $this->expectException(DomainException::class);
-
-        new Version(1, 1, -1);
+        $this->assertNull(Version::of(1, 1, -1)->match(
+            static fn($version) => $version,
+            static fn() => null,
+        ));
     }
 }

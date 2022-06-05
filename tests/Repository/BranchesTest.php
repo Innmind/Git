@@ -16,8 +16,11 @@ use Innmind\Server\Control\{
     Server\Process\ExitCode
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\Set;
-use function Innmind\Immutable\unwrap;
+use Innmind\Immutable\{
+    Set,
+    Either,
+    SideEffect,
+};
 use PHPUnit\Framework\TestCase;
 
 class BranchesTest extends TestCase
@@ -34,15 +37,16 @@ class BranchesTest extends TestCase
             ->method('execute')
             ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' '--no-color'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $process
             ->method('output')
             ->willReturn($output = $this->createMock(Output::class));
@@ -61,15 +65,14 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
         $local = $branches->local();
 
         $this->assertInstanceOf(Set::class, $local);
-        $this->assertSame(Branch::class, (string) $local->type());
         $this->assertCount(3, $local);
-        $local = unwrap($local);
+        $local = $local->toList();
         $this->assertSame('develop', \current($local)->toString());
         \next($local);
         $this->assertSame('foo-bar-baz', \current($local)->toString());
@@ -89,15 +92,16 @@ BRANCHES
             ->method('execute')
             ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' '-r' '--no-color'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $process
             ->method('output')
             ->willReturn($output = $this->createMock(Output::class));
@@ -116,15 +120,14 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
         $remote = $branches->remote();
 
         $this->assertInstanceOf(Set::class, $remote);
-        $this->assertSame(Branch::class, (string) $remote->type());
         $this->assertCount(3, $remote);
-        $remote = unwrap($remote);
+        $remote = $remote->toList();
         $this->assertSame('origin/develop', \current($remote)->toString());
         \next($remote);
         $this->assertSame('origin/foo-bar-baz', \current($remote)->toString());
@@ -145,11 +148,17 @@ BRANCHES
             ->withConsecutive(
                 [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'branch' '--no-color'" &&
-                        $command->workingDirectory()->toString() === '/tmp/foo';
+                        '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
                 })],
                 [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'branch' '-r' '--no-color'" &&
-                        $command->workingDirectory()->toString() === '/tmp/foo';
+                        '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
                 })],
             )
             ->will($this->onConsecutiveCalls(
@@ -158,10 +167,8 @@ BRANCHES
             ));
         $process1
             ->expects($this->once())
-            ->method('wait');
-        $process1
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $process1
             ->method('output')
             ->willReturn($output1 = $this->createMock(Output::class));
@@ -177,10 +184,8 @@ BRANCHES
         );
         $process2
             ->expects($this->once())
-            ->method('wait');
-        $process2
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $process2
             ->method('output')
             ->willReturn($output2 = $this->createMock(Output::class));
@@ -198,15 +203,14 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
         $all = $branches->all();
 
         $this->assertInstanceOf(Set::class, $all);
-        $this->assertSame(Branch::class, (string) $all->type());
         $this->assertCount(6, $all);
-        $all = unwrap($all);
+        $all = $all->toList();
         $this->assertSame('develop', \current($all)->toString());
         \next($all);
         $this->assertSame('foo-bar-baz', \current($all)->toString());
@@ -232,15 +236,16 @@ BRANCHES
             ->method('execute')
             ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' 'bar'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $process
             ->method('output')
             ->willReturn($this->createMock(Output::class));
@@ -248,11 +253,17 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
-        $this->assertNull($branches->new(new Branch('bar')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $branches->new(Branch::of('bar'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testNewOff()
@@ -267,15 +278,16 @@ BRANCHES
             ->method('execute')
             ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' 'bar' 'develop'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $process
             ->method('output')
             ->willReturn($this->createMock(Output::class));
@@ -283,11 +295,17 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
-        $this->assertNull($branches->new(new Branch('bar'), new Branch('develop')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $branches->new(Branch::of('bar'), Branch::of('develop'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testNewOrphan()
@@ -302,24 +320,31 @@ BRANCHES
             ->method('execute')
             ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'checkout' '--orphan' 'bar'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
 
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
-        $this->assertNull($branches->newOrphan(new Branch('bar')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $branches->newOrphan(Branch::of('bar'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testDelete()
@@ -334,15 +359,16 @@ BRANCHES
             ->method('execute')
             ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' '-d' 'bar'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $process
             ->method('output')
             ->willReturn($this->createMock(Output::class));
@@ -350,11 +376,17 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
-        $this->assertNull($branches->delete(new Branch('bar')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $branches->delete(Branch::of('bar'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testForceDelete()
@@ -369,15 +401,16 @@ BRANCHES
             ->method('execute')
             ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'branch' '-D' 'bar'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $process
             ->method('output')
             ->willReturn($this->createMock(Output::class));
@@ -385,10 +418,16 @@ BRANCHES
         $branches = new Branches(
             new Binary(
                 $server,
-                Path::of('/tmp/foo')
-            )
+                Path::of('/tmp/foo'),
+            ),
         );
 
-        $this->assertNull($branches->forceDelete(new Branch('bar')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $branches->forceDelete(Branch::of('bar'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 }

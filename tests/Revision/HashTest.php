@@ -3,11 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git\Revision;
 
-use Innmind\Git\{
-    Revision\Hash,
-    Revision,
-    Exception\DomainException
-};
+use Innmind\Git\Revision\Hash;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -21,19 +17,23 @@ class HashTest extends TestCase
     public function testInterface()
     {
         $this->assertInstanceOf(
-            Revision::class,
-            new Hash('0000000')
+            Hash::class,
+            Hash::maybe('0000000')->match(
+                static fn($hash) => $hash,
+                static fn() => null,
+            ),
         );
     }
 
-    public function testThrowWhenInvalidHash()
+    public function testReturnNothingWhenInvalidHash()
     {
         $this
             ->forAll(Set\Strings::any())
             ->then(function($string): void {
-                $this->expectException(DomainException::class);
-
-                new Hash($string);
+                $this->assertNull(Hash::maybe($string)->match(
+                    static fn($hash) => $hash,
+                    static fn() => null,
+                ));
             });
     }
 
@@ -45,8 +45,14 @@ class HashTest extends TestCase
                 $hash = \sha1($string);
                 $short = \substr($hash, 0, 7);
 
-                $this->assertSame($hash, (new Hash($hash))->toString());
-                $this->assertSame($short, (new Hash($short))->toString());
+                $this->assertSame($hash, Hash::maybe($hash)->match(
+                    static fn($hash) => $hash->toString(),
+                    static fn() => null,
+                ));
+                $this->assertSame($short, Hash::maybe($short)->match(
+                    static fn($hash) => $hash->toString(),
+                    static fn() => null,
+                ));
             });
     }
 }

@@ -7,17 +7,17 @@ use Innmind\Git\{
     Git,
     Repository,
     Version,
-    Exception\CommandFailed,
 };
+use Innmind\OperatingSystem\Factory;
 use Innmind\Server\Control\{
-    ServerFactory,
     Server,
     Server\Processes,
     Server\Process,
-    Server\Process\ExitCode
+    Server\Process\ExitCode,
 };
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
+use Innmind\Immutable\Either;
 use Symfony\Component\Filesystem\Filesystem;
 use PHPUnit\Framework\TestCase;
 
@@ -30,29 +30,38 @@ class GitTest extends TestCase
 
     public function testRepository()
     {
-        $git = new Git(
-            ServerFactory::build(),
-            $this->createMock(Clock::class)
+        $git = Git::of(
+            Factory::build()->control(),
+            $this->createMock(Clock::class),
         );
 
-        $this->assertInstanceOf(Repository::class, $git->repository(Path::of('/tmp/foo')));
+        $this->assertInstanceOf(
+            Repository::class,
+            $git->repository(Path::of('/tmp/foo'))->match(
+                static fn($repo) => $repo,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testVersion()
     {
-        $git = new Git(
-            ServerFactory::build(),
-            $this->createMock(Clock::class)
+        $git = Git::of(
+            Factory::build()->control(),
+            $this->createMock(Clock::class),
         );
 
-        $this->assertInstanceOf(Version::class, $git->version());
+        $this->assertInstanceOf(Version::class, $git->version()->match(
+            static fn($version) => $version,
+            static fn() => null,
+        ));
     }
 
-    public function testThrowWhenFailToDetermineVersion()
+    public function testReturnNothingWhenFailToDetermineVersion()
     {
-        $git = new Git(
+        $git = Git::of(
             $server = $this->createMock(Server::class),
-            $this->createMock(Clock::class)
+            $this->createMock(Clock::class),
         );
         $server
             ->expects($this->once())
@@ -66,11 +75,12 @@ class GitTest extends TestCase
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
 
-        $this->expectException(CommandFailed::class);
-
-        $git->version();
+        $this->assertNull($git->version()->match(
+            static fn($version) => $version,
+            static fn() => null,
+        ));
     }
 }
