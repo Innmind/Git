@@ -5,7 +5,6 @@ namespace Innmind\Git\Repository;
 
 use Innmind\Git\{
     Binary,
-    Revision,
     Message,
     Repository\Tag\Name,
     Exception\DomainException,

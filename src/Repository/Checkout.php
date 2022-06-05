@@ -5,7 +5,8 @@ namespace Innmind\Git\Repository;
 
 use Innmind\Git\{
     Binary,
-    Revision,
+    Revision\Hash,
+    Revision\Branch,
 };
 use Innmind\Url\Path;
 
@@ -30,7 +31,7 @@ final class Checkout
         );
     }
 
-    public function revision(Revision $revision): void
+    public function revision(Hash|Branch $revision): void
     {
         ($this->binary)(
             $this

@@ -5,8 +5,8 @@ namespace Innmind\Git\Repository;
 
 use Innmind\Git\{
     Binary,
-    Revision,
     Revision\Branch,
+    Revision\Hash,
 };
 use Innmind\Immutable\{
     Set,
@@ -109,7 +109,7 @@ final class Branches
             ->merge($this->remote());
     }
 
-    public function new(Branch $name, Revision $off = null): void
+    public function new(Branch $name, Hash|Branch $off = null): void
     {
         $command = $this
             ->binary

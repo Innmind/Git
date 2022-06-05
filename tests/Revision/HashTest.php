@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git\Revision;
 
-use Innmind\Git\{
-    Revision\Hash,
-    Revision,
-};
+use Innmind\Git\Revision\Hash;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -20,7 +17,7 @@ class HashTest extends TestCase
     public function testInterface()
     {
         $this->assertInstanceOf(
-            Revision::class,
+            Hash::class,
             Hash::maybe('0000000')->match(
                 static fn($hash) => $hash,
                 static fn() => null,

@@ -3,16 +3,13 @@ declare(strict_types = 1);
 
 namespace Innmind\Git\Revision;
 
-use Innmind\Git\{
-    Revision,
-    Exception\DomainException,
-};
+use Innmind\Git\Exception\DomainException;
 use Innmind\Immutable\{
     Str,
     Maybe,
 };
 
-final class Branch implements Revision
+final class Branch
 {
     private string $value;
 

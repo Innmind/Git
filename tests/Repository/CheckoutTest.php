@@ -7,7 +7,6 @@ use Innmind\Git\{
     Repository\Checkout,
     Revision\Branch,
     Revision\Hash,
-    Revision,
     Binary
 };
 use Innmind\Server\Control\{
@@ -65,7 +64,7 @@ class CheckoutTest extends TestCase
     /**
      * @dataProvider revisions
      */
-    public function testRevision(Revision $revision)
+    public function testRevision(Hash|Branch $revision)
     {
         $server = $this->createMock(Server::class);
         $server

@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git\Revision;
 
-use Innmind\Git\{
-    Revision\Branch,
-    Revision,
-};
+use Innmind\Git\Revision\Branch;
 use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -20,7 +17,7 @@ class BranchTest extends TestCase
     public function testInterface()
     {
         $this->assertInstanceOf(
-            Revision::class,
+            Branch::class,
             Branch::maybe('master')->match(
                 static fn($branch) => $branch,
                 static fn() => null,

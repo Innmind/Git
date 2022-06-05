@@ -3,13 +3,12 @@ declare(strict_types = 1);
 
 namespace Innmind\Git\Revision;
 
-use Innmind\Git\Revision;
 use Innmind\Immutable\{
     Str,
     Maybe,
 };
 
-final class Hash implements Revision
+final class Hash
 {
     private string $value;
 

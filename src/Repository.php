@@ -79,11 +79,10 @@ final class Repository
     }
 
     /**
-     * @return Maybe<Revision>
+     * @return Maybe<Hash|Branch>
      */
     public function head(): Maybe
     {
-        /** @var Maybe<Revision> */
         return ($this->binary)(
             $this
                 ->binary
@@ -178,11 +177,11 @@ final class Repository
     }
 
     /**
-     * @return Maybe<Revision>
+     * @return Maybe<Hash|Branch>
      */
     private static function parseRevision(Str $revision): Maybe
     {
-        /** @var Maybe<Revision> */
+        /** @var Maybe<Hash|Branch> */
         return $revision
             ->capture('~\(HEAD detached at (?P<hash>[a-z0-9]{7,40})\)~')
             ->get('hash')
