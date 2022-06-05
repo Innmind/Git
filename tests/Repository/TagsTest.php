@@ -63,7 +63,13 @@ class TagsTest extends TestCase
             new Clock(new UTC),
         );
 
-        $this->assertNull($tags->push());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $tags->push()->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testAdd()
@@ -97,8 +103,12 @@ class TagsTest extends TestCase
             new Clock(new UTC),
         );
 
-        $this->assertNull(
-            $tags->add(Name::of('1.0.0'), Message::of('first release')),
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $tags->add(Name::of('1.0.0'), Message::of('first release'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
         );
     }
 
@@ -133,8 +143,12 @@ class TagsTest extends TestCase
             new Clock(new UTC),
         );
 
-        $this->assertNull(
-            $tags->add(Name::of('1.0.0')),
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $tags->add(Name::of('1.0.0'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
         );
     }
 
@@ -169,8 +183,12 @@ class TagsTest extends TestCase
             new Clock(new UTC),
         );
 
-        $this->assertNull(
-            $tags->sign(Name::of('1.0.0'), Message::of('first release')),
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $tags->sign(Name::of('1.0.0'), Message::of('first release'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
         );
     }
 

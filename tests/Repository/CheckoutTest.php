@@ -58,7 +58,13 @@ class CheckoutTest extends TestCase
             ),
         );
 
-        $this->assertNull($checkout->file(Path::of($path)));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $checkout->file(Path::of($path))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     /**
@@ -94,7 +100,13 @@ class CheckoutTest extends TestCase
             ),
         );
 
-        $this->assertNull($checkout->revision($revision));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $checkout->revision($revision)->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function paths(): array

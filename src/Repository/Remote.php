@@ -9,6 +9,10 @@ use Innmind\Git\{
     Repository\Remote\Url,
     Revision\Branch,
 };
+use Innmind\Immutable\{
+    Maybe,
+    SideEffect,
+};
 
 final class Remote
 {
@@ -26,21 +30,27 @@ final class Remote
         return $this->name;
     }
 
-    public function prune(): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function prune(): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('remote')
                 ->withArgument('prune')
                 ->withArgument($this->name->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function setUrl(Url $url): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function setUrl(Url $url): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
@@ -48,12 +58,15 @@ final class Remote
                 ->withArgument('set-url')
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function addUrl(Url $url): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function addUrl(Url $url): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
@@ -62,12 +75,15 @@ final class Remote
                 ->withOption('add')
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function deleteUrl(Url $url): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function deleteUrl(Url $url): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
@@ -76,12 +92,15 @@ final class Remote
                 ->withOption('delete')
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString())
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function push(Branch $branch): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function push(Branch $branch): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
@@ -89,18 +108,21 @@ final class Remote
                 ->withShortOption('u')
                 ->withArgument($this->name->toString())
                 ->withArgument($branch->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function delete(Branch $branch): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function delete(Branch $branch): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('push')
                 ->withArgument($this->name->toString())
                 ->withArgument(':'.$branch->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 }

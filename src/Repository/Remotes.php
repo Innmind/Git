@@ -11,6 +11,8 @@ use Innmind\Git\{
 use Innmind\Immutable\{
     Set,
     Str,
+    Maybe,
+    SideEffect,
 };
 
 final class Remotes
@@ -78,15 +80,18 @@ final class Remotes
         return $this->get($name);
     }
 
-    public function remove(Name $name): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function remove(Name $name): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('remote')
                 ->withArgument('remove')
                 ->withArgument($name->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 }

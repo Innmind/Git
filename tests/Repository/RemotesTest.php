@@ -158,6 +158,12 @@ REMOTES
             ),
         );
 
-        $this->assertNull($remotes->remove(Name::of('origin')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remotes->remove(Name::of('origin'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 }

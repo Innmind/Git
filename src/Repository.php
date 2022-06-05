@@ -107,24 +107,30 @@ final class Repository
         return new Branches($this->binary);
     }
 
-    public function push(): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function push(): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('push'),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function pull(): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function pull(): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('pull'),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
     public function remotes(): Remotes
@@ -142,38 +148,47 @@ final class Repository
         return new Tags($this->binary, $this->clock);
     }
 
-    public function add(Path $file): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function add(Path $file): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('add')
                 ->withArgument($file->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function commit(Message $message): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function commit(Message $message): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('commit')
                 ->withShortOption('m')
                 ->withArgument($message->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function merge(Branch $branch): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function merge(Branch $branch): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('merge')
                 ->withArgument($branch->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
     /**

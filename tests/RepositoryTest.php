@@ -314,7 +314,13 @@ class RepositoryTest extends TestCase
             static fn() => null,
         );
 
-        $this->assertNull($repo->push());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $repo->push()->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testPull()
@@ -359,7 +365,13 @@ class RepositoryTest extends TestCase
             static fn() => null,
         );
 
-        $this->assertNull($repo->pull());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $repo->pull()->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testRemotes()
@@ -446,7 +458,13 @@ class RepositoryTest extends TestCase
             static fn() => null,
         );
 
-        $this->assertNull($repo->add(Path::of('foo')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $repo->add(Path::of('foo'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testCommit()
@@ -498,7 +516,13 @@ class RepositoryTest extends TestCase
                     static fn() => null,
                 );
 
-                $this->assertNull($repo->commit(Message::of($message)));
+                $this->assertInstanceOf(
+                    SideEffect::class,
+                    $repo->commit(Message::of($message))->match(
+                        static fn($sideEffect) => $sideEffect,
+                        static fn() => null,
+                    ),
+                );
             });
     }
 
@@ -544,7 +568,13 @@ class RepositoryTest extends TestCase
             static fn() => null,
         );
 
-        $this->assertNull($repo->merge(Branch::of('develop')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $repo->merge(Branch::of('develop'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function heads(): array

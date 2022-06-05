@@ -11,6 +11,8 @@ use Innmind\Git\{
 use Innmind\Immutable\{
     Set,
     Str,
+    Maybe,
+    SideEffect,
 };
 
 final class Branches
@@ -109,7 +111,10 @@ final class Branches
             ->merge($this->remote());
     }
 
-    public function new(Branch $name, Hash|Branch $off = null): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function new(Branch $name, Hash|Branch $off = null): Maybe
     {
         $command = $this
             ->binary
@@ -121,10 +126,13 @@ final class Branches
             $command = $command->withArgument($off->toString());
         }
 
-        ($this->binary)($command);
+        return ($this->binary)($command)->map(static fn() => new SideEffect);
     }
 
-    public function newOrphan(Branch $name): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function newOrphan(Branch $name): Maybe
     {
         $command = $this
             ->binary
@@ -133,30 +141,36 @@ final class Branches
             ->withOption('orphan')
             ->withArgument($name->toString());
 
-        ($this->binary)($command);
+        return ($this->binary)($command)->map(static fn() => new SideEffect);
     }
 
-    public function delete(Branch $name): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function delete(Branch $name): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('branch')
                 ->withShortOption('d')
                 ->withArgument($name->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function forceDelete(Branch $name): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function forceDelete(Branch $name): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('branch')
                 ->withShortOption('D')
                 ->withArgument($name->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 }

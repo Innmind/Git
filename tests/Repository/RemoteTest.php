@@ -74,7 +74,13 @@ class RemoteTest extends TestCase
             Name::of('origin'),
         );
 
-        $this->assertNull($remote->prune());
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remote->prune()->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testSetUrl()
@@ -111,7 +117,13 @@ class RemoteTest extends TestCase
             Name::of('origin'),
         );
 
-        $this->assertNull($remote->setUrl(Url::of('/local/remote')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remote->setUrl(Url::of('/local/remote'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testAddUrl()
@@ -148,7 +160,13 @@ class RemoteTest extends TestCase
             Name::of('origin'),
         );
 
-        $this->assertNull($remote->addUrl(Url::of('/local/remote')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remote->addUrl(Url::of('/local/remote'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testDeleteUrl()
@@ -185,7 +203,13 @@ class RemoteTest extends TestCase
             Name::of('origin'),
         );
 
-        $this->assertNull($remote->deleteUrl(Url::of('/local/remote')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remote->deleteUrl(Url::of('/local/remote'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testPush()
@@ -219,7 +243,13 @@ class RemoteTest extends TestCase
             Name::of('origin'),
         );
 
-        $this->assertNull($remote->push(Branch::of('develop')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remote->push(Branch::of('develop'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testDelete()
@@ -253,6 +283,12 @@ class RemoteTest extends TestCase
             Name::of('origin'),
         );
 
-        $this->assertNull($remote->delete(Branch::of('develop')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $remote->delete(Branch::of('develop'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 }

@@ -257,7 +257,13 @@ BRANCHES
             ),
         );
 
-        $this->assertNull($branches->new(Branch::of('bar')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $branches->new(Branch::of('bar'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testNewOff()
@@ -293,7 +299,13 @@ BRANCHES
             ),
         );
 
-        $this->assertNull($branches->new(Branch::of('bar'), Branch::of('develop')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $branches->new(Branch::of('bar'), Branch::of('develop'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testNewOrphan()
@@ -326,7 +338,13 @@ BRANCHES
             ),
         );
 
-        $this->assertNull($branches->newOrphan(Branch::of('bar')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $branches->newOrphan(Branch::of('bar'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testDelete()
@@ -362,7 +380,13 @@ BRANCHES
             ),
         );
 
-        $this->assertNull($branches->delete(Branch::of('bar')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $branches->delete(Branch::of('bar'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 
     public function testForceDelete()
@@ -398,6 +422,12 @@ BRANCHES
             ),
         );
 
-        $this->assertNull($branches->forceDelete(Branch::of('bar')));
+        $this->assertInstanceOf(
+            SideEffect::class,
+            $branches->forceDelete(Branch::of('bar'))->match(
+                static fn($sideEffect) => $sideEffect,
+                static fn() => null,
+            ),
+        );
     }
 }

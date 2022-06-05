@@ -18,6 +18,7 @@ use Innmind\Immutable\{
     Set,
     Str,
     Maybe,
+    SideEffect,
 };
 
 final class Tags
@@ -31,18 +32,24 @@ final class Tags
         $this->clock = $clock;
     }
 
-    public function push(): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function push(): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('push')
                 ->withOption('tags'),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function add(Name $name, Message $message = null): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function add(Name $name, Message $message = null): Maybe
     {
         $command = $this
             ->binary
@@ -57,12 +64,15 @@ final class Tags
                 ->withArgument($message->toString());
         }
 
-        ($this->binary)($command);
+        return ($this->binary)($command)->map(static fn() => new SideEffect);
     }
 
-    public function sign(Name $name, Message $message): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function sign(Name $name, Message $message): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
@@ -72,7 +82,7 @@ final class Tags
                 ->withArgument($name->toString())
                 ->withShortOption('m')
                 ->withArgument($message->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
     /**
