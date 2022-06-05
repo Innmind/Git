@@ -3,20 +3,44 @@ declare(strict_types = 1);
 
 namespace Innmind\Git\Repository\Tag;
 
-use Innmind\Git\Exception\DomainException;
-use Innmind\Immutable\Str;
+use Innmind\Immutable\{
+    Str,
+    Maybe,
+};
 
 final class Name
 {
+    /** @var non-empty-string */
     private string $value;
 
-    public function __construct(string $name)
+    /**
+     * @param non-empty-string $name
+     */
+    private function __construct(string $name)
+    {
+        $this->value = $name;
+    }
+
+    /**
+     * @param non-empty-string $name
+     */
+    public static function of(string $name): self
+    {
+        return new self($name);
+    }
+
+    /**
+     * @return Maybe<self>
+     */
+    public static function maybe(string $name): Maybe
     {
         if (Str::of($name)->trim()->empty()) {
-            throw new DomainException;
+            /** @var Maybe<self> */
+            return Maybe::nothing();
         }
 
-        $this->value = $name;
+        /** @psalm-suppress ArgumentTypeCoercion */
+        return Maybe::just(new self($name));
     }
 
     public function toString(): string

@@ -3,10 +3,7 @@ declare(strict_types = 1);
 
 namespace Tests\Innmind\Git;
 
-use Innmind\Git\{
-    Binary,
-    Exception\CommandFailed
-};
+use Innmind\Git\Binary;
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
@@ -16,6 +13,10 @@ use Innmind\Server\Control\{
     Server\Command
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Either,
+    SideEffect,
+};
 use PHPUnit\Framework\TestCase;
 
 class BinaryTest extends TestCase
@@ -32,17 +33,17 @@ class BinaryTest extends TestCase
             ->method('execute')
             ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'watev'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo' &&
-                    $command->toBeRunInBackground() === false;
+                    $command->toBeRunInBackground() === false &&
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(0));
+            ->method('wait')
+            ->willReturn(Either::right(new SideEffect));
         $process
             ->expects($this->once())
             ->method('output')
@@ -50,16 +51,22 @@ class BinaryTest extends TestCase
 
         $bin = new Binary(
             $server,
-            Path::of('/tmp/foo')
+            Path::of('/tmp/foo'),
         );
 
         $this->assertInstanceOf(Command::class, $bin->command());
         $this->assertSame('git', $bin->command()->toString());
-        $this->assertSame('/tmp/foo', $bin->command()->workingDirectory()->toString());
-        $this->assertSame($output, $bin($bin->command()->withArgument('watev')));
+        $this->assertSame('/tmp/foo', $bin->command()->workingDirectory()->match(
+            static fn($path) => $path->toString(),
+            static fn() => null,
+        ));
+        $this->assertSame($output, $bin($bin->command()->withArgument('watev'))->match(
+            static fn($output) => $output,
+            static fn() => null,
+        ));
     }
 
-    public function testThrowWhenCommandFailed()
+    public function testReturnNothingWhenCommandFailed()
     {
         $server = $this->createMock(Server::class);
         $server
@@ -71,29 +78,25 @@ class BinaryTest extends TestCase
             ->method('execute')
             ->with($this->callback(static function($command): bool {
                 return $command->toString() === "git 'watev'" &&
-                    $command->workingDirectory()->toString() === '/tmp/foo';
+                    '/tmp/foo' === $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    );
             }))
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->expects($this->once())
-            ->method('wait');
-        $process
-            ->expects($this->once())
-            ->method('exitCode')
-            ->willReturn(new ExitCode(1));
+            ->method('wait')
+            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
 
         $bin = new Binary(
             $server,
-            Path::of('/tmp/foo')
+            Path::of('/tmp/foo'),
         );
 
-        try {
-            $bin($bin->command()->withArgument('watev'));
-            $this->fail('it should throw');
-        } catch (CommandFailed $e) {
-            $this->assertInstanceOf(Command::class, $e->command());
-            $this->assertSame("git 'watev'", $e->command()->toString());
-            $this->assertSame($process, $e->process());
-        }
+        $this->assertNull($bin($bin->command()->withArgument('watev'))->match(
+            static fn($output) => $output,
+            static fn() => null,
+        ));
     }
 }

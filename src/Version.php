@@ -3,7 +3,7 @@ declare(strict_types = 1);
 
 namespace Innmind\Git;
 
-use Innmind\Git\Exception\DomainException;
+use Innmind\Immutable\Maybe;
 
 final class Version
 {
@@ -11,15 +11,24 @@ final class Version
     private int $minor;
     private int $bugfix;
 
-    public function __construct(int $major, int $minor, int $bugfix)
+    private function __construct(int $major, int $minor, int $bugfix)
     {
-        if (\min($major, $minor, $bugfix) < 0) {
-            throw new DomainException("$major.$minor.$bugfix");
-        }
-
         $this->major = $major;
         $this->minor = $minor;
         $this->bugfix = $bugfix;
+    }
+
+    /**
+     * @return Maybe<self>
+     */
+    public static function of(int $major, int $minor, int $bugfix): Maybe
+    {
+        if (\min($major, $minor, $bugfix) < 0) {
+            /** @var Maybe<self> */
+            return Maybe::nothing();
+        }
+
+        return Maybe::just(new self($major, $minor, $bugfix));
     }
 
     public function major(): int

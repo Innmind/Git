@@ -5,9 +5,14 @@ namespace Innmind\Git\Repository;
 
 use Innmind\Git\{
     Binary,
-    Revision,
+    Revision\Hash,
+    Revision\Branch,
 };
 use Innmind\Url\Path;
+use Innmind\Immutable\{
+    Maybe,
+    SideEffect,
+};
 
 final class Checkout
 {
@@ -18,26 +23,32 @@ final class Checkout
         $this->binary = $binary;
     }
 
-    public function file(Path $path): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function file(Path $path): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('checkout')
                 ->withArgument('--')
                 ->withArgument($path->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function revision(Revision $revision): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function revision(Hash|Branch $revision): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('checkout')
                 ->withArgument($revision->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 }

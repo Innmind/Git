@@ -11,6 +11,8 @@ use Innmind\Git\{
 use Innmind\Immutable\{
     Set,
     Str,
+    Maybe,
+    SideEffect,
 };
 
 final class Remotes
@@ -27,20 +29,32 @@ final class Remotes
      */
     public function all(): Set
     {
-        $remotes = Str::of(($this->binary)(
+        $remotes = ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('remote')
-        )->toString());
+        )
+            ->match(
+                static fn($output) => Str::of($output->toString()),
+                static fn() => Str::of(''),
+            );
 
         /** @var Set<Remote> */
-        return $remotes
-            ->split("\n")
-            ->toSetOf(
-                Remote::class,
-                fn(Str $remote): \Generator => yield $this->get(new Name($remote->toString())),
-            );
+        return Set::of(
+            ...$remotes
+                ->split("\n")
+                ->map(
+                    fn($remote) => Name::maybe($remote->toString())
+                        ->map($this->get(...))
+                        ->match(
+                            static fn($remote) => $remote,
+                            static fn() => null,
+                        ),
+                )
+                ->filter(static fn($remote) => $remote instanceof Remote)
+                ->toList(),
+        );
     }
 
     public function get(Name $name): Remote
@@ -66,15 +80,18 @@ final class Remotes
         return $this->get($name);
     }
 
-    public function remove(Name $name): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function remove(Name $name): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('remote')
                 ->withArgument('remove')
                 ->withArgument($name->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 }

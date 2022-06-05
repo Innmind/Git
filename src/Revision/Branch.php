@@ -3,23 +3,45 @@ declare(strict_types = 1);
 
 namespace Innmind\Git\Revision;
 
-use Innmind\Git\{
-    Revision,
-    Exception\DomainException,
+use Innmind\Git\Exception\DomainException;
+use Innmind\Immutable\{
+    Str,
+    Maybe,
 };
-use Innmind\Immutable\Str;
 
-final class Branch implements Revision
+final class Branch
 {
     private string $value;
 
-    public function __construct(string $branch)
+    private function __construct(string $branch)
     {
-        if (!Str::of($branch)->matches('~\w+~')) {
-            throw new DomainException($branch);
+        $this->value = $branch;
+    }
+
+    /**
+     * @param literal-string $branch
+     *
+     * @throws DomainException
+     */
+    public static function of(string $branch): self
+    {
+        return self::maybe($branch)->match(
+            static fn($self) => $self,
+            static fn() => throw new DomainException($branch),
+        );
+    }
+
+    /**
+     * @return Maybe<self>
+     */
+    public static function maybe(string $branch): Maybe
+    {
+        if (!Str::of($branch)->matches('~^[\w\-\/\.]+$~')) {
+            /** @var Maybe<self> */
+            return Maybe::nothing();
         }
 
-        $this->value = $branch;
+        return Maybe::just(new self($branch));
     }
 
     public function toString(): string

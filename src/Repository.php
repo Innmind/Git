@@ -10,9 +10,6 @@ use Innmind\Git\{
     Repository\Remotes,
     Repository\Checkout,
     Repository\Tags,
-    Exception\RepositoryInitFailed,
-    Exception\PathNotUsable,
-    Exception\DomainException,
 };
 use Innmind\Server\Control\{
     Server,
@@ -20,159 +17,192 @@ use Innmind\Server\Control\{
 };
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
-use Innmind\Immutable\Str;
+use Innmind\Immutable\{
+    Str,
+    Maybe,
+    SideEffect,
+};
 
 final class Repository
 {
     private Binary $binary;
     private Clock $clock;
-    private ?Branches $branches = null;
-    private ?Remotes $remotes = null;
-    private ?Checkout $checkout = null;
-    private ?Tags $tags = null;
 
-    public function __construct(
+    private function __construct(
         Server $server,
         Path $path,
-        Clock $clock
+        Clock $clock,
     ) {
         $this->binary = new Binary($server, $path);
         $this->clock = $clock;
+    }
 
-        $process = $server
+    /**
+     * @return Maybe<self>
+     */
+    public static function of(
+        Server $server,
+        Path $path,
+        Clock $clock,
+    ): Maybe {
+        /** @var Maybe<self> */
+        return $server
             ->processes()
             ->execute(
                 Command::foreground('mkdir')
                     ->withShortOption('p')
                     ->withArgument($path->toString()),
+            )
+            ->wait()
+            ->match(
+                static fn() => Maybe::just(new self($server, $path, $clock)),
+                static fn() => Maybe::nothing(),
             );
-        $process->wait();
-        $code = $process->exitCode();
-
-        if (!$code->successful()) {
-            throw new PathNotUsable($path->toString());
-        }
     }
 
-    public function init(): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function init(): Maybe
     {
-        $output = ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('init'),
-        );
-        $outputStr = Str::of($output->toString());
-
-        if (
-            $outputStr->contains('Initialized empty Git repository') ||
-            $outputStr->contains('Reinitialized existing Git repository')
-        ) {
-            return;
-        }
-
-        throw new RepositoryInitFailed($output);
+        )
+            ->map(static fn($output) => Str::of($output->toString()))
+            ->filter(
+                static fn($output) => $output->contains('Initialized empty Git repository') || $output->contains('Reinitialized existing Git repository'),
+            )
+            ->map(static fn() => new SideEffect);
     }
 
-    public function head(): Revision
+    /**
+     * @return Maybe<Hash|Branch>
+     */
+    public function head(): Maybe
     {
-        $output = Str::of(($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('branch')
                 ->withOption('no-color'),
-        )->toString());
-        $revision = $output
+        )
+            ->match(
+                static fn($output) => Str::of($output->toString()),
+                static fn() => Str::of(''),
+            )
             ->split("\n")
             ->filter(static function(Str $line): bool {
                 return $line->matches('~^\* .+~');
             })
-            ->first();
-
-        if ($revision->matches('~\(HEAD detached at [a-z0-9]{7,40}\)~')) {
-            return new Hash(
-                $revision
-                    ->capture('~\(HEAD detached at (?P<hash>[a-z0-9]{7,40})\)~')
-                    ->get('hash')
-                    ->toString(),
-            );
-        }
-
-        return new Branch($revision->substring(2)->toString());
+            ->first()
+            ->flatMap(self::parseRevision(...));
     }
 
     public function branches(): Branches
     {
-        return $this->branches ??= new Branches($this->binary);
+        return new Branches($this->binary);
     }
 
-    public function push(): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function push(): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('push'),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function pull(): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function pull(): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('pull'),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
     public function remotes(): Remotes
     {
-        return $this->remotes ??= new Remotes($this->binary);
+        return new Remotes($this->binary);
     }
 
     public function checkout(): Checkout
     {
-        return $this->checkout ??= new Checkout($this->binary);
+        return new Checkout($this->binary);
     }
 
     public function tags(): Tags
     {
-        return $this->tags ??= new Tags($this->binary, $this->clock);
+        return new Tags($this->binary, $this->clock);
     }
 
-    public function add(Path $file): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function add(Path $file): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('add')
                 ->withArgument($file->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function commit(Message $message): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function commit(Message $message): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('commit')
                 ->withShortOption('m')
                 ->withArgument($message->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function merge(Branch $branch): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function merge(Branch $branch): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('merge')
                 ->withArgument($branch->toString()),
-        );
+        )->map(static fn() => new SideEffect);
+    }
+
+    /**
+     * @return Maybe<Hash|Branch>
+     */
+    private static function parseRevision(Str $revision): Maybe
+    {
+        /** @var Maybe<Hash|Branch> */
+        return $revision
+            ->capture('~\(HEAD detached at (?P<hash>[a-z0-9]{7,40})\)~')
+            ->get('hash')
+            ->match(
+                static fn($hash) => Hash::maybe($hash->toString()),
+                static fn() => Branch::maybe($revision->drop(2)->toString()),
+            );
     }
 }

@@ -5,7 +5,6 @@ namespace Innmind\Git\Repository;
 
 use Innmind\Git\{
     Binary,
-    Revision,
     Message,
     Repository\Tag\Name,
     Exception\DomainException,
@@ -13,12 +12,14 @@ use Innmind\Git\{
 use Innmind\TimeContinuum\{
     Clock,
     Earth\Format\RFC2822,
+    PointInTime,
 };
 use Innmind\Immutable\{
     Set,
     Str,
+    Maybe,
+    SideEffect,
 };
-use function Innmind\Immutable\unwrap;
 
 final class Tags
 {
@@ -31,18 +32,24 @@ final class Tags
         $this->clock = $clock;
     }
 
-    public function push(): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function push(): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
                 ->withArgument('push')
                 ->withOption('tags'),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
-    public function add(Name $name, Message $message = null): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function add(Name $name, Message $message = null): Maybe
     {
         $command = $this
             ->binary
@@ -57,12 +64,15 @@ final class Tags
                 ->withArgument($message->toString());
         }
 
-        ($this->binary)($command);
+        return ($this->binary)($command)->map(static fn() => new SideEffect);
     }
 
-    public function sign(Name $name, Message $message): void
+    /**
+     * @return Maybe<SideEffect>
+     */
+    public function sign(Name $name, Message $message): Maybe
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
@@ -72,7 +82,7 @@ final class Tags
                 ->withArgument($name->toString())
                 ->withShortOption('m')
                 ->withArgument($message->toString()),
-        );
+        )->map(static fn() => new SideEffect);
     }
 
     /**
@@ -88,28 +98,34 @@ final class Tags
                 ->withOption('list')
                 ->withOption('format', '%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)')
         );
-        $output = Str::of($output->toString());
+        $output = $output->match(
+            static fn($output) => Str::of($output->toString()),
+            static fn() => Str::of(''),
+        );
 
         /** @var Set<Tag> */
-        return $output
-            ->split("\n")
-            ->filter(static function(Str $line): bool {
-                return !$line->trim()->empty();
-            })
-            ->toSetOf(
-                Tag::class,
-                function(Str $line): \Generator {
-                    [$name, $message, $time] = unwrap($line->split('|||'));
+        return Set::of(
+            ...$output
+                ->split("\n")
+                ->filter(static function(Str $line): bool {
+                    return !$line->trim()->empty();
+                })
+                ->map(function(Str $line): ?Tag {
+                    [$name, $message, $time] = $line->split('|||')->toList();
 
-                    yield new Tag(
-                        new Name($name->toString()),
-                        new Message($message->toString()),
-                        $this->clock->at(
-                            $time->toString(),
-                            new RFC2822,
-                        ),
-                    );
-                },
-            );
+                    return Maybe::all(
+                        Name::maybe($name->toString()),
+                        Message::maybe($message->toString()),
+                        $this->clock->at($time->toString(), new RFC2822),
+                    )
+                        ->map(static fn(Name $name, Message $message, PointInTime $date) => new Tag($name, $message, $date))
+                        ->match(
+                            static fn($tag) => $tag,
+                            static fn() => null,
+                        );
+                })
+                ->filter(static fn($tag) => $tag !== null)
+                ->toList(),
+        );
     }
 }
