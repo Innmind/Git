@@ -227,12 +227,12 @@ class TagsTest extends TestCase
         $output
             ->expects($this->once())
             ->method('toString')
-            ->willReturn("1.0.0|||first release|||Sat, 16 Mar 2019 12:09:24 +0100\n1.0.1|||fix eris dependency|||Sat, 30 Mar 2019 12:30:35 +0100");
+            ->willReturn("1.0.0|||first release|||Sat, 16 Mar 2019 12:09:24 +0100\n1.0.1|||fix eris dependency|||Sat, 30 Mar 2019 12:30:35 +0100\n2.0.0|||tag in first 9 days of month is parsed|||Wed, 1 Jun 2022 12:00:00 +0200");
 
         $all = $tags->all();
 
         $this->assertInstanceOf(Set::class, $all);
-        $this->assertCount(2, $all);
+        $this->assertCount(3, $all);
         $all = $all->toList();
         $this->assertSame('1.0.0', \current($all)->name()->toString());
         $this->assertSame('first release', \current($all)->message()->toString());
@@ -245,6 +245,13 @@ class TagsTest extends TestCase
         $this->assertSame('fix eris dependency', \current($all)->message()->toString());
         $this->assertSame(
             '2019-03-30T11:30:35+00:00',
+            \current($all)->date()->format(new ISO8601),
+        );
+        \next($all);
+        $this->assertSame('2.0.0', \current($all)->name()->toString());
+        $this->assertSame('tag in first 9 days of month is parsed', \current($all)->message()->toString());
+        $this->assertSame(
+            '2022-06-01T10:00:00+00:00',
             \current($all)->date()->format(new ISO8601),
         );
     }

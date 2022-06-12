@@ -112,6 +112,10 @@ final class Tags
                 })
                 ->map(function(Str $line): ?Tag {
                     [$name, $message, $time] = $line->split('|||')->toList();
+                    $time = $time->pregReplace(
+                        '~, (\d) ~',
+                        ', 0${1} ',
+                    );
 
                     return Maybe::all(
                         Name::maybe($name->toString()),
