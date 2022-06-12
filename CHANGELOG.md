@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.0.1 - 2022-06-12
+
+### Fixed
+
+- Tags created in the first 9 days of a month were not parsed when calling `Tags::all()`
+
 ## 3.0.0 - 2022-06-05
 
 ### Changed
