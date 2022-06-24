@@ -32,8 +32,9 @@ final class Repository
         Server $server,
         Path $path,
         Clock $clock,
+        Path $home = null,
     ) {
-        $this->binary = new Binary($server, $path);
+        $this->binary = new Binary($server, $path, $home);
         $this->clock = $clock;
     }
 
@@ -44,6 +45,7 @@ final class Repository
         Server $server,
         Path $path,
         Clock $clock,
+        Path $home = null,
     ): Maybe {
         /** @var Maybe<self> */
         return $server
@@ -55,7 +57,7 @@ final class Repository
             )
             ->wait()
             ->match(
-                static fn() => Maybe::just(new self($server, $path, $clock)),
+                static fn() => Maybe::just(new self($server, $path, $clock, $home)),
                 static fn() => Maybe::nothing(),
             );
     }

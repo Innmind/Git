@@ -19,16 +19,21 @@ final class Git
 {
     private Server $server;
     private Clock $clock;
+    private ?Path $home;
 
-    private function __construct(Server $server, Clock $clock)
+    private function __construct(Server $server, Clock $clock, Path $home = null)
     {
         $this->server = $server;
         $this->clock = $clock;
+        $this->home = $home;
     }
 
-    public static function of(Server $server, Clock $clock): self
+    /**
+     * @param Path|null $home Required for some operations like signing commits
+     */
+    public static function of(Server $server, Clock $clock, Path $home = null): self
     {
-        return new self($server, $clock);
+        return new self($server, $clock, $home);
     }
 
     /**
@@ -36,7 +41,7 @@ final class Git
      */
     public function repository(Path $path): Maybe
     {
-        return Repository::of($this->server, $path, $this->clock);
+        return Repository::of($this->server, $path, $this->clock, $this->home);
     }
 
     /**
