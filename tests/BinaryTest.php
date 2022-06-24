@@ -99,4 +99,18 @@ class BinaryTest extends TestCase
             static fn() => null,
         ));
     }
+
+    public function testHomeIsAddedToTheCommandEnvironment()
+    {
+        $bin = new Binary(
+            $this->createMock(Server::class),
+            Path::of('/tmp/foo'),
+            Path::of('/Users/baptouuuu'),
+        );
+
+        $this->assertSame('/Users/baptouuuu', $bin->command()->environment()->get('HOME')->match(
+            static fn($home) => $home,
+            static fn() => null,
+        ));
+    }
 }

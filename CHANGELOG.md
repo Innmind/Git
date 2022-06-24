@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Fixed
+
+- A `HOME` environment variable is required when signing commits
+
 ## 3.0.1 - 2022-06-12
 
 ### Fixed

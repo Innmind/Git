@@ -19,11 +19,15 @@ final class Binary
     private Server $server;
     private Command $command;
 
-    public function __construct(Server $server, Path $path)
+    public function __construct(Server $server, Path $path, Path $home = null)
     {
         $this->server = $server;
         $this->command = Command::foreground('git')
             ->withWorkingDirectory($path);
+
+        if ($home) {
+            $this->command = $this->command->withEnvironment('HOME', $home->toString());
+        }
     }
 
     /**
