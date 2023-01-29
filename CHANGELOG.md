@@ -1,5 +1,11 @@
 # Changelog
 
+## 3.1.0 - 2023-01-29
+
+### Added
+
+- Support for `innmind/server-control:~5.0`
+
 ## 3.0.2 - 2022-06-24
 
 ### Fixed

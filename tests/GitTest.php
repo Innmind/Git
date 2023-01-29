@@ -14,6 +14,7 @@ use Innmind\Server\Control\{
     Server\Processes,
     Server\Process,
     Server\Process\ExitCode,
+    Server\Process\Output,
 };
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
@@ -76,7 +77,10 @@ class GitTest extends TestCase
             ->willReturn($process = $this->createMock(Process::class));
         $process
             ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
+            ->willReturn(Either::left(new Process\Failed(
+                new ExitCode(1),
+                $this->createMock(Output::class),
+            )));
 
         $this->assertNull($git->version()->match(
             static fn($version) => $version,
