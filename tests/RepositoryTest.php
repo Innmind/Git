@@ -61,7 +61,10 @@ class RepositoryTest extends TestCase
         $process
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
+            ->willReturn(Either::left(new Process\Failed(
+                new ExitCode(1),
+                $this->createMock(Output::class),
+            )));
 
         $repo = Repository::of(
             $server,
@@ -106,7 +109,10 @@ class RepositoryTest extends TestCase
         $process2
             ->expects($this->once())
             ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(new ExitCode(1))));
+            ->willReturn(Either::left(new Process\Failed(
+                new ExitCode(1),
+                $this->createMock(Output::class),
+            )));
 
         $repo = Repository::of(
             $server,

@@ -60,7 +60,7 @@ class BranchesTest extends TestCase
   master
 
 BRANCHES
-        );
+            );
 
         $branches = new Branches(
             new Binary(
@@ -115,7 +115,7 @@ BRANCHES
   origin/master
 
 BRANCHES
-        );
+            );
 
         $branches = new Branches(
             new Binary(
@@ -149,16 +149,16 @@ BRANCHES
                 [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'branch' '--no-color'" &&
                         '/tmp/foo' === $command->workingDirectory()->match(
-                        static fn($path) => $path->toString(),
-                        static fn() => null,
-                    );
+                            static fn($path) => $path->toString(),
+                            static fn() => null,
+                        );
                 })],
                 [$this->callback(static function($command): bool {
                     return $command->toString() === "git 'branch' '-r' '--no-color'" &&
                         '/tmp/foo' === $command->workingDirectory()->match(
-                        static fn($path) => $path->toString(),
-                        static fn() => null,
-                    );
+                            static fn($path) => $path->toString(),
+                            static fn() => null,
+                        );
                 })],
             )
             ->will($this->onConsecutiveCalls(
@@ -181,7 +181,7 @@ BRANCHES
   foo-bar-baz
   master
 BRANCHES
-        );
+            );
         $process2
             ->expects($this->once())
             ->method('wait')
@@ -198,7 +198,7 @@ BRANCHES
   origin/foo-bar-baz
   origin/master
 BRANCHES
-        );
+            );
 
         $branches = new Branches(
             new Binary(
