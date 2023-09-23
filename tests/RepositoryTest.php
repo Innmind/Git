@@ -85,23 +85,25 @@ class RepositoryTest extends TestCase
             ->expects($this->exactly(2))
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
+        $process1 = $this->createMock(Process::class);
+        $process2 = $this->createMock(Process::class);
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "git 'init'" &&
-                        '/tmp/foo' === $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        );
-                })],
-            )
-            ->will($this->onConsecutiveCalls(
-                $process1 = $this->createMock(Process::class),
-                $process2 = $this->createMock(Process::class),
-            ));
+            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
+                if ($matcher->numberOfInvocations() === 2) {
+                    $this->assertSame("git 'init'", $command->toString());
+                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ));
+                }
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $process1,
+                    2 => $process2,
+                };
+            });
         $process1
             ->expects($this->once())
             ->method('wait')
@@ -136,23 +138,25 @@ class RepositoryTest extends TestCase
             ->expects($this->exactly(2))
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
+        $process1 = $this->createMock(Process::class);
+        $process2 = $this->createMock(Process::class);
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "git 'init'" &&
-                        '/tmp/foo' === $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        );
-                })],
-            )
-            ->will($this->onConsecutiveCalls(
-                $process1 = $this->createMock(Process::class),
-                $process2 = $this->createMock(Process::class),
-            ));
+            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
+                if ($matcher->numberOfInvocations() === 2) {
+                    $this->assertSame("git 'init'", $command->toString());
+                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ));
+                }
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $process1,
+                    2 => $process2,
+                };
+            });
         $process1
             ->expects($this->once())
             ->method('wait')
@@ -213,23 +217,25 @@ class RepositoryTest extends TestCase
             ->expects($this->exactly(2))
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
+        $process1 = $this->createMock(Process::class);
+        $process2 = $this->createMock(Process::class);
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "git 'branch' '--no-color'" &&
-                        '/tmp/foo' === $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        );
-                })],
-            )
-            ->will($this->onConsecutiveCalls(
-                $process1 = $this->createMock(Process::class),
-                $process2 = $this->createMock(Process::class),
-            ));
+            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
+                if ($matcher->numberOfInvocations() === 2) {
+                    $this->assertSame("git 'branch' '--no-color'", $command->toString());
+                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ));
+                }
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $process1,
+                    2 => $process2,
+                };
+            });
         $process1
             ->expects($this->once())
             ->method('wait')
@@ -285,23 +291,25 @@ class RepositoryTest extends TestCase
             ->expects($this->exactly(2))
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
+        $process1 = $this->createMock(Process::class);
+        $process2 = $this->createMock(Process::class);
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "git 'push'" &&
-                        '/tmp/foo' === $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        );
-                })],
-            )
-            ->will($this->onConsecutiveCalls(
-                $process1 = $this->createMock(Process::class),
-                $process2 = $this->createMock(Process::class),
-            ));
+            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
+                if ($matcher->numberOfInvocations() === 2) {
+                    $this->assertSame("git 'push'", $command->toString());
+                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ));
+                }
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $process1,
+                    2 => $process2,
+                };
+            });
         $process1
             ->expects($this->once())
             ->method('wait')
@@ -336,23 +344,25 @@ class RepositoryTest extends TestCase
             ->expects($this->exactly(2))
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
+        $process1 = $this->createMock(Process::class);
+        $process2 = $this->createMock(Process::class);
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "git 'pull'" &&
-                        '/tmp/foo' === $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        );
-                })],
-            )
-            ->will($this->onConsecutiveCalls(
-                $process1 = $this->createMock(Process::class),
-                $process2 = $this->createMock(Process::class),
-            ));
+            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
+                if ($matcher->numberOfInvocations() === 2) {
+                    $this->assertSame("git 'pull'", $command->toString());
+                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ));
+                }
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $process1,
+                    2 => $process2,
+                };
+            });
         $process1
             ->expects($this->once())
             ->method('wait')
@@ -429,23 +439,25 @@ class RepositoryTest extends TestCase
             ->expects($this->exactly(2))
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
+        $process1 = $this->createMock(Process::class);
+        $process2 = $this->createMock(Process::class);
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "git 'add' 'foo'" &&
-                        '/tmp/foo' === $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        );
-                })],
-            )
-            ->will($this->onConsecutiveCalls(
-                $process1 = $this->createMock(Process::class),
-                $process2 = $this->createMock(Process::class),
-            ));
+            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
+                if ($matcher->numberOfInvocations() === 2) {
+                    $this->assertSame("git 'add' 'foo'", $command->toString());
+                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ));
+                }
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $process1,
+                    2 => $process2,
+                };
+            });
         $process1
             ->expects($this->once())
             ->method('wait')
@@ -485,25 +497,27 @@ class RepositoryTest extends TestCase
                     ->expects($this->exactly(2))
                     ->method('processes')
                     ->willReturn($processes = $this->createMock(Processes::class));
+                $process1 = $this->createMock(Process::class);
+                $process2 = $this->createMock(Process::class);
                 $processes
-                    ->expects($this->exactly(2))
+                    ->expects($matcher = $this->exactly(2))
                     ->method('execute')
-                    ->withConsecutive(
-                        [],
-                        [$this->callback(static function($command) use ($message): bool {
-                            $message = (new Str($message))->toString();
+                    ->willReturnCallback(function($command) use ($matcher, $message, $process1, $process2) {
+                        $message = (new Str($message))->toString();
 
-                            return $command->toString() === "git 'commit' '-m' $message" &&
-                                '/tmp/foo' === $command->workingDirectory()->match(
-                                    static fn($path) => $path->toString(),
-                                    static fn() => null,
-                                );
-                        })],
-                    )
-                    ->will($this->onConsecutiveCalls(
-                        $process1 = $this->createMock(Process::class),
-                        $process2 = $this->createMock(Process::class),
-                    ));
+                        if ($matcher->numberOfInvocations() === 2) {
+                            $this->assertSame("git 'commit' '-m' $message", $command->toString());
+                            $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                                static fn($path) => $path->toString(),
+                                static fn() => null,
+                            ));
+                        }
+
+                        return match ($matcher->numberOfInvocations()) {
+                            1 => $process1,
+                            2 => $process2,
+                        };
+                    });
                 $process1
                     ->expects($this->once())
                     ->method('wait')
@@ -539,23 +553,25 @@ class RepositoryTest extends TestCase
             ->expects($this->exactly(2))
             ->method('processes')
             ->willReturn($processes = $this->createMock(Processes::class));
+        $process1 = $this->createMock(Process::class);
+        $process2 = $this->createMock(Process::class);
         $processes
-            ->expects($this->exactly(2))
+            ->expects($matcher = $this->exactly(2))
             ->method('execute')
-            ->withConsecutive(
-                [],
-                [$this->callback(static function($command): bool {
-                    return $command->toString() === "git 'merge' 'develop'" &&
-                        '/tmp/foo' === $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        );
-                })],
-            )
-            ->will($this->onConsecutiveCalls(
-                $process1 = $this->createMock(Process::class),
-                $process2 = $this->createMock(Process::class),
-            ));
+            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
+                if ($matcher->numberOfInvocations() === 2) {
+                    $this->assertSame("git 'merge' 'develop'", $command->toString());
+                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ));
+                }
+
+                return match ($matcher->numberOfInvocations()) {
+                    1 => $process1,
+                    2 => $process2,
+                };
+            });
         $process1
             ->expects($this->once())
             ->method('wait')
@@ -583,7 +599,7 @@ class RepositoryTest extends TestCase
         );
     }
 
-    public function heads(): array
+    public static function heads(): array
     {
         $detached = <<<DETACHED
 * (HEAD detached at aa4a336)

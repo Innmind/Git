@@ -109,7 +109,7 @@ class CheckoutTest extends TestCase
         );
     }
 
-    public function paths(): array
+    public static function paths(): array
     {
         return [
             ['some/relative/file.txt'],
@@ -119,7 +119,7 @@ class CheckoutTest extends TestCase
         ];
     }
 
-    public function revisions(): array
+    public static function revisions(): array
     {
         return [
             [Branch::of('master')],

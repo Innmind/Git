@@ -33,13 +33,12 @@ class NameTest extends TestCase
             Set\Sequence::of(
                 Set\Decorate::immutable(
                     static fn($ord) => \chr($ord),
-                    new Set\Either(
+                    Set\Either::any(
                         Set\Integers::between(65, 90), // A-Z
                         Set\Integers::between(97, 122), // a-z
                     ),
                 ),
-                Set\Integers::between($min, 20),
-            ),
+            )->between($min, 20),
         );
 
         $this

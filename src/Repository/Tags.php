@@ -111,6 +111,7 @@ final class Tags
                     return !$line->trim()->empty();
                 })
                 ->map(function(Str $line): ?Tag {
+                    /** @psalm-suppress PossiblyUndefinedArrayOffset */
                     [$name, $message, $time] = $line->split('|||')->toList();
                     $time = $time->pregReplace(
                         '~, (\d) ~',
