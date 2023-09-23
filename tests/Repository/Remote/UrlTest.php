@@ -34,7 +34,7 @@ class UrlTest extends TestCase
         $this->assertSame($format, Url::of($format)->toString());
     }
 
-    public function formats(): array
+    public static function formats(): array
     {
         return [
             ['/tmp'],
