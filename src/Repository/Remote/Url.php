@@ -27,6 +27,7 @@ final class Url
      *
      * @throws DomainException
      */
+    #[\NoDiscard]
     public static function of(string $url): self
     {
         return self::maybe($url)->match(
@@ -38,6 +39,7 @@ final class Url
     /**
      * @return Maybe<self>
      */
+    #[\NoDiscard]
     public static function maybe(string $url): Maybe
     {
         return BaseUrl::maybe($url)
@@ -48,6 +50,7 @@ final class Url
             ->map(static fn($url) => new self($url->toString()));
     }
 
+    #[\NoDiscard]
     public function toString(): string
     {
         return $this->value;

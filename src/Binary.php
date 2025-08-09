@@ -33,6 +33,7 @@ final class Binary
     /**
      * @return Maybe<Output>
      */
+    #[\NoDiscard]
     public function __invoke(Command $command): Maybe
     {
         $process = $this
@@ -49,6 +50,7 @@ final class Binary
             );
     }
 
+    #[\NoDiscard]
     public function command(): Command
     {
         return $this->command;

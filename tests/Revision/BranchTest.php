@@ -28,7 +28,7 @@ class BranchTest extends TestCase
     public function testReturnNothingWhenInvalidBranchName()
     {
         $this
-            ->forAll(Set::strings()->filter(static fn($string) => !\preg_match('~^\w+$~', $string)))
+            ->forAll(Set::strings()->filter(static fn($string) => !\preg_match('~^[\w\-\/\.]+$~', $string)))
             ->then(function($string): void {
                 $this->assertNull(Branch::maybe($string)->match(
                     static fn($branch) => $branch,

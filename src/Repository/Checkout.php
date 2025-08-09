@@ -26,6 +26,7 @@ final class Checkout
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function file(Path $path): Maybe
     {
         return ($this->binary)(
@@ -41,6 +42,7 @@ final class Checkout
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function revision(Hash|Branch $revision): Maybe
     {
         return ($this->binary)(

@@ -31,6 +31,7 @@ final class Git
     /**
      * @param Path|null $home Required for some operations like signing commits
      */
+    #[\NoDiscard]
     public static function of(Server $server, Clock $clock, ?Path $home = null): self
     {
         return new self($server, $clock, $home);
@@ -39,6 +40,7 @@ final class Git
     /**
      * @return Maybe<Repository>
      */
+    #[\NoDiscard]
     public function repository(Path $path): Maybe
     {
         return Repository::of($this->server, $path, $this->clock, $this->home);
@@ -47,6 +49,7 @@ final class Git
     /**
      * @return Maybe<Version>
      */
+    #[\NoDiscard]
     public function version(): Maybe
     {
         $process = $this

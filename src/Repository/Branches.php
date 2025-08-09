@@ -27,6 +27,7 @@ final class Branches
     /**
      * @return Set<Branch>
      */
+    #[\NoDiscard]
     public function local(): Set
     {
         $branches = ($this->binary)(
@@ -65,6 +66,7 @@ final class Branches
     /**
      * @return Set<Branch>
      */
+    #[\NoDiscard]
     public function remote(): Set
     {
         $branches = ($this->binary)(
@@ -104,6 +106,7 @@ final class Branches
     /**
      * @return Set<Branch>
      */
+    #[\NoDiscard]
     public function all(): Set
     {
         return $this
@@ -114,6 +117,7 @@ final class Branches
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function new(Branch $name, Hash|Branch|null $off = null): Maybe
     {
         $command = $this
@@ -132,6 +136,7 @@ final class Branches
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function newOrphan(Branch $name): Maybe
     {
         $command = $this
@@ -147,6 +152,7 @@ final class Branches
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function delete(Branch $name): Maybe
     {
         return ($this->binary)(
@@ -162,6 +168,7 @@ final class Branches
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function forceDelete(Branch $name): Maybe
     {
         return ($this->binary)(

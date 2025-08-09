@@ -23,6 +23,7 @@ final class Name
      *
      * @throws DomainException
      */
+    #[\NoDiscard]
     public static function of(string $remote): self
     {
         return self::maybe($remote)->match(
@@ -34,6 +35,7 @@ final class Name
     /**
      * @return Maybe<self>
      */
+    #[\NoDiscard]
     public static function maybe(string $remote): Maybe
     {
         if (!Str::of($remote)->matches('~^[\w\-\/\.]+$~')) {
@@ -44,6 +46,7 @@ final class Name
         return Maybe::just(new self($remote));
     }
 
+    #[\NoDiscard]
     public function toString(): string
     {
         return $this->value;

@@ -20,6 +20,7 @@ final class Hash
     /**
      * @return Maybe<self>
      */
+    #[\NoDiscard]
     public static function maybe(string $hash): Maybe
     {
         $hash = Str::of($hash);
@@ -32,6 +33,7 @@ final class Hash
         return Maybe::just(new self($hash->toString()));
     }
 
+    #[\NoDiscard]
     public function toString(): string
     {
         return $this->value;

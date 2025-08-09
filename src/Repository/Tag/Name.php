@@ -24,6 +24,7 @@ final class Name
     /**
      * @param non-empty-string $name
      */
+    #[\NoDiscard]
     public static function of(string $name): self
     {
         return new self($name);
@@ -32,6 +33,7 @@ final class Name
     /**
      * @return Maybe<self>
      */
+    #[\NoDiscard]
     public static function maybe(string $name): Maybe
     {
         if (Str::of($name)->trim()->empty()) {
@@ -43,6 +45,7 @@ final class Name
         return Maybe::just(new self($name));
     }
 
+    #[\NoDiscard]
     public function toString(): string
     {
         return $this->value;
