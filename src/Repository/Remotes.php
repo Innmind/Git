@@ -17,8 +17,16 @@ use Innmind\Immutable\{
 
 final class Remotes
 {
-    public function __construct(private Binary $binary)
+    private function __construct(private Binary $binary)
     {
+    }
+
+    /**
+     * @internal
+     */
+    public static function of(Binary $binary): self
+    {
+        return new self($binary);
     }
 
     /**
@@ -28,10 +36,7 @@ final class Remotes
     public function all(): Set
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
-                ->withArgument('remote')
+            static fn($command) => $command->withArgument('remote'),
         )
             ->maybe()
             ->toSequence()
@@ -50,7 +55,7 @@ final class Remotes
     #[\NoDiscard]
     public function get(Name $name): Remote
     {
-        return new Remote(
+        return Remote::of(
             $this->binary,
             $name,
         );
@@ -63,9 +68,7 @@ final class Remotes
     public function add(Name $name, Url $url): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('add')
                 ->withArgument($name->toString())
@@ -80,12 +83,10 @@ final class Remotes
     public function remove(Name $name): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('remove')
                 ->withArgument($name->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 }

@@ -15,7 +15,7 @@ class TagTest extends TestCase
 {
     public function testInterface()
     {
-        $tag = new Tag(
+        $tag = Tag::of(
             $name = Name::of('1.0.0'),
             $message = Message::of('watev'),
             $date = PointInTime::now(),

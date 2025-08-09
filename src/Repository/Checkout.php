@@ -16,8 +16,16 @@ use Innmind\Immutable\{
 
 final class Checkout
 {
-    public function __construct(private Binary $binary)
+    private function __construct(private Binary $binary)
     {
+    }
+
+    /**
+     * @internal
+     */
+    public static function of(Binary $binary): self
+    {
+        return new self($binary);
     }
 
     /**
@@ -27,13 +35,11 @@ final class Checkout
     public function file(Path $path): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('checkout')
                 ->withArgument('--')
                 ->withArgument($path->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -43,11 +49,9 @@ final class Checkout
     public function revision(Hash|Branch $revision): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('checkout')
                 ->withArgument($revision->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 }

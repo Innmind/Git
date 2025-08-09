@@ -11,11 +11,22 @@ use Innmind\TimeContinuum\PointInTime;
 
 final class Tag
 {
-    public function __construct(
+    private function __construct(
         private Name $name,
         private Message $message,
         private PointInTime $date,
     ) {
+    }
+
+    /**
+     * @internal
+     */
+    public static function of(
+        Name $name,
+        Message $message,
+        PointInTime $date,
+    ): self {
+        return new self($name, $message, $date);
     }
 
     #[\NoDiscard]

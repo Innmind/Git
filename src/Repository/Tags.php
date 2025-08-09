@@ -8,10 +8,10 @@ use Innmind\Git\{
     Message,
     Repository\Tag\Name,
 };
+use Innmind\Server\Control\Server\Command;
 use Innmind\TimeContinuum\{
     Clock,
     Format,
-    PointInTime,
 };
 use Innmind\Immutable\{
     Set,
@@ -24,10 +24,18 @@ use Innmind\Immutable\{
 
 final class Tags
 {
-    public function __construct(
+    private function __construct(
         private Binary $binary,
         private Clock $clock,
     ) {
+    }
+
+    /**
+     * @internal
+     */
+    public static function of(Binary $binary, Clock $clock): self
+    {
+        return new self($binary, $clock);
     }
 
     /**
@@ -37,12 +45,10 @@ final class Tags
     public function push(): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('push')
                 ->withOption('tags'),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -51,20 +57,18 @@ final class Tags
     #[\NoDiscard]
     public function add(Name $name, ?Message $message = null): Attempt
     {
-        $command = $this
-            ->binary
-            ->command()
+        $map = static fn(Command $command): Command => $command
             ->withArgument('tag')
             ->withArgument($name->toString());
 
         if (null !== $message) {
-            $command = $command
+            $map = static fn(Command $command): Command => $map($command)
                 ->withShortOption('a')
                 ->withShortOption('m')
                 ->withArgument($message->toString());
         }
 
-        return ($this->binary)($command)->map(static fn() => new SideEffect);
+        return ($this->binary)($map)->map(SideEffect::identity(...));
     }
 
     /**
@@ -74,16 +78,14 @@ final class Tags
     public function sign(Name $name, Message $message): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('tag')
                 ->withShortOption('s')
                 ->withShortOption('a')
                 ->withArgument($name->toString())
                 ->withShortOption('m')
                 ->withArgument($message->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -93,9 +95,7 @@ final class Tags
     public function all(): Set
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('tag')
                 ->withOption('list')
                 ->withOption('format', '%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)')
@@ -121,7 +121,7 @@ final class Tags
                     Message::maybe($message->toString()),
                     $this->clock->at($time->toString(), Format::rfc2822()),
                 )
-                    ->map(static fn(Name $name, Message $message, PointInTime $date) => new Tag($name, $message, $date))
+                    ->map(Tag::of(...))
                     ->toSequence();
             })
             ->toSet();

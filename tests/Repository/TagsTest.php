@@ -40,8 +40,8 @@ class TagsTest extends TestCase
                 );
             });
 
-        $tags = new Tags(
-            new Binary(
+        $tags = Tags::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -74,8 +74,8 @@ class TagsTest extends TestCase
                 );
             });
 
-        $tags = new Tags(
-            new Binary(
+        $tags = Tags::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -108,8 +108,8 @@ class TagsTest extends TestCase
                 );
             });
 
-        $tags = new Tags(
-            new Binary(
+        $tags = Tags::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -142,8 +142,8 @@ class TagsTest extends TestCase
                 );
             });
 
-        $tags = new Tags(
-            new Binary(
+        $tags = Tags::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -181,8 +181,8 @@ class TagsTest extends TestCase
                     'output',
                 ]]),
             );
-        $tags = new Tags(
-            new Binary(
+        $tags = Tags::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -235,8 +235,8 @@ class TagsTest extends TestCase
                 },
                 static fn($_, $builder) => $builder->success([[' ', 'output']]),
             );
-        $tags = new Tags(
-            new Binary(
+        $tags = Tags::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),

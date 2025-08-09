@@ -16,12 +16,20 @@ use Innmind\Immutable\{
 
 final class Remote
 {
-    public function __construct(
+    private function __construct(
         private Binary $binary,
         private Name $name,
     ) {
         $this->binary = $binary;
         $this->name = $name;
+    }
+
+    /**
+     * @internal
+     */
+    public static function of(Binary $binary, Name $name): self
+    {
+        return new self($binary, $name);
     }
 
     #[\NoDiscard]
@@ -37,13 +45,11 @@ final class Remote
     public function prune(): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('prune')
                 ->withArgument($this->name->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -53,14 +59,12 @@ final class Remote
     public function setUrl(Url $url): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('set-url')
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -70,15 +74,13 @@ final class Remote
     public function addUrl(Url $url): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('set-url')
                 ->withOption('add')
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -88,15 +90,13 @@ final class Remote
     public function deleteUrl(Url $url): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('set-url')
                 ->withOption('delete')
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString())
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -106,14 +106,12 @@ final class Remote
     public function push(Branch $branch): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('push')
                 ->withShortOption('u')
                 ->withArgument($this->name->toString())
                 ->withArgument($branch->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -123,12 +121,10 @@ final class Remote
     public function delete(Branch $branch): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('push')
                 ->withArgument($this->name->toString())
                 ->withArgument(':'.$branch->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 }

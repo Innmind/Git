@@ -19,8 +19,8 @@ class RemoteTest extends TestCase
 {
     public function testName()
     {
-        $remote = new Remote(
-            new Binary(
+        $remote = Remote::of(
+            Binary::of(
                 Mock::new($this->assert()),
                 Path::of('/tmp/foo'),
             ),
@@ -47,8 +47,8 @@ class RemoteTest extends TestCase
                 );
             });
 
-        $remote = new Remote(
-            new Binary(
+        $remote = Remote::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -81,8 +81,8 @@ class RemoteTest extends TestCase
                 );
             });
 
-        $remote = new Remote(
-            new Binary(
+        $remote = Remote::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -115,8 +115,8 @@ class RemoteTest extends TestCase
                 );
             });
 
-        $remote = new Remote(
-            new Binary(
+        $remote = Remote::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -149,8 +149,8 @@ class RemoteTest extends TestCase
                 );
             });
 
-        $remote = new Remote(
-            new Binary(
+        $remote = Remote::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -183,8 +183,8 @@ class RemoteTest extends TestCase
                 );
             });
 
-        $remote = new Remote(
-            new Binary(
+        $remote = Remote::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -217,8 +217,8 @@ class RemoteTest extends TestCase
                 );
             });
 
-        $remote = new Remote(
-            new Binary(
+        $remote = Remote::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),

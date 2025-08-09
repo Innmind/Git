@@ -35,8 +35,8 @@ class RemotesTest extends TestCase
                 ]]),
             );
 
-        $remotes = new Remotes(
-            new Binary(
+        $remotes = Remotes::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -56,8 +56,8 @@ class RemotesTest extends TestCase
 
     public function testGet()
     {
-        $remotes = new Remotes(
-            new Binary(
+        $remotes = Remotes::of(
+            Binary::of(
                 Mock::new($this->assert()),
                 Path::of('watev'),
             ),
@@ -86,8 +86,8 @@ class RemotesTest extends TestCase
                 );
             });
 
-        $remotes = new Remotes(
-            new Binary(
+        $remotes = Remotes::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -119,8 +119,8 @@ class RemotesTest extends TestCase
                 );
             });
 
-        $remotes = new Remotes(
-            new Binary(
+        $remotes = Remotes::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),

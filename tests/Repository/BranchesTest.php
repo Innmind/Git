@@ -47,8 +47,8 @@ class BranchesTest extends TestCase
                 ]]),
             );
 
-        $branches = new Branches(
-            new Binary(
+        $branches = Branches::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -94,8 +94,8 @@ class BranchesTest extends TestCase
                 ]]),
             );
 
-        $branches = new Branches(
-            new Binary(
+        $branches = Branches::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -166,8 +166,8 @@ class BranchesTest extends TestCase
                 ]]),
             );
 
-        $branches = new Branches(
-            new Binary(
+        $branches = Branches::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -207,8 +207,8 @@ class BranchesTest extends TestCase
                 );
             });
 
-        $branches = new Branches(
-            new Binary(
+        $branches = Branches::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -240,8 +240,8 @@ class BranchesTest extends TestCase
                 );
             });
 
-        $branches = new Branches(
-            new Binary(
+        $branches = Branches::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -273,8 +273,8 @@ class BranchesTest extends TestCase
                 );
             });
 
-        $branches = new Branches(
-            new Binary(
+        $branches = Branches::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -306,8 +306,8 @@ class BranchesTest extends TestCase
                 );
             });
 
-        $branches = new Branches(
-            new Binary(
+        $branches = Branches::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -339,8 +339,8 @@ class BranchesTest extends TestCase
                 );
             });
 
-        $branches = new Branches(
-            new Binary(
+        $branches = Branches::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),

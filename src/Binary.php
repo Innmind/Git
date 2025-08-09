@@ -22,7 +22,7 @@ final class Binary
     private Server $server;
     private Command $command;
 
-    public function __construct(Server $server, Path $path, ?Path $home = null)
+    private function __construct(Server $server, Path $path, ?Path $home = null)
     {
         $this->server = $server;
         $this->command = Command::foreground('git')
@@ -34,15 +34,17 @@ final class Binary
     }
 
     /**
+     * @param callable(Command): Command $map
+     *
      * @return Attempt<Sequence<Chunk>>
      */
     #[\NoDiscard]
-    public function __invoke(Command $command): Attempt
+    public function __invoke(callable $map): Attempt
     {
         return $this
             ->server
             ->processes()
-            ->execute($command)
+            ->execute($map($this->command))
             ->flatMap(
                 static fn($process) => $process
                     ->wait()
@@ -51,9 +53,11 @@ final class Binary
             ->map(static fn($success) => $success->output());
     }
 
-    #[\NoDiscard]
-    public function command(): Command
+    /**
+     * @internal
+     */
+    public static function of(Server $server, Path $path, ?Path $home = null): self
     {
-        return $this->command;
+        return new self($server, $path, $home);
     }
 }
