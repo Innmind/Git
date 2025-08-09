@@ -39,7 +39,7 @@ final class Checkout
                 ->withArgument('checkout')
                 ->withArgument('--')
                 ->withArgument($path->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -52,6 +52,6 @@ final class Checkout
             static fn($command) => $command
                 ->withArgument('checkout')
                 ->withArgument($revision->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 }

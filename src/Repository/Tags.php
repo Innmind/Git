@@ -48,7 +48,7 @@ final class Tags
             static fn($command) => $command
                 ->withArgument('push')
                 ->withOption('tags'),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -68,7 +68,7 @@ final class Tags
                 ->withArgument($message->toString());
         }
 
-        return ($this->binary)($map)->map(static fn() => new SideEffect);
+        return ($this->binary)($map)->map(SideEffect::identity(...));
     }
 
     /**
@@ -85,7 +85,7 @@ final class Tags
                 ->withArgument($name->toString())
                 ->withShortOption('m')
                 ->withArgument($message->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**

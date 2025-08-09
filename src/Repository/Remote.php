@@ -49,7 +49,7 @@ final class Remote
                 ->withArgument('remote')
                 ->withArgument('prune')
                 ->withArgument($this->name->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -64,7 +64,7 @@ final class Remote
                 ->withArgument('set-url')
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -80,7 +80,7 @@ final class Remote
                 ->withOption('add')
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -96,7 +96,7 @@ final class Remote
                 ->withOption('delete')
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString())
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -111,7 +111,7 @@ final class Remote
                 ->withShortOption('u')
                 ->withArgument($this->name->toString())
                 ->withArgument($branch->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -125,6 +125,6 @@ final class Remote
                 ->withArgument('push')
                 ->withArgument($this->name->toString())
                 ->withArgument(':'.$branch->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 }

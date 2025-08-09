@@ -84,7 +84,7 @@ final class Repository
                     false => Attempt::error(new \RuntimeException($output->toString())),
                 },
             )
-            ->map(static fn() => new SideEffect);
+            ->map(SideEffect::identity(...));
     }
 
     /**
@@ -126,7 +126,7 @@ final class Repository
     {
         return ($this->binary)(
             static fn($command) => $command->withArgument('push'),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -137,7 +137,7 @@ final class Repository
     {
         return ($this->binary)(
             static fn($command) => $command->withArgument('pull'),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     #[\NoDiscard]
@@ -168,7 +168,7 @@ final class Repository
             static fn($command) => $command
                 ->withArgument('add')
                 ->withArgument($file->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -182,7 +182,7 @@ final class Repository
                 ->withArgument('commit')
                 ->withShortOption('m')
                 ->withArgument($message->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -195,7 +195,7 @@ final class Repository
             static fn($command) => $command
                 ->withArgument('merge')
                 ->withArgument($branch->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**

@@ -87,6 +87,6 @@ final class Remotes
                 ->withArgument('remote')
                 ->withArgument('remove')
                 ->withArgument($name->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 }

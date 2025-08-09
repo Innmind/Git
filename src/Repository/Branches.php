@@ -112,7 +112,7 @@ final class Branches
                 ->withArgument($off->toString());
         }
 
-        return ($this->binary)($map)->map(static fn() => new SideEffect);
+        return ($this->binary)($map)->map(SideEffect::identity(...));
     }
 
     /**
@@ -126,7 +126,7 @@ final class Branches
                 ->withArgument('checkout')
                 ->withOption('orphan')
                 ->withArgument($name->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -140,7 +140,7 @@ final class Branches
                 ->withArgument('branch')
                 ->withShortOption('d')
                 ->withArgument($name->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
@@ -154,6 +154,6 @@ final class Branches
                 ->withArgument('branch')
                 ->withShortOption('D')
                 ->withArgument($name->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 }
