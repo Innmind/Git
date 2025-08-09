@@ -10,16 +10,14 @@ use Innmind\Immutable\{
 
 final class Hash
 {
-    private string $value;
-
-    private function __construct(string $hash)
+    private function __construct(private string $value)
     {
-        $this->value = $hash;
     }
 
     /**
      * @return Maybe<self>
      */
+    #[\NoDiscard]
     public static function maybe(string $hash): Maybe
     {
         $hash = Str::of($hash);
@@ -32,6 +30,7 @@ final class Hash
         return Maybe::just(new self($hash->toString()));
     }
 
+    #[\NoDiscard]
     public function toString(): string
     {
         return $this->value;

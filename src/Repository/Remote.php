@@ -10,119 +10,121 @@ use Innmind\Git\{
     Revision\Branch,
 };
 use Innmind\Immutable\{
-    Maybe,
+    Attempt,
     SideEffect,
 };
 
 final class Remote
 {
-    private Binary $binary;
-    private Name $name;
-
-    public function __construct(Binary $binary, Name $name)
-    {
+    private function __construct(
+        private Binary $binary,
+        private Name $name,
+    ) {
         $this->binary = $binary;
         $this->name = $name;
     }
 
+    /**
+     * @internal
+     */
+    public static function of(Binary $binary, Name $name): self
+    {
+        return new self($binary, $name);
+    }
+
+    #[\NoDiscard]
     public function name(): Name
     {
         return $this->name;
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function prune(): Maybe
+    #[\NoDiscard]
+    public function prune(): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('prune')
                 ->withArgument($this->name->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function setUrl(Url $url): Maybe
+    #[\NoDiscard]
+    public function setUrl(Url $url): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('set-url')
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function addUrl(Url $url): Maybe
+    #[\NoDiscard]
+    public function addUrl(Url $url): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('set-url')
                 ->withOption('add')
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function deleteUrl(Url $url): Maybe
+    #[\NoDiscard]
+    public function deleteUrl(Url $url): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('set-url')
                 ->withOption('delete')
                 ->withArgument($this->name->toString())
                 ->withArgument($url->toString())
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function push(Branch $branch): Maybe
+    #[\NoDiscard]
+    public function push(Branch $branch): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('push')
                 ->withShortOption('u')
                 ->withArgument($this->name->toString())
                 ->withArgument($branch->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function delete(Branch $branch): Maybe
+    #[\NoDiscard]
+    public function delete(Branch $branch): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('push')
                 ->withArgument($this->name->toString())
                 ->withArgument(':'.$branch->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 }

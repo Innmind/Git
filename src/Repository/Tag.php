@@ -11,27 +11,37 @@ use Innmind\TimeContinuum\PointInTime;
 
 final class Tag
 {
-    private Name $name;
-    private Message $message;
-    private PointInTime $date;
-
-    public function __construct(Name $name, Message $message, PointInTime $date)
-    {
-        $this->name = $name;
-        $this->message = $message;
-        $this->date = $date;
+    private function __construct(
+        private Name $name,
+        private Message $message,
+        private PointInTime $date,
+    ) {
     }
 
+    /**
+     * @internal
+     */
+    public static function of(
+        Name $name,
+        Message $message,
+        PointInTime $date,
+    ): self {
+        return new self($name, $message, $date);
+    }
+
+    #[\NoDiscard]
     public function name(): Name
     {
         return $this->name;
     }
 
+    #[\NoDiscard]
     public function message(): Message
     {
         return $this->message;
     }
 
+    #[\NoDiscard]
     public function date(): PointInTime
     {
         return $this->date;

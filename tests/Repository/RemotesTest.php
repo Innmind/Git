@@ -8,55 +8,35 @@ use Innmind\Git\{
     Repository\Remote,
     Repository\Remote\Name,
     Repository\Remote\Url,
-    Binary
+    Binary,
 };
-use Innmind\Server\Control\{
-    Server,
-    Server\Processes,
-    Server\Process,
-    Server\Process\Output,
-    Server\Process\ExitCode
-};
+use Innmind\Server\Control\Servers\Mock;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Set,
-    Either,
     SideEffect,
 };
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class RemotesTest extends TestCase
 {
     public function testAll()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process
-            ->method('output')
-            ->willReturn($output = $this->createMock(Output::class));
-        $output
-            ->expects($this->once())
-            ->method('toString')
-            ->willReturn(<<<REMOTES
-origin
-gitlab
-local
-REMOTES
+        $server = Mock::new($this->assert())
+            ->willExecute(
+                static fn() => null,
+                static fn($_, $builder) => $builder->success([[
+                    <<<REMOTES
+                    origin
+                    gitlab
+                    local
+                    REMOTES,
+                    'output',
+                ]]),
             );
 
-        $remotes = new Remotes(
-            new Binary(
+        $remotes = Remotes::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -76,9 +56,9 @@ REMOTES
 
     public function testGet()
     {
-        $remotes = new Remotes(
-            new Binary(
-                $this->createMock(Server::class),
+        $remotes = Remotes::of(
+            Binary::of(
+                Mock::new($this->assert()),
                 Path::of('watev'),
             ),
         );
@@ -91,29 +71,23 @@ REMOTES
 
     public function testAdd()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'remote' 'add' 'origin' 'git@github.com:Innmind/Git.git'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'remote' 'add' 'origin' 'git@github.com:Innmind/Git.git'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
+                    ),
+                );
+            });
 
-        $remotes = new Remotes(
-            new Binary(
+        $remotes = Remotes::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -122,7 +96,7 @@ REMOTES
         $remote = $remotes->add(
             $expected = Name::of('origin'),
             Url::of('git@github.com:Innmind/Git.git'),
-        );
+        )->unwrap();
 
         $this->assertInstanceOf(Remote::class, $remote);
         $this->assertSame($expected, $remote->name());
@@ -130,29 +104,23 @@ REMOTES
 
     public function testRemove()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'remote' 'remove' 'origin'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'remote' 'remove' 'origin'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
+                    ),
+                );
+            });
 
-        $remotes = new Remotes(
-            new Binary(
+        $remotes = Remotes::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),

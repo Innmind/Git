@@ -10,45 +10,48 @@ use Innmind\Git\{
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Maybe,
+    Attempt,
     SideEffect,
 };
 
 final class Checkout
 {
-    private Binary $binary;
-
-    public function __construct(Binary $binary)
+    private function __construct(private Binary $binary)
     {
-        $this->binary = $binary;
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @internal
      */
-    public function file(Path $path): Maybe
+    public static function of(Binary $binary): self
+    {
+        return new self($binary);
+    }
+
+    /**
+     * @return Attempt<SideEffect>
+     */
+    #[\NoDiscard]
+    public function file(Path $path): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('checkout')
                 ->withArgument('--')
                 ->withArgument($path->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function revision(Hash|Branch $revision): Maybe
+    #[\NoDiscard]
+    public function revision(Hash|Branch $revision): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('checkout')
                 ->withArgument($revision->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 }

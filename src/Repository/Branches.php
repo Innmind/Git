@@ -8,102 +8,88 @@ use Innmind\Git\{
     Revision\Branch,
     Revision\Hash,
 };
+use Innmind\Server\Control\Server\Command;
 use Innmind\Immutable\{
     Set,
     Str,
-    Maybe,
+    Attempt,
     SideEffect,
+    Monoid\Concat,
 };
 
 final class Branches
 {
-    private Binary $binary;
-
-    public function __construct(Binary $binary)
+    private function __construct(private Binary $binary)
     {
-        $this->binary = $binary;
+    }
+
+    /**
+     * @internal
+     */
+    public static function of(Binary $binary): self
+    {
+        return new self($binary);
     }
 
     /**
      * @return Set<Branch>
      */
+    #[\NoDiscard]
     public function local(): Set
     {
-        $branches = ($this->binary)(
-            $this
-                ->binary
-                ->command()
+        return ($this->binary)(
+            static fn($command) => $command
                 ->withArgument('branch')
                 ->withOption('no-color'),
         )
-            ->match(
-                static fn($output) => Str::of($output->toString()),
-                static fn() => Str::of(''),
-            );
-
-        /** @var Set<Branch> */
-        return Set::of(
-            ...$branches
-                ->split("\n")
-                ->filter(static function(Str $line): bool {
-                    return !$line->matches('~HEAD detached~');
-                })
-                ->filter(static fn(Str $line): bool => !$line->trim()->empty())
-                ->map(
-                    static fn(Str $branch) => Branch::maybe(
-                        $branch->drop(2)->toString(),
-                    )->match(
-                        static fn($branch) => $branch,
-                        static fn() => null,
-                    ),
-                )
-                ->filter(static fn($branch) => $branch instanceof Branch)
-                ->toList(),
-        );
+            ->maybe()
+            ->toSequence()
+            ->flatMap(static fn($output) => $output)
+            ->map(static fn($chunk) => $chunk->data())
+            ->fold(new Concat)
+            ->split("\n")
+            ->filter(static fn($line) => !$line->matches('~HEAD detached~'))
+            ->filter(static fn($line) => !$line->trim()->empty())
+            ->flatMap(
+                static fn(Str $branch) => Branch::maybe(
+                    $branch->drop(2)->toString(),
+                )->toSequence(),
+            )
+            ->toSet();
     }
 
     /**
      * @return Set<Branch>
      */
+    #[\NoDiscard]
     public function remote(): Set
     {
-        $branches = ($this->binary)(
-            $this
-                ->binary
-                ->command()
+        return ($this->binary)(
+            static fn($command) => $command
                 ->withArgument('branch')
                 ->withShortOption('r')
                 ->withOption('no-color'),
         )
-            ->match(
-                static fn($output) => Str::of($output->toString()),
-                static fn() => Str::of(''),
-            );
-
-        /** @var Set<Branch> */
-        return Set::of(
-            ...$branches
-                ->split("\n")
-                ->filter(static function(Str $line): bool {
-                    return !$line->matches('~-> origin/~');
-                })
-                ->filter(static fn(Str $line): bool => !$line->trim()->empty())
-                ->map(
-                    static fn(Str $branch) => Branch::maybe(
-                        $branch->drop(2)->toString(),
-                    )->match(
-                        static fn($branch) => $branch,
-                        static fn() => null,
-                    ),
-                )
-                ->filter(static fn($branch) => $branch instanceof Branch)
-                ->toList(),
-        );
+            ->maybe()
+            ->toSequence()
+            ->flatMap(static fn($output) => $output)
+            ->map(static fn($chunk) => $chunk->data())
+            ->fold(new Concat)
+            ->split("\n")
+            ->filter(static fn($line) => !$line->matches('~-> origin/~'))
+            ->filter(static fn($line) => !$line->trim()->empty())
+            ->flatMap(
+                static fn(Str $branch) => Branch::maybe(
+                    $branch->drop(2)->toString(),
+                )->toSequence(),
+            )
+            ->toSet();
     }
 
     /**
      * @return Set<Branch>
      */
+    #[\NoDiscard]
     public function all(): Set
     {
         return $this
@@ -112,65 +98,62 @@ final class Branches
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function new(Branch $name, Hash|Branch $off = null): Maybe
+    #[\NoDiscard]
+    public function new(Branch $name, Hash|Branch|null $off = null): Attempt
     {
-        $command = $this
-            ->binary
-            ->command()
+        $map = static fn(Command $command): Command => $command
             ->withArgument('branch')
             ->withArgument($name->toString());
 
         if ($off) {
-            $command = $command->withArgument($off->toString());
+            $map = static fn(Command $command): Command => $map($command)
+                ->withArgument($off->toString());
         }
 
-        return ($this->binary)($command)->map(static fn() => new SideEffect);
+        return ($this->binary)($map)->map(SideEffect::identity(...));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function newOrphan(Branch $name): Maybe
-    {
-        $command = $this
-            ->binary
-            ->command()
-            ->withArgument('checkout')
-            ->withOption('orphan')
-            ->withArgument($name->toString());
-
-        return ($this->binary)($command)->map(static fn() => new SideEffect);
-    }
-
-    /**
-     * @return Maybe<SideEffect>
-     */
-    public function delete(Branch $name): Maybe
+    #[\NoDiscard]
+    public function newOrphan(Branch $name): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
+                ->withArgument('checkout')
+                ->withOption('orphan')
+                ->withArgument($name->toString()),
+        )->map(SideEffect::identity(...));
+    }
+
+    /**
+     * @return Attempt<SideEffect>
+     */
+    #[\NoDiscard]
+    public function delete(Branch $name): Attempt
+    {
+        return ($this->binary)(
+            static fn($command) => $command
                 ->withArgument('branch')
                 ->withShortOption('d')
                 ->withArgument($name->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function forceDelete(Branch $name): Maybe
+    #[\NoDiscard]
+    public function forceDelete(Branch $name): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('branch')
                 ->withShortOption('D')
                 ->withArgument($name->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 }

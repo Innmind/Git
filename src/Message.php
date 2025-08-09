@@ -10,20 +10,17 @@ use Innmind\Immutable\{
 
 final class Message
 {
-    /** @var non-empty-string */
-    private string $value;
-
     /**
-     * @param non-empty-string $message
+     * @param non-empty-string $value
      */
-    private function __construct(string $message)
+    private function __construct(private string $value)
     {
-        $this->value = $message;
     }
 
     /**
      * @param non-empty-string $message
      */
+    #[\NoDiscard]
     public static function of(string $message): self
     {
         return new self($message);
@@ -32,6 +29,7 @@ final class Message
     /**
      * @return Maybe<self>
      */
+    #[\NoDiscard]
     public static function maybe(string $message): Maybe
     {
         if (Str::of($message)->trim()->empty()) {
@@ -46,6 +44,7 @@ final class Message
     /**
      * @return non-empty-string
      */
+    #[\NoDiscard]
     public function toString(): string
     {
         return $this->value;

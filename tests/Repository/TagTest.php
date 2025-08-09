@@ -6,19 +6,19 @@ namespace Tests\Innmind\Git\Repository;
 use Innmind\Git\{
     Repository\Tag,
     Repository\Tag\Name,
-    Message
+    Message,
 };
 use Innmind\TimeContinuum\PointInTime;
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class TagTest extends TestCase
 {
     public function testInterface()
     {
-        $tag = new Tag(
+        $tag = Tag::of(
             $name = Name::of('1.0.0'),
             $message = Message::of('watev'),
-            $date = $this->createMock(PointInTime::class),
+            $date = PointInTime::now(),
         );
 
         $this->assertSame($name, $tag->name());

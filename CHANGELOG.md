@@ -1,5 +1,22 @@
 # Changelog
 
+## 4.0.0 - 2025-08-09
+
+### Changed
+
+- All methods that modify the state of the repository or that may fail to read from it now return an `Innmind\Immutable\Attempt`
+- `Innmind\Git\Repository\Branches` constructor is now private and internal
+- `Innmind\Git\Repository\Checkout` constructor is now private and internal
+- `Innmind\Git\Repository\Remote` constructor is now private and internal
+- `Innmind\Git\Repository\Remotes` constructor is now private and internal
+- `Innmind\Git\Repository\Tag` constructor is now private and internal
+- `Innmind\Git\Repository\Tags` constructor is now private and internal
+- `Innmind\Git\Version` components are now bounded in `int<0, max>`
+
+### Fixed
+
+- PHP `8.4` deprecations
+
 ## 3.2.0 - 2023-09-23
 
 ### Added

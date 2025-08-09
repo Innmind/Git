@@ -6,10 +6,13 @@ namespace Innmind\Git;
 use Innmind\Server\Control\{
     Server,
     Server\Command,
-    Server\Process\Output,
+    Server\Process\Output\Chunk,
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\Maybe;
+use Innmind\Immutable\{
+    Attempt,
+    Sequence,
+};
 
 /**
  * @internal
@@ -19,7 +22,7 @@ final class Binary
     private Server $server;
     private Command $command;
 
-    public function __construct(Server $server, Path $path, Path $home = null)
+    private function __construct(Server $server, Path $path, ?Path $home = null)
     {
         $this->server = $server;
         $this->command = Command::foreground('git')
@@ -31,26 +34,30 @@ final class Binary
     }
 
     /**
-     * @return Maybe<Output>
+     * @param callable(Command): Command $map
+     *
+     * @return Attempt<Sequence<Chunk>>
      */
-    public function __invoke(Command $command): Maybe
+    #[\NoDiscard]
+    public function __invoke(callable $map): Attempt
     {
-        $process = $this
+        return $this
             ->server
             ->processes()
-            ->execute($command);
-
-        /** @var Maybe<Output> */
-        return $process
-            ->wait()
-            ->match(
-                static fn() => Maybe::just($process->output()),
-                static fn() => Maybe::nothing(),
-            );
+            ->execute($map($this->command))
+            ->flatMap(
+                static fn($process) => $process
+                    ->wait()
+                    ->attempt(static fn($error) => new \RuntimeException($error::class)),
+            )
+            ->map(static fn($success) => $success->output());
     }
 
-    public function command(): Command
+    /**
+     * @internal
+     */
+    public static function of(Server $server, Path $path, ?Path $home = null): self
     {
-        return $this->command;
+        return new self($server, $path, $home);
     }
 }

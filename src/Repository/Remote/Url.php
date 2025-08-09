@@ -15,11 +15,8 @@ use Innmind\Immutable\{
  */
 final class Url
 {
-    private string $value;
-
-    private function __construct(string $url)
+    private function __construct(private string $value)
     {
-        $this->value = $url;
     }
 
     /**
@@ -27,6 +24,7 @@ final class Url
      *
      * @throws DomainException
      */
+    #[\NoDiscard]
     public static function of(string $url): self
     {
         return self::maybe($url)->match(
@@ -38,6 +36,7 @@ final class Url
     /**
      * @return Maybe<self>
      */
+    #[\NoDiscard]
     public static function maybe(string $url): Maybe
     {
         return BaseUrl::maybe($url)
@@ -48,6 +47,7 @@ final class Url
             ->map(static fn($url) => new self($url->toString()));
     }
 
+    #[\NoDiscard]
     public function toString(): string
     {
         return $this->value;

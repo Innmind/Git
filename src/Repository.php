@@ -19,35 +19,29 @@ use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
 use Innmind\Immutable\{
     Str,
-    Maybe,
+    Attempt,
     SideEffect,
+    Monoid\Concat,
 };
 
 final class Repository
 {
-    private Binary $binary;
-    private Clock $clock;
-
     private function __construct(
-        Server $server,
-        Path $path,
-        Clock $clock,
-        Path $home = null,
+        private Binary $binary,
+        private Clock $clock,
     ) {
-        $this->binary = new Binary($server, $path, $home);
-        $this->clock = $clock;
     }
 
     /**
-     * @return Maybe<self>
+     * @return Attempt<self>
      */
+    #[\NoDiscard]
     public static function of(
         Server $server,
         Path $path,
         Clock $clock,
-        Path $home = null,
-    ): Maybe {
-        /** @var Maybe<self> */
+        ?Path $home = null,
+    ): Attempt {
         return $server
             ->processes()
             ->execute(
@@ -55,156 +49,168 @@ final class Repository
                     ->withShortOption('p')
                     ->withArgument($path->toString()),
             )
-            ->wait()
-            ->match(
-                static fn() => Maybe::just(new self($server, $path, $clock, $home)),
-                static fn() => Maybe::nothing(),
-            );
-    }
-
-    /**
-     * @return Maybe<SideEffect>
-     */
-    public function init(): Maybe
-    {
-        return ($this->binary)(
-            $this
-                ->binary
-                ->command()
-                ->withArgument('init'),
-        )
-            ->map(static fn($output) => Str::of($output->toString()))
-            ->filter(
-                static fn($output) => $output->contains('Initialized empty Git repository') || $output->contains('Reinitialized existing Git repository'),
+            ->flatMap(
+                static fn($process) => $process
+                    ->wait()
+                    ->attempt(static fn($error) => new \RuntimeException($error::class)),
             )
-            ->map(static fn() => new SideEffect);
+            ->map(static fn() => new self(
+                Binary::of(
+                    $server,
+                    $path,
+                    $home,
+                ),
+                $clock,
+            ));
     }
 
     /**
-     * @return Maybe<Hash|Branch>
+     * @return Attempt<SideEffect>
      */
-    public function head(): Maybe
+    #[\NoDiscard]
+    public function init(): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command->withArgument('init'),
+        )
+            ->map(
+                static fn($output) => $output
+                    ->map(static fn($chunk) => $chunk->data())
+                    ->fold(new Concat),
+            )
+            ->flatMap(
+                static fn($output) => match ($output->contains('Initialized empty Git repository') || $output->contains('Reinitialized existing Git repository')) {
+                    true => Attempt::result($output),
+                    false => Attempt::error(new \RuntimeException($output->toString())),
+                },
+            )
+            ->map(SideEffect::identity(...));
+    }
+
+    /**
+     * @return Attempt<Hash|Branch>
+     */
+    #[\NoDiscard]
+    public function head(): Attempt
+    {
+        return ($this->binary)(
+            static fn($command) => $command
                 ->withArgument('branch')
                 ->withOption('no-color'),
         )
-            ->match(
-                static fn($output) => Str::of($output->toString()),
-                static fn() => Str::of(''),
+            ->flatMap(
+                static fn($output) => $output
+                    ->map(static fn($chunk) => $chunk->data())
+                    ->fold(new Concat)
+                    ->split("\n")
+                    ->filter(static function(Str $line): bool {
+                        return $line->matches('~^\* .+~');
+                    })
+                    ->first()
+                    ->attempt(static fn() => new \RuntimeException('Revision not found')),
             )
-            ->split("\n")
-            ->filter(static function(Str $line): bool {
-                return $line->matches('~^\* .+~');
-            })
-            ->first()
             ->flatMap(self::parseRevision(...));
     }
 
+    #[\NoDiscard]
     public function branches(): Branches
     {
-        return new Branches($this->binary);
+        return Branches::of($this->binary);
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function push(): Maybe
+    #[\NoDiscard]
+    public function push(): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
-                ->withArgument('push'),
-        )->map(static fn() => new SideEffect);
+            static fn($command) => $command->withArgument('push'),
+        )->map(SideEffect::identity(...));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function pull(): Maybe
+    #[\NoDiscard]
+    public function pull(): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
-                ->withArgument('pull'),
-        )->map(static fn() => new SideEffect);
+            static fn($command) => $command->withArgument('pull'),
+        )->map(SideEffect::identity(...));
     }
 
+    #[\NoDiscard]
     public function remotes(): Remotes
     {
-        return new Remotes($this->binary);
+        return Remotes::of($this->binary);
     }
 
+    #[\NoDiscard]
     public function checkout(): Checkout
     {
-        return new Checkout($this->binary);
+        return Checkout::of($this->binary);
     }
 
+    #[\NoDiscard]
     public function tags(): Tags
     {
-        return new Tags($this->binary, $this->clock);
+        return Tags::of($this->binary, $this->clock);
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function add(Path $file): Maybe
+    #[\NoDiscard]
+    public function add(Path $file): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('add')
                 ->withArgument($file->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function commit(Message $message): Maybe
+    #[\NoDiscard]
+    public function commit(Message $message): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('commit')
                 ->withShortOption('m')
                 ->withArgument($message->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function merge(Branch $branch): Maybe
+    #[\NoDiscard]
+    public function merge(Branch $branch): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('merge')
                 ->withArgument($branch->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 
     /**
-     * @return Maybe<Hash|Branch>
+     * @return Attempt<Hash|Branch>
      */
-    private static function parseRevision(Str $revision): Maybe
+    private static function parseRevision(Str $revision): Attempt
     {
-        /** @var Maybe<Hash|Branch> */
+        /** @var Attempt<Hash|Branch> */
         return $revision
             ->capture('~\(HEAD detached at (?P<hash>[a-z0-9]{7,40})\)~')
             ->get('hash')
             ->match(
                 static fn($hash) => Hash::maybe($hash->toString()),
                 static fn() => Branch::maybe($revision->drop(2)->toString()),
-            );
+            )
+            ->attempt(static fn() => new \RuntimeException("Invalid revision '{$revision->toString()}'"));
     }
 }

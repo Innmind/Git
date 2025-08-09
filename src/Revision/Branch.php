@@ -11,11 +11,8 @@ use Innmind\Immutable\{
 
 final class Branch
 {
-    private string $value;
-
-    private function __construct(string $branch)
+    private function __construct(private string $value)
     {
-        $this->value = $branch;
     }
 
     /**
@@ -23,6 +20,7 @@ final class Branch
      *
      * @throws DomainException
      */
+    #[\NoDiscard]
     public static function of(string $branch): self
     {
         return self::maybe($branch)->match(
@@ -34,6 +32,7 @@ final class Branch
     /**
      * @return Maybe<self>
      */
+    #[\NoDiscard]
     public static function maybe(string $branch): Maybe
     {
         if (!Str::of($branch)->matches('~^[\w\-\/\.]+$~')) {

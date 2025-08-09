@@ -7,52 +7,36 @@ use Innmind\Git\{
     Repository\Checkout,
     Revision\Branch,
     Revision\Hash,
-    Binary
+    Binary,
 };
-use Innmind\Server\Control\{
-    Server,
-    Server\Processes,
-    Server\Process,
-    Server\Process\Output,
-    Server\Process\ExitCode
-};
+use Innmind\Server\Control\Servers\Mock;
 use Innmind\Url\Path;
-use Innmind\Immutable\{
-    Either,
-    SideEffect,
-};
-use PHPUnit\Framework\TestCase;
+use Innmind\Immutable\SideEffect;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class CheckoutTest extends TestCase
 {
-    /**
-     * @dataProvider paths
-     */
+    #[DataProvider('paths')]
     public function testFile(string $path)
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command) use ($path): bool {
-                return $command->toString() === "git 'checkout' '--' '$path'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) use ($path) {
+                $this->assertSame(
+                    "git 'checkout' '--' '$path'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
+                    ),
+                );
+            });
 
-        $checkout = new Checkout(
-            new Binary(
+        $checkout = Checkout::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -67,34 +51,26 @@ class CheckoutTest extends TestCase
         );
     }
 
-    /**
-     * @dataProvider revisions
-     */
+    #[DataProvider('revisions')]
     public function testRevision(Hash|Branch $revision)
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command) use ($revision): bool {
-                return $command->toString() === "git 'checkout' '{$revision->toString()}'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) use ($revision) {
+                $this->assertSame(
+                    "git 'checkout' '{$revision->toString()}'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
+                    ),
+                );
+            });
 
-        $checkout = new Checkout(
-            new Binary(
+        $checkout = Checkout::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),

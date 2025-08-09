@@ -15,10 +15,7 @@
     },
     "require": {
         "php": "~8.2",
-        "innmind/server-control": "~4.1|~5.0",
-        "innmind/immutable": "~4.0|~5.0",
-        "innmind/url": "~4.0",
-        "innmind/time-continuum": "~3.0"
+        "innmind/foundation": "^1.7.1"
     },
     "autoload": {
         "psr-4": {
@@ -31,11 +28,9 @@
         }
     },
     "require-dev": {
-        "phpunit/phpunit": "~10.2",
-        "symfony/filesystem": "~6.0",
-        "vimeo/psalm": "~5.12",
-        "innmind/black-box": "~5.5",
-        "innmind/coding-standard": "~2.0",
-        "innmind/operating-system": "^3.0"
+        "symfony/filesystem": "~6.0|~7.0",
+        "innmind/static-analysis": "^1.2.1",
+        "innmind/black-box": "~6.5",
+        "innmind/coding-standard": "~2.0"
     }
 }

@@ -10,88 +10,83 @@ use Innmind\Git\{
 };
 use Innmind\Immutable\{
     Set,
-    Str,
-    Maybe,
+    Attempt,
     SideEffect,
+    Monoid\Concat,
 };
 
 final class Remotes
 {
-    private Binary $binary;
-
-    public function __construct(Binary $binary)
+    private function __construct(private Binary $binary)
     {
-        $this->binary = $binary;
+    }
+
+    /**
+     * @internal
+     */
+    public static function of(Binary $binary): self
+    {
+        return new self($binary);
     }
 
     /**
      * @return Set<Remote>
      */
+    #[\NoDiscard]
     public function all(): Set
     {
-        $remotes = ($this->binary)(
-            $this
-                ->binary
-                ->command()
-                ->withArgument('remote')
+        return ($this->binary)(
+            static fn($command) => $command->withArgument('remote'),
         )
-            ->match(
-                static fn($output) => Str::of($output->toString()),
-                static fn() => Str::of(''),
-            );
-
-        /** @var Set<Remote> */
-        return Set::of(
-            ...$remotes
-                ->split("\n")
-                ->map(
-                    fn($remote) => Name::maybe($remote->toString())
-                        ->map($this->get(...))
-                        ->match(
-                            static fn($remote) => $remote,
-                            static fn() => null,
-                        ),
-                )
-                ->filter(static fn($remote) => $remote instanceof Remote)
-                ->toList(),
-        );
+            ->maybe()
+            ->toSequence()
+            ->flatMap(static fn($output) => $output)
+            ->map(static fn($chunk) => $chunk->data())
+            ->fold(new Concat)
+            ->split("\n")
+            ->flatMap(
+                fn($remote) => Name::maybe($remote->toString())
+                    ->map($this->get(...))
+                    ->toSequence(),
+            )
+            ->toSet();
     }
 
+    #[\NoDiscard]
     public function get(Name $name): Remote
     {
-        return new Remote(
+        return Remote::of(
             $this->binary,
             $name,
         );
     }
 
-    public function add(Name $name, Url $url): Remote
+    /**
+     * @return Attempt<Remote>
+     */
+    #[\NoDiscard]
+    public function add(Name $name, Url $url): Attempt
     {
-        ($this->binary)(
-            $this
-                ->binary
-                ->command()
+        return ($this->binary)(
+            static fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('add')
                 ->withArgument($name->toString())
                 ->withArgument($url->toString()),
-        );
-
-        return $this->get($name);
+        )->map(fn() => $this->get($name));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
-    public function remove(Name $name): Maybe
+    #[\NoDiscard]
+    public function remove(Name $name): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('remove')
                 ->withArgument($name->toString()),
-        )->map(static fn() => new SideEffect);
+        )->map(SideEffect::identity(...));
     }
 }
