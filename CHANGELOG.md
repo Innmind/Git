@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- All methods that modify the state of the repository or that may fail to read from it now return an `Innmind\Immutable\Attempt`
+
 ### Fixed
 
 - PHP `8.4` deprecations

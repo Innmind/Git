@@ -10,7 +10,7 @@ use Innmind\Server\Control\{
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Maybe,
+    Attempt,
     Sequence,
 };
 
@@ -34,18 +34,20 @@ final class Binary
     }
 
     /**
-     * @return Maybe<Sequence<Chunk>>
+     * @return Attempt<Sequence<Chunk>>
      */
     #[\NoDiscard]
-    public function __invoke(Command $command): Maybe
+    public function __invoke(Command $command): Attempt
     {
         return $this
             ->server
             ->processes()
             ->execute($command)
-            ->unwrap()
-            ->wait()
-            ->maybe()
+            ->flatMap(
+                static fn($process) => $process
+                    ->wait()
+                    ->attempt(static fn($error) => new \RuntimeException($error::class)),
+            )
             ->map(static fn($success) => $success->output());
     }
 

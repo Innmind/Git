@@ -10,6 +10,7 @@ use Innmind\Server\Control\{
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
 use Innmind\Immutable\{
+    Attempt,
     Maybe,
     Monoid\Concat,
 };
@@ -37,54 +38,47 @@ final class Git
     }
 
     /**
-     * @return Maybe<Repository>
+     * @return Attempt<Repository>
      */
     #[\NoDiscard]
-    public function repository(Path $path): Maybe
+    public function repository(Path $path): Attempt
     {
         return Repository::of($this->server, $path, $this->clock, $this->home);
     }
 
     /**
-     * @return Maybe<Version>
+     * @return Attempt<Version>
      */
     #[\NoDiscard]
-    public function version(): Maybe
+    public function version(): Attempt
     {
-        $process = $this
+        return $this
             ->server
             ->processes()
             ->execute(
                 Command::foreground('git')
                     ->withOption('version'),
             )
-            ->unwrap();
-        $output = $process
-            ->wait()
-            ->maybe()
-            ->map(static fn($success) => $success->output());
-
-        return $output
-            ->map(
-                static fn($output) => $output
-                    ->map(static fn($chunk) => $chunk->data())
-                    ->fold(new Concat),
+            ->flatMap(
+                static fn($process) => $process
+                    ->wait()
+                    ->attempt(static fn($error) => new \RuntimeException($error::class)),
             )
-            ->map(static fn($output) => $output->capture(
-                '~version (?<major>\d+)\.(?<minor>\d+)\.(?<bugfix>\d+)~',
-            ))
             ->map(
-                static fn($parts) => $parts
+                static fn($success) => $success
+                    ->output()
+                    ->map(static fn($chunk) => $chunk->data())
+                    ->fold(new Concat)
+                    ->capture(
+                        '~version (?<major>\d+)\.(?<minor>\d+)\.(?<bugfix>\d+)~',
+                    )
                     ->map(static fn($_, $value) => $value->toString())
                     ->map(static fn($_, $value) => (int) $value),
             )
             ->flatMap(
                 static fn($parts) => Maybe::all($parts->get('major'), $parts->get('minor'), $parts->get('bugfix'))
-                    ->flatMap(static fn(int $major, int $minor, int $bugfix) => Version::of(
-                        $major,
-                        $minor,
-                        $bugfix,
-                    )),
+                    ->flatMap(Version::of(...))
+                    ->attempt(static fn() => new \RuntimeException('Invalid version')),
             );
     }
 }
