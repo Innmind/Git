@@ -34,6 +34,7 @@ final class Tags
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function push(): Maybe
     {
         return ($this->binary)(
@@ -48,6 +49,7 @@ final class Tags
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function add(Name $name, ?Message $message = null): Maybe
     {
         $command = $this
@@ -69,6 +71,7 @@ final class Tags
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function sign(Name $name, Message $message): Maybe
     {
         return ($this->binary)(
@@ -87,6 +90,7 @@ final class Tags
     /**
      * @return Set<Tag>
      */
+    #[\NoDiscard]
     public function all(): Set
     {
         $output = ($this->binary)(

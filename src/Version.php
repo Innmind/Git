@@ -21,6 +21,7 @@ final class Version
     /**
      * @return Maybe<self>
      */
+    #[\NoDiscard]
     public static function of(int $major, int $minor, int $bugfix): Maybe
     {
         if (\min($major, $minor, $bugfix) < 0) {
@@ -31,16 +32,19 @@ final class Version
         return Maybe::just(new self($major, $minor, $bugfix));
     }
 
+    #[\NoDiscard]
     public function major(): int
     {
         return $this->major;
     }
 
+    #[\NoDiscard]
     public function minor(): int
     {
         return $this->minor;
     }
 
+    #[\NoDiscard]
     public function bugfix(): int
     {
         return $this->bugfix;

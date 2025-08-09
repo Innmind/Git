@@ -41,6 +41,7 @@ final class Repository
     /**
      * @return Maybe<self>
      */
+    #[\NoDiscard]
     public static function of(
         Server $server,
         Path $path,
@@ -65,6 +66,7 @@ final class Repository
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function init(): Maybe
     {
         return ($this->binary)(
@@ -83,6 +85,7 @@ final class Repository
     /**
      * @return Maybe<Hash|Branch>
      */
+    #[\NoDiscard]
     public function head(): Maybe
     {
         return ($this->binary)(
@@ -104,6 +107,7 @@ final class Repository
             ->flatMap(self::parseRevision(...));
     }
 
+    #[\NoDiscard]
     public function branches(): Branches
     {
         return new Branches($this->binary);
@@ -112,6 +116,7 @@ final class Repository
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function push(): Maybe
     {
         return ($this->binary)(
@@ -125,6 +130,7 @@ final class Repository
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function pull(): Maybe
     {
         return ($this->binary)(
@@ -135,16 +141,19 @@ final class Repository
         )->map(static fn() => new SideEffect);
     }
 
+    #[\NoDiscard]
     public function remotes(): Remotes
     {
         return new Remotes($this->binary);
     }
 
+    #[\NoDiscard]
     public function checkout(): Checkout
     {
         return new Checkout($this->binary);
     }
 
+    #[\NoDiscard]
     public function tags(): Tags
     {
         return new Tags($this->binary, $this->clock);
@@ -153,6 +162,7 @@ final class Repository
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function add(Path $file): Maybe
     {
         return ($this->binary)(
@@ -167,6 +177,7 @@ final class Repository
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function commit(Message $message): Maybe
     {
         return ($this->binary)(
@@ -182,6 +193,7 @@ final class Repository
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function merge(Branch $branch): Maybe
     {
         return ($this->binary)(

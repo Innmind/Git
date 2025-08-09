@@ -22,16 +22,19 @@ final class Tag
         $this->date = $date;
     }
 
+    #[\NoDiscard]
     public function name(): Name
     {
         return $this->name;
     }
 
+    #[\NoDiscard]
     public function message(): Message
     {
         return $this->message;
     }
 
+    #[\NoDiscard]
     public function date(): PointInTime
     {
         return $this->date;

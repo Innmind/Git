@@ -27,6 +27,7 @@ final class Remotes
     /**
      * @return Set<Remote>
      */
+    #[\NoDiscard]
     public function all(): Set
     {
         $remotes = ($this->binary)(
@@ -57,6 +58,7 @@ final class Remotes
         );
     }
 
+    #[\NoDiscard]
     public function get(Name $name): Remote
     {
         return new Remote(
@@ -65,6 +67,7 @@ final class Remotes
         );
     }
 
+    #[\NoDiscard]
     public function add(Name $name, Url $url): Remote
     {
         ($this->binary)(
@@ -83,6 +86,7 @@ final class Remotes
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function remove(Name $name): Maybe
     {
         return ($this->binary)(

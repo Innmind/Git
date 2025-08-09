@@ -25,6 +25,7 @@ final class Remote
         $this->name = $name;
     }
 
+    #[\NoDiscard]
     public function name(): Name
     {
         return $this->name;
@@ -33,6 +34,7 @@ final class Remote
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function prune(): Maybe
     {
         return ($this->binary)(
@@ -48,6 +50,7 @@ final class Remote
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function setUrl(Url $url): Maybe
     {
         return ($this->binary)(
@@ -64,6 +67,7 @@ final class Remote
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function addUrl(Url $url): Maybe
     {
         return ($this->binary)(
@@ -81,6 +85,7 @@ final class Remote
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function deleteUrl(Url $url): Maybe
     {
         return ($this->binary)(
@@ -98,6 +103,7 @@ final class Remote
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function push(Branch $branch): Maybe
     {
         return ($this->binary)(
@@ -114,6 +120,7 @@ final class Remote
     /**
      * @return Maybe<SideEffect>
      */
+    #[\NoDiscard]
     public function delete(Branch $branch): Maybe
     {
         return ($this->binary)(
