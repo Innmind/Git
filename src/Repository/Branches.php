@@ -18,11 +18,8 @@ use Innmind\Immutable\{
 
 final class Branches
 {
-    private Binary $binary;
-
-    public function __construct(Binary $binary)
+    public function __construct(private Binary $binary)
     {
-        $this->binary = $binary;
     }
 
     /**
@@ -31,7 +28,7 @@ final class Branches
     #[\NoDiscard]
     public function local(): Set
     {
-        $branches = ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
@@ -42,27 +39,16 @@ final class Branches
             ->toSequence()
             ->flatMap(static fn($output) => $output)
             ->map(static fn($chunk) => $chunk->data())
-            ->fold(new Concat);
-
-        /** @var Set<Branch> */
-        return Set::of(
-            ...$branches
-                ->split("\n")
-                ->filter(static function(Str $line): bool {
-                    return !$line->matches('~HEAD detached~');
-                })
-                ->filter(static fn(Str $line): bool => !$line->trim()->empty())
-                ->map(
-                    static fn(Str $branch) => Branch::maybe(
-                        $branch->drop(2)->toString(),
-                    )->match(
-                        static fn($branch) => $branch,
-                        static fn() => null,
-                    ),
-                )
-                ->filter(static fn($branch) => $branch instanceof Branch)
-                ->toList(),
-        );
+            ->fold(new Concat)
+            ->split("\n")
+            ->filter(static fn($line) => !$line->matches('~HEAD detached~'))
+            ->filter(static fn($line) => !$line->trim()->empty())
+            ->flatMap(
+                static fn(Str $branch) => Branch::maybe(
+                    $branch->drop(2)->toString(),
+                )->toSequence(),
+            )
+            ->toSet();
     }
 
     /**
@@ -71,7 +57,7 @@ final class Branches
     #[\NoDiscard]
     public function remote(): Set
     {
-        $branches = ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
@@ -83,27 +69,16 @@ final class Branches
             ->toSequence()
             ->flatMap(static fn($output) => $output)
             ->map(static fn($chunk) => $chunk->data())
-            ->fold(new Concat);
-
-        /** @var Set<Branch> */
-        return Set::of(
-            ...$branches
-                ->split("\n")
-                ->filter(static function(Str $line): bool {
-                    return !$line->matches('~-> origin/~');
-                })
-                ->filter(static fn(Str $line): bool => !$line->trim()->empty())
-                ->map(
-                    static fn(Str $branch) => Branch::maybe(
-                        $branch->drop(2)->toString(),
-                    )->match(
-                        static fn($branch) => $branch,
-                        static fn() => null,
-                    ),
-                )
-                ->filter(static fn($branch) => $branch instanceof Branch)
-                ->toList(),
-        );
+            ->fold(new Concat)
+            ->split("\n")
+            ->filter(static fn($line) => !$line->matches('~-> origin/~'))
+            ->filter(static fn($line) => !$line->trim()->empty())
+            ->flatMap(
+                static fn(Str $branch) => Branch::maybe(
+                    $branch->drop(2)->toString(),
+                )->toSequence(),
+            )
+            ->toSet();
     }
 
     /**

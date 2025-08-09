@@ -24,13 +24,10 @@ use Innmind\Immutable\{
 
 final class Tags
 {
-    private Binary $binary;
-    private Clock $clock;
-
-    public function __construct(Binary $binary, Clock $clock)
-    {
-        $this->binary = $binary;
-        $this->clock = $clock;
+    public function __construct(
+        private Binary $binary,
+        private Clock $clock,
+    ) {
     }
 
     /**
@@ -95,7 +92,7 @@ final class Tags
     #[\NoDiscard]
     public function all(): Set
     {
-        $output = ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
@@ -107,37 +104,26 @@ final class Tags
             ->toSequence()
             ->flatMap(static fn($output) => $output)
             ->map(static fn($chunk) => $chunk->data())
-            ->fold(new Concat);
+            ->fold(new Concat)
+            ->split("\n")
+            ->filter(static fn($line) => !$line->trim()->empty())
+            ->flatMap(function(Str $line) {
+                /** @psalm-suppress PossiblyUndefinedArrayOffset */
+                [$name, $message, $time] = $line->split('|||')->toList();
+                $time = $time->pregReplace(
+                    '~, (\d) ~',
+                    ', 0${1} ',
+                );
 
-        /** @var Set<Tag> */
-        return Set::of(
-            ...$output
-                ->split("\n")
-                ->filter(static function(Str $line): bool {
-                    return !$line->trim()->empty();
-                })
-                ->map(function(Str $line): ?Tag {
-                    /** @psalm-suppress PossiblyUndefinedArrayOffset */
-                    [$name, $message, $time] = $line->split('|||')->toList();
-                    $time = $time->pregReplace(
-                        '~, (\d) ~',
-                        ', 0${1} ',
-                    );
-
-                    /** @psalm-suppress ArgumentTypeCoercion */
-                    return Maybe::all(
-                        Name::maybe($name->toString()),
-                        Message::maybe($message->toString()),
-                        $this->clock->at($time->toString(), Format::rfc2822()),
-                    )
-                        ->map(static fn(Name $name, Message $message, PointInTime $date) => new Tag($name, $message, $date))
-                        ->match(
-                            static fn($tag) => $tag,
-                            static fn() => null,
-                        );
-                })
-                ->filter(static fn($tag) => $tag !== null)
-                ->toList(),
-        );
+                /** @psalm-suppress ArgumentTypeCoercion */
+                return Maybe::all(
+                    Name::maybe($name->toString()),
+                    Message::maybe($message->toString()),
+                    $this->clock->at($time->toString(), Format::rfc2822()),
+                )
+                    ->map(static fn(Name $name, Message $message, PointInTime $date) => new Tag($name, $message, $date))
+                    ->toSequence();
+            })
+            ->toSet();
     }
 }

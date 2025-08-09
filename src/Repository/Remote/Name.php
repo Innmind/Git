@@ -11,11 +11,8 @@ use Innmind\Immutable\{
 
 final class Name
 {
-    private string $value;
-
-    private function __construct(string $remote)
+    private function __construct(private string $value)
     {
-        $this->value = $remote;
     }
 
     /**

@@ -11,15 +11,11 @@ use Innmind\TimeContinuum\PointInTime;
 
 final class Tag
 {
-    private Name $name;
-    private Message $message;
-    private PointInTime $date;
-
-    public function __construct(Name $name, Message $message, PointInTime $date)
-    {
-        $this->name = $name;
-        $this->message = $message;
-        $this->date = $date;
+    public function __construct(
+        private Name $name,
+        private Message $message,
+        private PointInTime $date,
+    ) {
     }
 
     #[\NoDiscard]

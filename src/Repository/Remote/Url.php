@@ -15,11 +15,8 @@ use Innmind\Immutable\{
  */
 final class Url
 {
-    private string $value;
-
-    private function __construct(string $url)
+    private function __construct(private string $value)
     {
-        $this->value = $url;
     }
 
     /**

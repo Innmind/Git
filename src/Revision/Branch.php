@@ -11,11 +11,8 @@ use Innmind\Immutable\{
 
 final class Branch
 {
-    private string $value;
-
-    private function __construct(string $branch)
+    private function __construct(private string $value)
     {
-        $this->value = $branch;
     }
 
     /**

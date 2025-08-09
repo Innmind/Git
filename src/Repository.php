@@ -26,17 +26,10 @@ use Innmind\Immutable\{
 
 final class Repository
 {
-    private Binary $binary;
-    private Clock $clock;
-
     private function __construct(
-        Server $server,
-        Path $path,
-        Clock $clock,
-        ?Path $home = null,
+        private Binary $binary,
+        private Clock $clock,
     ) {
-        $this->binary = new Binary($server, $path, $home);
-        $this->clock = $clock;
     }
 
     /**
@@ -61,7 +54,14 @@ final class Repository
                     ->wait()
                     ->attempt(static fn($error) => new \RuntimeException($error::class)),
             )
-            ->map(static fn() => new self($server, $path, $clock, $home));
+            ->map(static fn() => new self(
+                new Binary(
+                    $server,
+                    $path,
+                    $home,
+                ),
+                $clock,
+            ));
     }
 
     /**

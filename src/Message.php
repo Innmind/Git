@@ -10,15 +10,11 @@ use Innmind\Immutable\{
 
 final class Message
 {
-    /** @var non-empty-string */
-    private string $value;
-
     /**
-     * @param non-empty-string $message
+     * @param non-empty-string $value
      */
-    private function __construct(string $message)
+    private function __construct(private string $value)
     {
-        $this->value = $message;
     }
 
     /**
