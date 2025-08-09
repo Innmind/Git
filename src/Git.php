@@ -17,15 +17,11 @@ use Innmind\Immutable\{
 
 final class Git
 {
-    private Server $server;
-    private Clock $clock;
-    private ?Path $home;
-
-    private function __construct(Server $server, Clock $clock, ?Path $home = null)
-    {
-        $this->server = $server;
-        $this->clock = $clock;
-        $this->home = $home;
+    private function __construct(
+        private Server $server,
+        private Clock $clock,
+        private ?Path $home = null,
+    ) {
     }
 
     /**

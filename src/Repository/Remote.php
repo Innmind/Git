@@ -16,11 +16,10 @@ use Innmind\Immutable\{
 
 final class Remote
 {
-    private Binary $binary;
-    private Name $name;
-
-    public function __construct(Binary $binary, Name $name)
-    {
+    public function __construct(
+        private Binary $binary,
+        private Name $name,
+    ) {
         $this->binary = $binary;
         $this->name = $name;
     }

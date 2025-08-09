@@ -7,15 +7,11 @@ use Innmind\Immutable\Maybe;
 
 final class Version
 {
-    private int $major;
-    private int $minor;
-    private int $bugfix;
-
-    private function __construct(int $major, int $minor, int $bugfix)
-    {
-        $this->major = $major;
-        $this->minor = $minor;
-        $this->bugfix = $bugfix;
+    private function __construct(
+        private int $major,
+        private int $minor,
+        private int $bugfix,
+    ) {
     }
 
     /**

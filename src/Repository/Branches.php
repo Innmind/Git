@@ -18,11 +18,8 @@ use Innmind\Immutable\{
 
 final class Branches
 {
-    private Binary $binary;
-
-    public function __construct(Binary $binary)
+    public function __construct(private Binary $binary)
     {
-        $this->binary = $binary;
     }
 
     /**

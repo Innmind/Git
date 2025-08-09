@@ -10,11 +10,8 @@ use Innmind\Immutable\{
 
 final class Hash
 {
-    private string $value;
-
-    private function __construct(string $hash)
+    private function __construct(private string $value)
     {
-        $this->value = $hash;
     }
 
     /**

@@ -24,13 +24,10 @@ use Innmind\Immutable\{
 
 final class Tags
 {
-    private Binary $binary;
-    private Clock $clock;
-
-    public function __construct(Binary $binary, Clock $clock)
-    {
-        $this->binary = $binary;
-        $this->clock = $clock;
+    public function __construct(
+        private Binary $binary,
+        private Clock $clock,
+    ) {
     }
 
     /**
