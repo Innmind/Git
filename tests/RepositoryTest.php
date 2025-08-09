@@ -488,7 +488,7 @@ class RepositoryTest extends TestCase
     public function testCommit()
     {
         $this
-            ->forAll(Set\Strings::atLeast(1)->filter(
+            ->forAll(Set::strings()->atLeast(1)->filter(
                 static fn($string) => $string === \trim($string),
             ))
             ->then(function(string $message): void {
