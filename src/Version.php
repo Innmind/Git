@@ -7,6 +7,11 @@ use Innmind\Immutable\Maybe;
 
 final class Version
 {
+    /**
+     * @param int<0, max> $major
+     * @param int<0, max> $minor
+     * @param int<0, max> $bugfix
+     */
     private function __construct(
         private int $major,
         private int $minor,
@@ -20,7 +25,11 @@ final class Version
     #[\NoDiscard]
     public static function of(int $major, int $minor, int $bugfix): Maybe
     {
-        if (\min($major, $minor, $bugfix) < 0) {
+        if (
+            $major < 0 ||
+            $minor < 0 ||
+            $bugfix < 0
+        ) {
             /** @var Maybe<self> */
             return Maybe::nothing();
         }
@@ -28,18 +37,27 @@ final class Version
         return Maybe::just(new self($major, $minor, $bugfix));
     }
 
+    /**
+     * @return int<0, max>
+     */
     #[\NoDiscard]
     public function major(): int
     {
         return $this->major;
     }
 
+    /**
+     * @return int<0, max>
+     */
     #[\NoDiscard]
     public function minor(): int
     {
         return $this->minor;
     }
 
+    /**
+     * @return int<0, max>
+     */
     #[\NoDiscard]
     public function bugfix(): int
     {

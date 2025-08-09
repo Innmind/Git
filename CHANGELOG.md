@@ -11,6 +11,7 @@
 - `Innmind\Git\Repository\Remotes` constructor is now private and internal
 - `Innmind\Git\Repository\Tag` constructor is now private and internal
 - `Innmind\Git\Repository\Tags` constructor is now private and internal
+- `Innmind\Git\Version` components are now bounded in `int<0, max>`
 
 ### Fixed
 
