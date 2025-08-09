@@ -36,10 +36,7 @@ final class Remotes
     public function all(): Set
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
-                ->withArgument('remote')
+            static fn($command) => $command->withArgument('remote'),
         )
             ->maybe()
             ->toSequence()
@@ -71,9 +68,7 @@ final class Remotes
     public function add(Name $name, Url $url): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('add')
                 ->withArgument($name->toString())
@@ -88,9 +83,7 @@ final class Remotes
     public function remove(Name $name): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('remove')
                 ->withArgument($name->toString()),

@@ -71,10 +71,7 @@ final class Repository
     public function init(): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
-                ->withArgument('init'),
+            static fn($command) => $command->withArgument('init'),
         )
             ->map(
                 static fn($output) => $output
@@ -97,9 +94,7 @@ final class Repository
     public function head(): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('branch')
                 ->withOption('no-color'),
         )
@@ -130,10 +125,7 @@ final class Repository
     public function push(): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
-                ->withArgument('push'),
+            static fn($command) => $command->withArgument('push'),
         )->map(static fn() => new SideEffect);
     }
 
@@ -144,10 +136,7 @@ final class Repository
     public function pull(): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
-                ->withArgument('pull'),
+            static fn($command) => $command->withArgument('pull'),
         )->map(static fn() => new SideEffect);
     }
 
@@ -176,9 +165,7 @@ final class Repository
     public function add(Path $file): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('add')
                 ->withArgument($file->toString()),
         )->map(static fn() => new SideEffect);
@@ -191,9 +178,7 @@ final class Repository
     public function commit(Message $message): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('commit')
                 ->withShortOption('m')
                 ->withArgument($message->toString()),
@@ -207,9 +192,7 @@ final class Repository
     public function merge(Branch $branch): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('merge')
                 ->withArgument($branch->toString()),
         )->map(static fn() => new SideEffect);

@@ -8,6 +8,7 @@ use Innmind\Git\{
     Message,
     Repository\Tag\Name,
 };
+use Innmind\Server\Control\Server\Command;
 use Innmind\TimeContinuum\{
     Clock,
     Format,
@@ -44,9 +45,7 @@ final class Tags
     public function push(): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('push')
                 ->withOption('tags'),
         )->map(static fn() => new SideEffect);
@@ -58,20 +57,18 @@ final class Tags
     #[\NoDiscard]
     public function add(Name $name, ?Message $message = null): Attempt
     {
-        $command = $this
-            ->binary
-            ->command()
+        $map = static fn(Command $command): Command => $command
             ->withArgument('tag')
             ->withArgument($name->toString());
 
         if (null !== $message) {
-            $command = $command
+            $map = static fn(Command $command): Command => $map($command)
                 ->withShortOption('a')
                 ->withShortOption('m')
                 ->withArgument($message->toString());
         }
 
-        return ($this->binary)($command)->map(static fn() => new SideEffect);
+        return ($this->binary)($map)->map(static fn() => new SideEffect);
     }
 
     /**
@@ -81,9 +78,7 @@ final class Tags
     public function sign(Name $name, Message $message): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('tag')
                 ->withShortOption('s')
                 ->withShortOption('a')
@@ -100,9 +95,7 @@ final class Tags
     public function all(): Set
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('tag')
                 ->withOption('list')
                 ->withOption('format', '%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)')

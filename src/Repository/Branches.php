@@ -8,6 +8,7 @@ use Innmind\Git\{
     Revision\Branch,
     Revision\Hash,
 };
+use Innmind\Server\Control\Server\Command;
 use Innmind\Immutable\{
     Set,
     Str,
@@ -37,9 +38,7 @@ final class Branches
     public function local(): Set
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('branch')
                 ->withOption('no-color'),
         )
@@ -66,9 +65,7 @@ final class Branches
     public function remote(): Set
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('branch')
                 ->withShortOption('r')
                 ->withOption('no-color'),
@@ -106,17 +103,16 @@ final class Branches
     #[\NoDiscard]
     public function new(Branch $name, Hash|Branch|null $off = null): Attempt
     {
-        $command = $this
-            ->binary
-            ->command()
+        $map = static fn(Command $command): Command => $command
             ->withArgument('branch')
             ->withArgument($name->toString());
 
         if ($off) {
-            $command = $command->withArgument($off->toString());
+            $map = static fn(Command $command): Command => $map($command)
+                ->withArgument($off->toString());
         }
 
-        return ($this->binary)($command)->map(static fn() => new SideEffect);
+        return ($this->binary)($map)->map(static fn() => new SideEffect);
     }
 
     /**
@@ -125,14 +121,12 @@ final class Branches
     #[\NoDiscard]
     public function newOrphan(Branch $name): Attempt
     {
-        $command = $this
-            ->binary
-            ->command()
-            ->withArgument('checkout')
-            ->withOption('orphan')
-            ->withArgument($name->toString());
-
-        return ($this->binary)($command)->map(static fn() => new SideEffect);
+        return ($this->binary)(
+            static fn($command) => $command
+                ->withArgument('checkout')
+                ->withOption('orphan')
+                ->withArgument($name->toString()),
+        )->map(static fn() => new SideEffect);
     }
 
     /**
@@ -142,9 +136,7 @@ final class Branches
     public function delete(Branch $name): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('branch')
                 ->withShortOption('d')
                 ->withArgument($name->toString()),
@@ -158,9 +150,7 @@ final class Branches
     public function forceDelete(Branch $name): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            static fn($command) => $command
                 ->withArgument('branch')
                 ->withShortOption('D')
                 ->withArgument($name->toString()),

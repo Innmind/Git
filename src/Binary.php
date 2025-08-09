@@ -34,15 +34,17 @@ final class Binary
     }
 
     /**
+     * @param callable(Command): Command $map
+     *
      * @return Attempt<Sequence<Chunk>>
      */
     #[\NoDiscard]
-    public function __invoke(Command $command): Attempt
+    public function __invoke(callable $map): Attempt
     {
         return $this
             ->server
             ->processes()
-            ->execute($command)
+            ->execute($map($this->command))
             ->flatMap(
                 static fn($process) => $process
                     ->wait()
@@ -57,11 +59,5 @@ final class Binary
     public static function of(Server $server, Path $path, ?Path $home = null): self
     {
         return new self($server, $path, $home);
-    }
-
-    #[\NoDiscard]
-    public function command(): Command
-    {
-        return $this->command;
     }
 }

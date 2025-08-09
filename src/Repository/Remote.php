@@ -45,9 +45,7 @@ final class Remote
     public function prune(): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('prune')
                 ->withArgument($this->name->toString()),
@@ -61,9 +59,7 @@ final class Remote
     public function setUrl(Url $url): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('set-url')
                 ->withArgument($this->name->toString())
@@ -78,9 +74,7 @@ final class Remote
     public function addUrl(Url $url): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('set-url')
                 ->withOption('add')
@@ -96,9 +90,7 @@ final class Remote
     public function deleteUrl(Url $url): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('remote')
                 ->withArgument('set-url')
                 ->withOption('delete')
@@ -114,9 +106,7 @@ final class Remote
     public function push(Branch $branch): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('push')
                 ->withShortOption('u')
                 ->withArgument($this->name->toString())
@@ -131,9 +121,7 @@ final class Remote
     public function delete(Branch $branch): Attempt
     {
         return ($this->binary)(
-            $this
-                ->binary
-                ->command()
+            fn($command) => $command
                 ->withArgument('push')
                 ->withArgument($this->name->toString())
                 ->withArgument(':'.$branch->toString()),
