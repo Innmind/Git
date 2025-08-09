@@ -11,7 +11,7 @@ use Innmind\Git\{
 use Innmind\Immutable\{
     Set,
     Str,
-    Maybe,
+    Attempt,
     SideEffect,
     Monoid\Concat,
 };
@@ -38,6 +38,7 @@ final class Branches
                 ->withArgument('branch')
                 ->withOption('no-color'),
         )
+            ->maybe()
             ->toSequence()
             ->flatMap(static fn($output) => $output)
             ->map(static fn($chunk) => $chunk->data())
@@ -78,6 +79,7 @@ final class Branches
                 ->withShortOption('r')
                 ->withOption('no-color'),
         )
+            ->maybe()
             ->toSequence()
             ->flatMap(static fn($output) => $output)
             ->map(static fn($chunk) => $chunk->data())
@@ -116,10 +118,10 @@ final class Branches
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function new(Branch $name, Hash|Branch|null $off = null): Maybe
+    public function new(Branch $name, Hash|Branch|null $off = null): Attempt
     {
         $command = $this
             ->binary
@@ -135,10 +137,10 @@ final class Branches
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function newOrphan(Branch $name): Maybe
+    public function newOrphan(Branch $name): Attempt
     {
         $command = $this
             ->binary
@@ -151,10 +153,10 @@ final class Branches
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function delete(Branch $name): Maybe
+    public function delete(Branch $name): Attempt
     {
         return ($this->binary)(
             $this
@@ -167,10 +169,10 @@ final class Branches
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function forceDelete(Branch $name): Maybe
+    public function forceDelete(Branch $name): Attempt
     {
         return ($this->binary)(
             $this

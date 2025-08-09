@@ -19,7 +19,7 @@ use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
 use Innmind\Immutable\{
     Str,
-    Maybe,
+    Attempt,
     SideEffect,
     Monoid\Concat,
 };
@@ -40,7 +40,7 @@ final class Repository
     }
 
     /**
-     * @return Maybe<self>
+     * @return Attempt<self>
      */
     #[\NoDiscard]
     public static function of(
@@ -48,8 +48,7 @@ final class Repository
         Path $path,
         Clock $clock,
         ?Path $home = null,
-    ): Maybe {
-        /** @var Maybe<self> */
+    ): Attempt {
         return $server
             ->processes()
             ->execute(
@@ -57,19 +56,19 @@ final class Repository
                     ->withShortOption('p')
                     ->withArgument($path->toString()),
             )
-            ->unwrap()
-            ->wait()
-            ->match(
-                static fn() => Maybe::just(new self($server, $path, $clock, $home)),
-                static fn() => Maybe::nothing(),
-            );
+            ->flatMap(
+                static fn($process) => $process
+                    ->wait()
+                    ->attempt(static fn($error) => new \RuntimeException($error::class)),
+            )
+            ->map(static fn() => new self($server, $path, $clock, $home));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function init(): Maybe
+    public function init(): Attempt
     {
         return ($this->binary)(
             $this
@@ -82,17 +81,20 @@ final class Repository
                     ->map(static fn($chunk) => $chunk->data())
                     ->fold(new Concat),
             )
-            ->filter(
-                static fn($output) => $output->contains('Initialized empty Git repository') || $output->contains('Reinitialized existing Git repository'),
+            ->flatMap(
+                static fn($output) => match ($output->contains('Initialized empty Git repository') || $output->contains('Reinitialized existing Git repository')) {
+                    true => Attempt::result($output),
+                    false => Attempt::error(new \RuntimeException($output->toString())),
+                },
             )
             ->map(static fn() => new SideEffect);
     }
 
     /**
-     * @return Maybe<Hash|Branch>
+     * @return Attempt<Hash|Branch>
      */
     #[\NoDiscard]
-    public function head(): Maybe
+    public function head(): Attempt
     {
         return ($this->binary)(
             $this
@@ -101,15 +103,17 @@ final class Repository
                 ->withArgument('branch')
                 ->withOption('no-color'),
         )
-            ->toSequence()
-            ->flatMap(static fn($output) => $output)
-            ->map(static fn($chunk) => $chunk->data())
-            ->fold(new Concat)
-            ->split("\n")
-            ->filter(static function(Str $line): bool {
-                return $line->matches('~^\* .+~');
-            })
-            ->first()
+            ->flatMap(
+                static fn($output) => $output
+                    ->map(static fn($chunk) => $chunk->data())
+                    ->fold(new Concat)
+                    ->split("\n")
+                    ->filter(static function(Str $line): bool {
+                        return $line->matches('~^\* .+~');
+                    })
+                    ->first()
+                    ->attempt(static fn() => new \RuntimeException('Revision not found')),
+            )
             ->flatMap(self::parseRevision(...));
     }
 
@@ -120,10 +124,10 @@ final class Repository
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function push(): Maybe
+    public function push(): Attempt
     {
         return ($this->binary)(
             $this
@@ -134,10 +138,10 @@ final class Repository
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function pull(): Maybe
+    public function pull(): Attempt
     {
         return ($this->binary)(
             $this
@@ -166,10 +170,10 @@ final class Repository
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function add(Path $file): Maybe
+    public function add(Path $file): Attempt
     {
         return ($this->binary)(
             $this
@@ -181,10 +185,10 @@ final class Repository
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function commit(Message $message): Maybe
+    public function commit(Message $message): Attempt
     {
         return ($this->binary)(
             $this
@@ -197,10 +201,10 @@ final class Repository
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function merge(Branch $branch): Maybe
+    public function merge(Branch $branch): Attempt
     {
         return ($this->binary)(
             $this
@@ -212,17 +216,18 @@ final class Repository
     }
 
     /**
-     * @return Maybe<Hash|Branch>
+     * @return Attempt<Hash|Branch>
      */
-    private static function parseRevision(Str $revision): Maybe
+    private static function parseRevision(Str $revision): Attempt
     {
-        /** @var Maybe<Hash|Branch> */
+        /** @var Attempt<Hash|Branch> */
         return $revision
             ->capture('~\(HEAD detached at (?P<hash>[a-z0-9]{7,40})\)~')
             ->get('hash')
             ->match(
                 static fn($hash) => Hash::maybe($hash->toString()),
                 static fn() => Branch::maybe($revision->drop(2)->toString()),
-            );
+            )
+            ->attempt(static fn() => new \RuntimeException("Invalid revision '{$revision->toString()}'"));
     }
 }

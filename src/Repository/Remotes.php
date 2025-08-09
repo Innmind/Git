@@ -10,7 +10,7 @@ use Innmind\Git\{
 };
 use Innmind\Immutable\{
     Set,
-    Maybe,
+    Attempt,
     SideEffect,
     Monoid\Concat,
 };
@@ -36,6 +36,7 @@ final class Remotes
                 ->command()
                 ->withArgument('remote')
         )
+            ->maybe()
             ->toSequence()
             ->flatMap(static fn($output) => $output)
             ->map(static fn($chunk) => $chunk->data())
@@ -67,10 +68,13 @@ final class Remotes
         );
     }
 
+    /**
+     * @return Attempt<Remote>
+     */
     #[\NoDiscard]
-    public function add(Name $name, Url $url): Remote
+    public function add(Name $name, Url $url): Attempt
     {
-        ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
@@ -78,16 +82,14 @@ final class Remotes
                 ->withArgument('add')
                 ->withArgument($name->toString())
                 ->withArgument($url->toString()),
-        );
-
-        return $this->get($name);
+        )->map(fn() => $this->get($name));
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function remove(Name $name): Maybe
+    public function remove(Name $name): Attempt
     {
         return ($this->binary)(
             $this

@@ -96,7 +96,7 @@ class RemotesTest extends TestCase
         $remote = $remotes->add(
             $expected = Name::of('origin'),
             Url::of('git@github.com:Innmind/Git.git'),
-        );
+        )->unwrap();
 
         $this->assertInstanceOf(Remote::class, $remote);
         $this->assertSame($expected, $remote->name());

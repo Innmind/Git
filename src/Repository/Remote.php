@@ -10,7 +10,7 @@ use Innmind\Git\{
     Revision\Branch,
 };
 use Innmind\Immutable\{
-    Maybe,
+    Attempt,
     SideEffect,
 };
 
@@ -32,10 +32,10 @@ final class Remote
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function prune(): Maybe
+    public function prune(): Attempt
     {
         return ($this->binary)(
             $this
@@ -48,10 +48,10 @@ final class Remote
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function setUrl(Url $url): Maybe
+    public function setUrl(Url $url): Attempt
     {
         return ($this->binary)(
             $this
@@ -65,10 +65,10 @@ final class Remote
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function addUrl(Url $url): Maybe
+    public function addUrl(Url $url): Attempt
     {
         return ($this->binary)(
             $this
@@ -83,10 +83,10 @@ final class Remote
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function deleteUrl(Url $url): Maybe
+    public function deleteUrl(Url $url): Attempt
     {
         return ($this->binary)(
             $this
@@ -101,10 +101,10 @@ final class Remote
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function push(Branch $branch): Maybe
+    public function push(Branch $branch): Attempt
     {
         return ($this->binary)(
             $this
@@ -118,10 +118,10 @@ final class Remote
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function delete(Branch $branch): Maybe
+    public function delete(Branch $branch): Attempt
     {
         return ($this->binary)(
             $this

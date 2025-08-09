@@ -10,7 +10,7 @@ use Innmind\Git\{
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Maybe,
+    Attempt,
     SideEffect,
 };
 
@@ -24,10 +24,10 @@ final class Checkout
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function file(Path $path): Maybe
+    public function file(Path $path): Attempt
     {
         return ($this->binary)(
             $this
@@ -40,10 +40,10 @@ final class Checkout
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function revision(Hash|Branch $revision): Maybe
+    public function revision(Hash|Branch $revision): Attempt
     {
         return ($this->binary)(
             $this

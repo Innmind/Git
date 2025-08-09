@@ -16,6 +16,7 @@ use Innmind\TimeContinuum\{
 use Innmind\Immutable\{
     Set,
     Str,
+    Attempt,
     Maybe,
     SideEffect,
     Monoid\Concat,
@@ -33,10 +34,10 @@ final class Tags
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function push(): Maybe
+    public function push(): Attempt
     {
         return ($this->binary)(
             $this
@@ -48,10 +49,10 @@ final class Tags
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function add(Name $name, ?Message $message = null): Maybe
+    public function add(Name $name, ?Message $message = null): Attempt
     {
         $command = $this
             ->binary
@@ -70,10 +71,10 @@ final class Tags
     }
 
     /**
-     * @return Maybe<SideEffect>
+     * @return Attempt<SideEffect>
      */
     #[\NoDiscard]
-    public function sign(Name $name, Message $message): Maybe
+    public function sign(Name $name, Message $message): Attempt
     {
         return ($this->binary)(
             $this
@@ -102,6 +103,7 @@ final class Tags
                 ->withOption('list')
                 ->withOption('format', '%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)')
         )
+            ->maybe()
             ->toSequence()
             ->flatMap(static fn($output) => $output)
             ->map(static fn($chunk) => $chunk->data())
