@@ -324,13 +324,13 @@ class RepositoryTest extends TestCase
         );
     }
 
-    public function testCommit()
+    public function testCommit(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set::strings()->atLeast(1)->filter(
                 static fn($string) => $string === \trim($string),
             ))
-            ->then(function(string $message): void {
+            ->prove(function(string $message): void {
                 $messageArgument = (new Str($message))->toString();
                 $server = Mock::new($this->assert())
                     ->willExecute(static fn() => null)

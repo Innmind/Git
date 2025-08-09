@@ -14,11 +14,11 @@ class NameTest extends TestCase
 {
     use BlackBox;
 
-    public function testReturnNothingWhenInvalidRemoteName()
+    public function testReturnNothingWhenInvalidRemoteName(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set::strings()->unicode())
-            ->then(function($string): void {
+            ->prove(function($string): void {
                 $this->assertNull(Name::maybe($string)->match(
                     static fn($name) => $name,
                     static fn() => null,
@@ -26,7 +26,7 @@ class NameTest extends TestCase
             });
     }
 
-    public function testNamesAreAccepted()
+    public function testNamesAreAccepted(): BlackBox\Proof
     {
         $names = static fn($min = 0) => Set::strings()
             ->madeOf(
@@ -37,12 +37,12 @@ class NameTest extends TestCase
             )
             ->between($min, 20);
 
-        $this
+        return $this
             ->forAll(
                 $names(1),
                 $names(),
             )
-            ->then(function($first, $second): void {
+            ->prove(function($first, $second): void {
                 $this->assertSame($first, Name::maybe($first)->match(
                     static fn($name) => $name->toString(),
                     static fn() => null,

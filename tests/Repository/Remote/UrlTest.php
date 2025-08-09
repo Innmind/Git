@@ -15,11 +15,11 @@ class UrlTest extends TestCase
 {
     use BlackBox;
 
-    public function testReturnNothingWhenGivenAnyRandomString()
+    public function testReturnNothingWhenGivenAnyRandomString(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set::of("\x01", "\x02", "\x03"))
-            ->then(function(string $string): void {
+            ->prove(function(string $string): void {
                 $this->assertNull(Url::maybe($string)->match(
                     static fn($url) => $url,
                     static fn() => null,
