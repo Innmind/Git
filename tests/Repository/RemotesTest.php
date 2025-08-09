@@ -8,14 +8,13 @@ use Innmind\Git\{
     Repository\Remote,
     Repository\Remote\Name,
     Repository\Remote\Url,
-    Binary
+    Binary,
 };
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Process,
     Server\Process\Output,
-    Server\Process\ExitCode
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{

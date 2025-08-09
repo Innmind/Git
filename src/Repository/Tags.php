@@ -7,7 +7,6 @@ use Innmind\Git\{
     Binary,
     Message,
     Repository\Tag\Name,
-    Exception\DomainException,
 };
 use Innmind\TimeContinuum\{
     Clock,

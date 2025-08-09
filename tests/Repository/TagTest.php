@@ -6,7 +6,7 @@ namespace Tests\Innmind\Git\Repository;
 use Innmind\Git\{
     Repository\Tag,
     Repository\Tag\Name,
-    Message
+    Message,
 };
 use Innmind\TimeContinuum\PointInTime;
 use PHPUnit\Framework\TestCase;

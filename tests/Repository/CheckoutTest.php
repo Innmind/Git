@@ -7,14 +7,12 @@ use Innmind\Git\{
     Repository\Checkout,
     Revision\Branch,
     Revision\Hash,
-    Binary
+    Binary,
 };
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Process,
-    Server\Process\Output,
-    Server\Process\ExitCode
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{

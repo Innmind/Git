@@ -5,17 +5,15 @@ namespace Tests\Innmind\Git\Repository;
 
 use Innmind\Git\{
     Repository\Tags,
-    Repository\Tag,
     Binary,
     Message,
-    Repository\Tag\Name
+    Repository\Tag\Name,
 };
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Process,
     Server\Process\Output,
-    Server\Process\ExitCode
 };
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Earth\{

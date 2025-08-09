@@ -6,14 +6,13 @@ namespace Tests\Innmind\Git\Repository;
 use Innmind\Git\{
     Repository\Branches,
     Revision\Branch,
-    Binary
+    Binary,
 };
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Process,
     Server\Process\Output,
-    Server\Process\ExitCode
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{

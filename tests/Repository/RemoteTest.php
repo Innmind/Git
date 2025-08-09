@@ -8,15 +8,13 @@ use Innmind\Git\{
     Repository\Remote\Name,
     Repository\Remote\Url,
     Binary,
-    Revision\Branch
+    Revision\Branch,
 };
 use Innmind\Server\Control\{
     Server,
     Server\Processes,
     Server\Process,
     Server\Process\Output,
-    Server\Process\ExitCode,
-    ServerFactory
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
