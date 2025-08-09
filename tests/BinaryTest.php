@@ -42,6 +42,10 @@ class BinaryTest extends TestCase
             static fn($path) => $path->toString(),
             static fn() => null,
         ));
+        $this->assertSame(0, $bin($bin->command()->withArgument('watev'))->match(
+            static fn($output) => $output->size(),
+            static fn() => null,
+        ));
     }
 
     public function testReturnNothingWhenCommandFailed()
