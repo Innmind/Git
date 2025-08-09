@@ -21,7 +21,7 @@ final class Git
     private Clock $clock;
     private ?Path $home;
 
-    private function __construct(Server $server, Clock $clock, Path $home = null)
+    private function __construct(Server $server, Clock $clock, ?Path $home = null)
     {
         $this->server = $server;
         $this->clock = $clock;
@@ -31,7 +31,7 @@ final class Git
     /**
      * @param Path|null $home Required for some operations like signing commits
      */
-    public static function of(Server $server, Clock $clock, Path $home = null): self
+    public static function of(Server $server, Clock $clock, ?Path $home = null): self
     {
         return new self($server, $clock, $home);
     }
