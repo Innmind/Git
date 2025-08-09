@@ -28,7 +28,7 @@ class BranchTest extends TestCase
     public function testReturnNothingWhenInvalidBranchName()
     {
         $this
-            ->forAll(Set\Strings::any()->filter(static fn($string) => !\preg_match('~^\w+$~', $string)))
+            ->forAll(Set::strings()->filter(static fn($string) => !\preg_match('~^\w+$~', $string)))
             ->then(function($string): void {
                 $this->assertNull(Branch::maybe($string)->match(
                     static fn($branch) => $branch,
@@ -39,18 +39,14 @@ class BranchTest extends TestCase
 
     public function testNamesAreAccepted()
     {
-        $names = static fn($min = 0) => Set\Decorate::immutable(
-            static fn($chars) => \implode('', $chars),
-            Set\Sequence::of(
-                Set\Decorate::immutable(
-                    static fn($ord) => \chr($ord),
-                    Set\Either::any(
-                        Set\Integers::between(65, 90), // A-Z
-                        Set\Integers::between(97, 122), // a-z
-                    ),
-                ),
-            )->between($min, 20),
-        );
+        $names = static fn($min = 0) => Set::strings()
+            ->madeOf(
+                Set::either(
+                    Set::integers()->between(65, 90), // A-Z
+                    Set::integers()->between(97, 122), // a-z
+                )->map(\chr(...)),
+            )
+            ->between($min, 20);
 
         $this
             ->forAll(

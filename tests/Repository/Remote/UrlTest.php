@@ -17,7 +17,7 @@ class UrlTest extends TestCase
     public function testReturnNothingWhenGivenAnyRandomString()
     {
         $this
-            ->forAll(Set\Elements::of("\x01", "\x02", "\x03"))
+            ->forAll(Set::of("\x01", "\x02", "\x03"))
             ->then(function(string $string): void {
                 $this->assertNull(Url::maybe($string)->match(
                     static fn($url) => $url,

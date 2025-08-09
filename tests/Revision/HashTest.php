@@ -28,7 +28,7 @@ class HashTest extends TestCase
     public function testReturnNothingWhenInvalidHash()
     {
         $this
-            ->forAll(Set\Strings::any())
+            ->forAll(Set::strings())
             ->then(function($string): void {
                 $this->assertNull(Hash::maybe($string)->match(
                     static fn($hash) => $hash,
@@ -40,7 +40,7 @@ class HashTest extends TestCase
     public function testOnlyHashAreAccepted()
     {
         $this
-            ->forAll(Set\Strings::any())
+            ->forAll(Set::strings())
             ->then(function($string): void {
                 $hash = \sha1($string);
                 $short = \substr($hash, 0, 7);
