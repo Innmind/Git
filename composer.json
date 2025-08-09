@@ -34,7 +34,7 @@
         "phpunit/phpunit": "~10.2",
         "symfony/filesystem": "~6.0",
         "vimeo/psalm": "~5.12",
-        "innmind/black-box": "~5.5",
+        "innmind/black-box": "~6.5",
         "innmind/coding-standard": "~2.0",
         "innmind/operating-system": "^3.0"
     }

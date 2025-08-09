@@ -17,7 +17,7 @@ class NameTest extends TestCase
     public function testReturnNothingWhenInvalidRemoteName()
     {
         $this
-            ->forAll(Set\Unicode::strings())
+            ->forAll(Set::strings()->unicode())
             ->then(function($string): void {
                 $this->assertNull(Name::maybe($string)->match(
                     static fn($name) => $name,
@@ -28,18 +28,14 @@ class NameTest extends TestCase
 
     public function testNamesAreAccepted()
     {
-        $names = static fn($min = 0) => Set\Decorate::immutable(
-            static fn($chars) => \implode('', $chars),
-            Set\Sequence::of(
-                Set\Decorate::immutable(
-                    static fn($ord) => \chr($ord),
-                    Set\Either::any(
-                        Set\Integers::between(65, 90), // A-Z
-                        Set\Integers::between(97, 122), // a-z
-                    ),
-                ),
-            )->between($min, 20),
-        );
+        $names = static fn($min = 0) => Set::strings()
+            ->madeOf(
+                Set::either(
+                    Set::integers()->between(65, 90), // A-Z
+                    Set::integers()->between(97, 122), // a-z
+                )->map(\chr(...)),
+            )
+            ->between($min, 20);
 
         $this
             ->forAll(

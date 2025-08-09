@@ -17,7 +17,7 @@ class NameTest extends TestCase
     public function testAcceptAnyNonEmptyString()
     {
         $this
-            ->forAll(Set\Strings::atLeast(1)->filter(static fn($name) => $name === \trim($name)))
+            ->forAll(Set::strings()->atLeast(1)->filter(static fn($name) => $name === \trim($name)))
             ->then(function(string $name): void {
                 $this->assertSame($name, Name::maybe($name)->match(
                     static fn($name) => $name->toString(),
