@@ -27,7 +27,7 @@ final class Remotes
     #[\NoDiscard]
     public function all(): Set
     {
-        $remotes = ($this->binary)(
+        return ($this->binary)(
             $this
                 ->binary
                 ->command()
@@ -37,23 +37,14 @@ final class Remotes
             ->toSequence()
             ->flatMap(static fn($output) => $output)
             ->map(static fn($chunk) => $chunk->data())
-            ->fold(new Concat);
-
-        /** @var Set<Remote> */
-        return Set::of(
-            ...$remotes
-                ->split("\n")
-                ->map(
-                    fn($remote) => Name::maybe($remote->toString())
-                        ->map($this->get(...))
-                        ->match(
-                            static fn($remote) => $remote,
-                            static fn() => null,
-                        ),
-                )
-                ->filter(static fn($remote) => $remote instanceof Remote)
-                ->toList(),
-        );
+            ->fold(new Concat)
+            ->split("\n")
+            ->flatMap(
+                fn($remote) => Name::maybe($remote->toString())
+                    ->map($this->get(...))
+                    ->toSequence(),
+            )
+            ->toSet();
     }
 
     #[\NoDiscard]
