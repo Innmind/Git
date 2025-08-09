@@ -6,13 +6,12 @@ namespace Innmind\Git;
 use Innmind\Server\Control\{
     Server,
     Server\Command,
-    Server\Process\Output,
 };
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
 use Innmind\Immutable\{
-    Str,
     Maybe,
+    Monoid\Concat,
 };
 
 final class Git
@@ -58,17 +57,19 @@ final class Git
             ->execute(
                 Command::foreground('git')
                     ->withOption('version'),
-            );
-        /** @var Maybe<Output> */
+            )
+            ->unwrap();
         $output = $process
             ->wait()
-            ->match(
-                static fn() => Maybe::just($process->output()),
-                static fn() => Maybe::nothing(),
-            );
+            ->maybe()
+            ->map(static fn($success) => $success->output());
 
         return $output
-            ->map(static fn($output) => Str::of($output->toString()))
+            ->map(
+                static fn($output) => $output
+                    ->map(static fn($chunk) => $chunk->data())
+                    ->fold(new Concat),
+            )
             ->map(static fn($output) => $output->capture(
                 '~version (?<major>\d+)\.(?<minor>\d+)\.(?<bugfix>\d+)~',
             ))

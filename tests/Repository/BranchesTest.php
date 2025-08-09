@@ -8,57 +8,43 @@ use Innmind\Git\{
     Revision\Branch,
     Binary,
 };
-use Innmind\Server\Control\{
-    Server,
-    Server\Processes,
-    Server\Process,
-    Server\Process\Output,
-};
+use Innmind\Server\Control\Servers\Mock;
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Set,
-    Either,
     SideEffect,
 };
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class BranchesTest extends TestCase
 {
     public function testLocal()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'branch' '--no-color'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
-                        static fn($path) => $path->toString(),
-                        static fn() => null,
+        $server = Mock::new($this->assert())
+            ->willExecute(
+                function($command) {
+                    $this->assertSame(
+                        "git 'branch' '--no-color'",
+                        $command->toString(),
                     );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process
-            ->method('output')
-            ->willReturn($output = $this->createMock(Output::class));
-        $output
-            ->expects($this->once())
-            ->method('toString')
-            ->willReturn(<<<BRANCHES
-* (HEAD detached at aa4a336)
-  develop
-  foo-bar-baz
-  master
+                    $this->assertSame(
+                        '/tmp/foo',
+                        $command->workingDirectory()->match(
+                            static fn($path) => $path->toString(),
+                            static fn() => null,
+                        ),
+                    );
+                },
+                static fn($_, $builder) => $builder->success([[
+                    <<<BRANCHES
+                    * (HEAD detached at aa4a336)
+                      develop
+                      foo-bar-baz
+                      master
 
-BRANCHES
+                    BRANCHES,
+                    'output',
+                ]]),
             );
 
         $branches = new Branches(
@@ -81,39 +67,31 @@ BRANCHES
 
     public function testRemote()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'branch' '-r' '--no-color'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
-                        static fn($path) => $path->toString(),
-                        static fn() => null,
+        $server = Mock::new($this->assert())
+            ->willExecute(
+                function($command) {
+                    $this->assertSame(
+                        "git 'branch' '-r' '--no-color'",
+                        $command->toString(),
                     );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process
-            ->method('output')
-            ->willReturn($output = $this->createMock(Output::class));
-        $output
-            ->expects($this->once())
-            ->method('toString')
-            ->willReturn(<<<BRANCHES
-  origin/HEAD -> origin/master
-  origin/develop
-  origin/foo-bar-baz
-  origin/master
+                    $this->assertSame(
+                        '/tmp/foo',
+                        $command->workingDirectory()->match(
+                            static fn($path) => $path->toString(),
+                            static fn() => null,
+                        ),
+                    );
+                },
+                static fn($_, $builder) => $builder->success([[
+                    <<<BRANCHES
+                      origin/HEAD -> origin/master
+                      origin/develop
+                      origin/foo-bar-baz
+                      origin/master
 
-BRANCHES
+                    BRANCHES,
+                    'output',
+                ]]),
             );
 
         $branches = new Branches(
@@ -136,64 +114,56 @@ BRANCHES
 
     public function testAll()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->exactly(2))
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $process1 = $this->createMock(Process::class);
-        $process2 = $this->createMock(Process::class);
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
-                match ($matcher->numberOfInvocations()) {
-                    1 => $this->assertSame("git 'branch' '--no-color'", $command->toString()),
-                    2 => $this->assertSame("git 'branch' '-r' '--no-color'", $command->toString()),
-                };
-                $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                    static fn($path) => $path->toString(),
-                    static fn() => null,
-                ));
+        $server = Mock::new($this->assert())
+            ->willExecute(
+                function($command) {
+                    $this->assertSame(
+                        "git 'branch' '--no-color'",
+                        $command->toString(),
+                    );
+                    $this->assertSame(
+                        '/tmp/foo',
+                        $command->workingDirectory()->match(
+                            static fn($path) => $path->toString(),
+                            static fn() => null,
+                        ),
+                    );
+                },
+                static fn($_, $builder) => $builder->success([[
+                    <<<BRANCHES
+                    * (HEAD detached at aa4a336)
+                      develop
+                      foo-bar-baz
+                      master
 
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $process1,
-                    2 => $process2,
-                };
-            });
-        $process1
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process1
-            ->method('output')
-            ->willReturn($output1 = $this->createMock(Output::class));
-        $output1
-            ->expects($this->once())
-            ->method('toString')
-            ->willReturn(<<<BRANCHES
-* (HEAD detached at aa4a336)
-  develop
-  foo-bar-baz
-  master
-BRANCHES
-            );
-        $process2
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process2
-            ->method('output')
-            ->willReturn($output2 = $this->createMock(Output::class));
-        $output2
-            ->expects($this->once())
-            ->method('toString')
-            ->willReturn(<<<BRANCHES
-  origin/HEAD -> origin/master
-  origin/develop
-  origin/foo-bar-baz
-  origin/master
-BRANCHES
+                    BRANCHES,
+                    'output',
+                ]]),
+            )
+            ->willExecute(
+                function($command) {
+                    $this->assertSame(
+                        "git 'branch' '-r' '--no-color'",
+                        $command->toString(),
+                    );
+                    $this->assertSame(
+                        '/tmp/foo',
+                        $command->workingDirectory()->match(
+                            static fn($path) => $path->toString(),
+                            static fn() => null,
+                        ),
+                    );
+                },
+                static fn($_, $builder) => $builder->success([[
+                    <<<BRANCHES
+                      origin/HEAD -> origin/master
+                      origin/develop
+                      origin/foo-bar-baz
+                      origin/master
+
+                    BRANCHES,
+                    'output',
+                ]]),
             );
 
         $branches = new Branches(
@@ -222,29 +192,20 @@ BRANCHES
 
     public function testNew()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'branch' 'bar'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'branch' 'bar'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process
-            ->method('output')
-            ->willReturn($this->createMock(Output::class));
+                    ),
+                );
+            });
 
         $branches = new Branches(
             new Binary(
@@ -264,29 +225,20 @@ BRANCHES
 
     public function testNewOff()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'branch' 'bar' 'develop'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'branch' 'bar' 'develop'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process
-            ->method('output')
-            ->willReturn($this->createMock(Output::class));
+                    ),
+                );
+            });
 
         $branches = new Branches(
             new Binary(
@@ -306,26 +258,20 @@ BRANCHES
 
     public function testNewOrphan()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'checkout' '--orphan' 'bar'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'checkout' '--orphan' 'bar'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
+                    ),
+                );
+            });
 
         $branches = new Branches(
             new Binary(
@@ -345,29 +291,20 @@ BRANCHES
 
     public function testDelete()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'branch' '-d' 'bar'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'branch' '-d' 'bar'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process
-            ->method('output')
-            ->willReturn($this->createMock(Output::class));
+                    ),
+                );
+            });
 
         $branches = new Branches(
             new Binary(
@@ -387,29 +324,20 @@ BRANCHES
 
     public function testForceDelete()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'branch' '-D' 'bar'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'branch' '-D' 'bar'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process
-            ->method('output')
-            ->willReturn($this->createMock(Output::class));
+                    ),
+                );
+            });
 
         $branches = new Branches(
             new Binary(

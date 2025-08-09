@@ -25,7 +25,9 @@ jobs:
         with:
           dependency-versions: ${{ matrix.dependencies }}
       - name: PHPUnit
-        run: vendor/bin/phpunit --coverage-clover=coverage.clover
+        run: php blackbox.php
+        env:
+          ENABLE_COVERAGE: 'true'
       - uses: codecov/codecov-action@v1
         with:
           token: ${{ secrets.CODECOV_TOKEN }}

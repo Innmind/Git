@@ -9,18 +9,11 @@ use Innmind\Git\{
     Version,
 };
 use Innmind\OperatingSystem\Factory;
-use Innmind\Server\Control\{
-    Server,
-    Server\Processes,
-    Server\Process,
-    Server\Process\ExitCode,
-    Server\Process\Output,
-};
+use Innmind\Server\Control\Servers\Mock;
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
-use Innmind\Immutable\Either;
 use Symfony\Component\Filesystem\Filesystem;
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class GitTest extends TestCase
 {
@@ -33,7 +26,7 @@ class GitTest extends TestCase
     {
         $git = Git::of(
             Factory::build()->control(),
-            $this->createMock(Clock::class),
+            Clock::live(),
         );
 
         $this->assertInstanceOf(
@@ -49,7 +42,7 @@ class GitTest extends TestCase
     {
         $git = Git::of(
             Factory::build()->control(),
-            $this->createMock(Clock::class),
+            Clock::live(),
         );
 
         $this->assertInstanceOf(Version::class, $git->version()->match(
@@ -61,26 +54,16 @@ class GitTest extends TestCase
     public function testReturnNothingWhenFailToDetermineVersion()
     {
         $git = Git::of(
-            $server = $this->createMock(Server::class),
-            $this->createMock(Clock::class),
+            Mock::new($this->assert())
+                ->willExecute(
+                    fn($command) => $this->assertSame(
+                        "git '--version'",
+                        $command->toString(),
+                    ),
+                    static fn($_, $builder) => $builder->failed(),
+                ),
+            Clock::live(),
         );
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git '--version'";
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                $this->createMock(Output::class),
-            )));
 
         $this->assertNull($git->version()->match(
             static fn($version) => $version,

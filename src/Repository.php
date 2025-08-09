@@ -21,6 +21,7 @@ use Innmind\Immutable\{
     Str,
     Maybe,
     SideEffect,
+    Monoid\Concat,
 };
 
 final class Repository
@@ -56,6 +57,7 @@ final class Repository
                     ->withShortOption('p')
                     ->withArgument($path->toString()),
             )
+            ->unwrap()
             ->wait()
             ->match(
                 static fn() => Maybe::just(new self($server, $path, $clock, $home)),
@@ -75,7 +77,11 @@ final class Repository
                 ->command()
                 ->withArgument('init'),
         )
-            ->map(static fn($output) => Str::of($output->toString()))
+            ->map(
+                static fn($output) => $output
+                    ->map(static fn($chunk) => $chunk->data())
+                    ->fold(new Concat),
+            )
             ->filter(
                 static fn($output) => $output->contains('Initialized empty Git repository') || $output->contains('Reinitialized existing Git repository'),
             )
@@ -95,10 +101,10 @@ final class Repository
                 ->withArgument('branch')
                 ->withOption('no-color'),
         )
-            ->match(
-                static fn($output) => Str::of($output->toString()),
-                static fn() => Str::of(''),
-            )
+            ->toSequence()
+            ->flatMap(static fn($output) => $output)
+            ->map(static fn($chunk) => $chunk->data())
+            ->fold(new Concat)
             ->split("\n")
             ->filter(static function(Str $line): bool {
                 return $line->matches('~^\* .+~');

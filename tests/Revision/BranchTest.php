@@ -4,9 +4,9 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Git\Revision;
 
 use Innmind\Git\Revision\Branch;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 

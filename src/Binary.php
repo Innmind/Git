@@ -6,10 +6,13 @@ namespace Innmind\Git;
 use Innmind\Server\Control\{
     Server,
     Server\Command,
-    Server\Process\Output,
+    Server\Process\Output\Chunk,
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\Maybe;
+use Innmind\Immutable\{
+    Maybe,
+    Sequence,
+};
 
 /**
  * @internal
@@ -31,23 +34,19 @@ final class Binary
     }
 
     /**
-     * @return Maybe<Output>
+     * @return Maybe<Sequence<Chunk>>
      */
     #[\NoDiscard]
     public function __invoke(Command $command): Maybe
     {
-        $process = $this
+        return $this
             ->server
             ->processes()
-            ->execute($command);
-
-        /** @var Maybe<Output> */
-        return $process
+            ->execute($command)
+            ->unwrap()
             ->wait()
-            ->match(
-                static fn() => Maybe::just($process->output()),
-                static fn() => Maybe::nothing(),
-            );
+            ->maybe()
+            ->map(static fn($success) => $success->output());
     }
 
     #[\NoDiscard]
