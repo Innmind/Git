@@ -28,25 +28,30 @@ use Innmind\Url\Path;
 
 $os = Factory::build();
 $git = Git::of($os->control(), $os->clock());
-$repository = $git->repository(Path::of('/somewhere/on/the/local/machine'))->match(
-    static fn($repository) => $repository,
-    static fn() => throw new \RuntimeException('The path does not exist'),
-);
-$_ = $repository->init()->match(
-    static fn() => null, // pass
-    static fn() => throw new \RuntimeException('Failed to init the repository'),
-);
+$repository = $git
+    ->repository(Path::of('/somewhere/on/the/local/machine'))
+    ->unwrap();
+$_ = $repository
+    ->init()
+    ->unwrap();
 $remotes = $repository->remotes();
-$remotes->add(Name::of('origin'), Url::of('git@github.com:Vendor/Repo.git'))
-$remotes->push(Branch::of('master'));
+$remotes
+    ->add(Name::of('origin'), Url::of('git@github.com:Vendor/Repo.git'))
+    ->unwrap();
+$remotes
+    ->get(Name::of('origin'))
+    ->push(Branch::of('master'))
+    ->unwrap();
 $repository
     ->branches()
-    ->new(Branch::of('develop'));
+    ->new(Branch::of('develop'))
+    ->unwrap();
 $repository
     ->checkout()
-    ->revision(Branch::of('develop'));
+    ->revision(Branch::of('develop'))
+    ->unwrap();
 ```
 
 This example initialize a local git repository, declare a github repository as its remote and finally checkout the new branch `develop`.
 
-The offered functionalities goes beyond this single example, check the classes' interface to discover all of them.
+The offered functionalities goes beyond this single example, check the classes' api to discover all of them.
