@@ -10,18 +10,10 @@ use Innmind\Git\{
     Binary,
     Revision\Branch,
 };
-use Innmind\Server\Control\{
-    Server,
-    Server\Processes,
-    Server\Process,
-    Server\Process\Output,
-};
+use Innmind\Server\Control\Servers\Mock;
 use Innmind\Url\Path;
-use Innmind\Immutable\{
-    Either,
-    SideEffect,
-};
-use PHPUnit\Framework\TestCase;
+use Innmind\Immutable\SideEffect;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class RemoteTest extends TestCase
 {
@@ -29,7 +21,7 @@ class RemoteTest extends TestCase
     {
         $remote = new Remote(
             new Binary(
-                $this->createMock(Server::class),
+                Mock::new($this->assert()),
                 Path::of('/tmp/foo'),
             ),
             $expected = Name::of('origin'),
@@ -40,29 +32,20 @@ class RemoteTest extends TestCase
 
     public function testPrune()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'remote' 'prune' 'origin'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'remote' 'prune' 'origin'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process
-            ->method('output')
-            ->willReturn($this->createMock(Output::class));
+                    ),
+                );
+            });
 
         $remote = new Remote(
             new Binary(
@@ -83,29 +66,20 @@ class RemoteTest extends TestCase
 
     public function testSetUrl()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'remote' 'set-url' 'origin' '/local/remote'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'remote' 'set-url' 'origin' '/local/remote'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process
-            ->method('output')
-            ->willReturn($this->createMock(Output::class));
+                    ),
+                );
+            });
 
         $remote = new Remote(
             new Binary(
@@ -126,29 +100,20 @@ class RemoteTest extends TestCase
 
     public function testAddUrl()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'remote' 'set-url' '--add' 'origin' '/local/remote'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'remote' 'set-url' '--add' 'origin' '/local/remote'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process
-            ->method('output')
-            ->willReturn($this->createMock(Output::class));
+                    ),
+                );
+            });
 
         $remote = new Remote(
             new Binary(
@@ -169,29 +134,20 @@ class RemoteTest extends TestCase
 
     public function testDeleteUrl()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'remote' 'set-url' '--delete' 'origin' '/local/remote'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'remote' 'set-url' '--delete' 'origin' '/local/remote'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process
-            ->method('output')
-            ->willReturn($this->createMock(Output::class));
+                    ),
+                );
+            });
 
         $remote = new Remote(
             new Binary(
@@ -212,26 +168,20 @@ class RemoteTest extends TestCase
 
     public function testPush()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'push' '-u' 'origin' 'develop'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'push' '-u' 'origin' 'develop'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
+                    ),
+                );
+            });
 
         $remote = new Remote(
             new Binary(
@@ -252,26 +202,20 @@ class RemoteTest extends TestCase
 
     public function testDelete()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'push' 'origin' ':develop'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'push' 'origin' ':develop'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
+                    ),
+                );
+            });
 
         $remote = new Remote(
             new Binary(

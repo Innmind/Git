@@ -15,25 +15,19 @@ use Innmind\Git\{
 };
 use Innmind\OperatingSystem\Factory;
 use Innmind\Server\Control\{
-    Server,
-    Server\Processes,
-    Server\Process,
-    Server\Process\Output,
-    Server\Process\ExitCode,
     Server\Command\Str,
+    Servers\Mock,
 };
 use Innmind\Url\Path;
 use Innmind\TimeContinuum\Clock;
-use Innmind\Immutable\{
-    Either,
-    SideEffect,
-};
+use Innmind\Immutable\SideEffect;
 use Symfony\Component\Filesystem\Filesystem;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
+use PHPUnit\Framework\Attributes\DataProvider;
 
 class RepositoryTest extends TestCase
 {
@@ -46,30 +40,19 @@ class RepositoryTest extends TestCase
 
     public function testReturnNothingWhenDirectoryIsNotAccessible()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "mkdir '-p' '/tmp/foo'";
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                $this->createMock(Output::class),
-            )));
+        $server = Mock::new($this->assert())
+            ->willExecute(
+                fn($command) => $this->assertSame(
+                    "mkdir '-p' '/tmp/foo'",
+                    $command->toString(),
+                ),
+                static fn($_, $builder) => $builder->failed(),
+            );
 
         $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         );
 
         $this->assertNull($repo->match(
@@ -80,46 +63,23 @@ class RepositoryTest extends TestCase
 
     public function testReturnNothingWhenInitProcessFailed()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->exactly(2))
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $process1 = $this->createMock(Process::class);
-        $process2 = $this->createMock(Process::class);
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
-                if ($matcher->numberOfInvocations() === 2) {
+        $server = Mock::new($this->assert())
+            ->willExecute(static fn() => null)
+            ->willExecute(
+                function($command) {
                     $this->assertSame("git 'init'", $command->toString());
                     $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
                     ));
-                }
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $process1,
-                    2 => $process2,
-                };
-            });
-        $process1
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process2
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                $this->createMock(Output::class),
-            )));
+                },
+                static fn($_, $builder) => $builder->failed(),
+            );
 
         $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         )->match(
             static fn($repo) => $repo,
             static fn() => null,
@@ -133,46 +93,20 @@ class RepositoryTest extends TestCase
 
     public function testReturnNothingWhenInitOutputIsNotAsExpected()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->exactly(2))
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $process1 = $this->createMock(Process::class);
-        $process2 = $this->createMock(Process::class);
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
-                if ($matcher->numberOfInvocations() === 2) {
-                    $this->assertSame("git 'init'", $command->toString());
-                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                        static fn($path) => $path->toString(),
-                        static fn() => null,
-                    ));
-                }
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $process1,
-                    2 => $process2,
-                };
+        $server = Mock::new($this->assert())
+            ->willExecute(static fn() => null)
+            ->willExecute(function($command) {
+                $this->assertSame("git 'init'", $command->toString());
+                $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                    static fn($path) => $path->toString(),
+                    static fn() => null,
+                ));
             });
-        $process1
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process2
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process2
-            ->method('output')
-            ->willReturn($output = $this->createMock(Output::class));
 
         $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         )->match(
             static fn($repo) => $repo,
             static fn() => null,
@@ -189,13 +123,13 @@ class RepositoryTest extends TestCase
         $repo = Repository::of(
             Factory::build()->control(),
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         )->match(
             static fn($repo) => $repo,
             static fn() => null,
         );
 
-        $this->assertDirectoryDoesNotExist('/tmp/foo/.git');
+        $this->assertFalse(\file_exists('/tmp/foo/.git'));
         $this->assertInstanceOf(SideEffect::class, $repo->init()->match(
             static fn($sideEffect) => $sideEffect,
             static fn() => null,
@@ -204,58 +138,32 @@ class RepositoryTest extends TestCase
             static fn($sideEffect) => $sideEffect,
             static fn() => null,
         )); //validate reinit doesn't throw
-        $this->assertDirectoryExists('/tmp/foo/.git');
+        $this->assertTrue(\file_exists('/tmp/foo/.git'));
+        $this->assertTrue(\is_dir('/tmp/foo/.git'));
     }
 
-    /**
-     * @dataProvider heads
-     */
+    #[DataProvider('heads')]
     public function testHead(string $list, string $expected, string $class)
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->exactly(2))
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $process1 = $this->createMock(Process::class);
-        $process2 = $this->createMock(Process::class);
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
-                if ($matcher->numberOfInvocations() === 2) {
+        $server = Mock::new($this->assert())
+            ->willExecute(static fn() => null)
+            ->willExecute(
+                function($command) {
                     $this->assertSame("git 'branch' '--no-color'", $command->toString());
                     $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
                     ));
-                }
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $process1,
-                    2 => $process2,
-                };
-            });
-        $process1
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process2
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process2
-            ->method('output')
-            ->willReturn($output = $this->createMock(Output::class));
-        $output
-            ->expects($this->once())
-            ->method('toString')
-            ->willReturn($list);
+                },
+                static fn($_, $builder) => $builder->success([
+                    [$list, 'output'],
+                ]),
+            );
 
         $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         )->match(
             static fn($repo) => $repo,
             static fn() => null,
@@ -275,7 +183,7 @@ class RepositoryTest extends TestCase
         $repo = Repository::of(
             Factory::build()->control(),
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         )->match(
             static fn($repo) => $repo,
             static fn() => null,
@@ -286,43 +194,20 @@ class RepositoryTest extends TestCase
 
     public function testPush()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->exactly(2))
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $process1 = $this->createMock(Process::class);
-        $process2 = $this->createMock(Process::class);
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
-                if ($matcher->numberOfInvocations() === 2) {
-                    $this->assertSame("git 'push'", $command->toString());
-                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                        static fn($path) => $path->toString(),
-                        static fn() => null,
-                    ));
-                }
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $process1,
-                    2 => $process2,
-                };
+        $server = Mock::new($this->assert())
+            ->willExecute(static fn() => null)
+            ->willExecute(function($command) {
+                $this->assertSame("git 'push'", $command->toString());
+                $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                    static fn($path) => $path->toString(),
+                    static fn() => null,
+                ));
             });
-        $process1
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process2
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
 
         $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         )->match(
             static fn($repo) => $repo,
             static fn() => null,
@@ -339,43 +224,20 @@ class RepositoryTest extends TestCase
 
     public function testPull()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->exactly(2))
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $process1 = $this->createMock(Process::class);
-        $process2 = $this->createMock(Process::class);
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
-                if ($matcher->numberOfInvocations() === 2) {
-                    $this->assertSame("git 'pull'", $command->toString());
-                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                        static fn($path) => $path->toString(),
-                        static fn() => null,
-                    ));
-                }
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $process1,
-                    2 => $process2,
-                };
+        $server = Mock::new($this->assert())
+            ->willExecute(static fn() => null)
+            ->willExecute(function($command) {
+                $this->assertSame("git 'pull'", $command->toString());
+                $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                    static fn($path) => $path->toString(),
+                    static fn() => null,
+                ));
             });
-        $process1
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process2
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
 
         $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         )->match(
             static fn($repo) => $repo,
             static fn() => null,
@@ -395,7 +257,7 @@ class RepositoryTest extends TestCase
         $repo = Repository::of(
             Factory::build()->control(),
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         )->match(
             static fn($repo) => $repo,
             static fn() => null,
@@ -409,7 +271,7 @@ class RepositoryTest extends TestCase
         $repo = Repository::of(
             Factory::build()->control(),
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         )->match(
             static fn($repo) => $repo,
             static fn() => null,
@@ -423,7 +285,7 @@ class RepositoryTest extends TestCase
         $repo = Repository::of(
             Factory::build()->control(),
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         )->match(
             static fn($repo) => $repo,
             static fn() => null,
@@ -434,43 +296,20 @@ class RepositoryTest extends TestCase
 
     public function testAdd()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->exactly(2))
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $process1 = $this->createMock(Process::class);
-        $process2 = $this->createMock(Process::class);
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
-                if ($matcher->numberOfInvocations() === 2) {
-                    $this->assertSame("git 'add' 'foo'", $command->toString());
-                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                        static fn($path) => $path->toString(),
-                        static fn() => null,
-                    ));
-                }
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $process1,
-                    2 => $process2,
-                };
+        $server = Mock::new($this->assert())
+            ->willExecute(static fn() => null)
+            ->willExecute(function($command) {
+                $this->assertSame("git 'add' 'foo'", $command->toString());
+                $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                    static fn($path) => $path->toString(),
+                    static fn() => null,
+                ));
             });
-        $process1
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process2
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
 
         $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         )->match(
             static fn($repo) => $repo,
             static fn() => null,
@@ -485,52 +324,28 @@ class RepositoryTest extends TestCase
         );
     }
 
-    public function testCommit()
+    public function testCommit(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set::strings()->atLeast(1)->filter(
                 static fn($string) => $string === \trim($string),
             ))
-            ->then(function(string $message): void {
-                $server = $this->createMock(Server::class);
-                $server
-                    ->expects($this->exactly(2))
-                    ->method('processes')
-                    ->willReturn($processes = $this->createMock(Processes::class));
-                $process1 = $this->createMock(Process::class);
-                $process2 = $this->createMock(Process::class);
-                $processes
-                    ->expects($matcher = $this->exactly(2))
-                    ->method('execute')
-                    ->willReturnCallback(function($command) use ($matcher, $message, $process1, $process2) {
-                        $message = (new Str($message))->toString();
-
-                        if ($matcher->numberOfInvocations() === 2) {
-                            $this->assertSame("git 'commit' '-m' $message", $command->toString());
-                            $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                                static fn($path) => $path->toString(),
-                                static fn() => null,
-                            ));
-                        }
-
-                        return match ($matcher->numberOfInvocations()) {
-                            1 => $process1,
-                            2 => $process2,
-                        };
+            ->prove(function(string $message): void {
+                $messageArgument = (new Str($message))->toString();
+                $server = Mock::new($this->assert())
+                    ->willExecute(static fn() => null)
+                    ->willExecute(function($command) use ($messageArgument) {
+                        $this->assertSame("git 'commit' '-m' $messageArgument", $command->toString());
+                        $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                            static fn($path) => $path->toString(),
+                            static fn() => null,
+                        ));
                     });
-                $process1
-                    ->expects($this->once())
-                    ->method('wait')
-                    ->willReturn(Either::right(new SideEffect));
-                $process2
-                    ->expects($this->once())
-                    ->method('wait')
-                    ->willReturn(Either::right(new SideEffect));
 
                 $repo = Repository::of(
                     $server,
                     Path::of('/tmp/foo'),
-                    $this->createMock(Clock::class),
+                    Clock::live(),
                 )->match(
                     static fn($repo) => $repo,
                     static fn() => null,
@@ -548,43 +363,23 @@ class RepositoryTest extends TestCase
 
     public function testMerge()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->exactly(2))
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $process1 = $this->createMock(Process::class);
-        $process2 = $this->createMock(Process::class);
-        $processes
-            ->expects($matcher = $this->exactly(2))
-            ->method('execute')
-            ->willReturnCallback(function($command) use ($matcher, $process1, $process2) {
-                if ($matcher->numberOfInvocations() === 2) {
-                    $this->assertSame("git 'merge' 'develop'", $command->toString());
-                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                        static fn($path) => $path->toString(),
-                        static fn() => null,
-                    ));
-                }
-
-                return match ($matcher->numberOfInvocations()) {
-                    1 => $process1,
-                    2 => $process2,
-                };
+        $server = Mock::new($this->assert())
+            ->willExecute(static fn($command) => null)
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'merge' 'develop'",
+                    $command->toString(),
+                );
+                $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                    static fn($path) => $path->toString(),
+                    static fn() => null,
+                ));
             });
-        $process1
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process2
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
 
         $repo = Repository::of(
             $server,
             Path::of('/tmp/foo'),
-            $this->createMock(Clock::class),
+            Clock::live(),
         )->match(
             static fn($repo) => $repo,
             static fn() => null,

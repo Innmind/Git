@@ -13,6 +13,7 @@ use Innmind\Immutable\{
     Str,
     Maybe,
     SideEffect,
+    Monoid\Concat,
 };
 
 final class Branches
@@ -37,10 +38,10 @@ final class Branches
                 ->withArgument('branch')
                 ->withOption('no-color'),
         )
-            ->match(
-                static fn($output) => Str::of($output->toString()),
-                static fn() => Str::of(''),
-            );
+            ->toSequence()
+            ->flatMap(static fn($output) => $output)
+            ->map(static fn($chunk) => $chunk->data())
+            ->fold(new Concat);
 
         /** @var Set<Branch> */
         return Set::of(
@@ -77,10 +78,10 @@ final class Branches
                 ->withShortOption('r')
                 ->withOption('no-color'),
         )
-            ->match(
-                static fn($output) => Str::of($output->toString()),
-                static fn() => Str::of(''),
-            );
+            ->toSequence()
+            ->flatMap(static fn($output) => $output)
+            ->map(static fn($chunk) => $chunk->data())
+            ->fold(new Concat);
 
         /** @var Set<Branch> */
         return Set::of(

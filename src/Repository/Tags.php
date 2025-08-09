@@ -10,7 +10,7 @@ use Innmind\Git\{
 };
 use Innmind\TimeContinuum\{
     Clock,
-    Earth\Format\RFC2822,
+    Format,
     PointInTime,
 };
 use Innmind\Immutable\{
@@ -18,6 +18,7 @@ use Innmind\Immutable\{
     Str,
     Maybe,
     SideEffect,
+    Monoid\Concat,
 };
 
 final class Tags
@@ -100,11 +101,11 @@ final class Tags
                 ->withArgument('tag')
                 ->withOption('list')
                 ->withOption('format', '%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)')
-        );
-        $output = $output->match(
-            static fn($output) => Str::of($output->toString()),
-            static fn() => Str::of(''),
-        );
+        )
+            ->toSequence()
+            ->flatMap(static fn($output) => $output)
+            ->map(static fn($chunk) => $chunk->data())
+            ->fold(new Concat);
 
         /** @var Set<Tag> */
         return Set::of(
@@ -121,10 +122,11 @@ final class Tags
                         ', 0${1} ',
                     );
 
+                    /** @psalm-suppress ArgumentTypeCoercion */
                     return Maybe::all(
                         Name::maybe($name->toString()),
                         Message::maybe($message->toString()),
-                        $this->clock->at($time->toString(), new RFC2822),
+                        $this->clock->at($time->toString(), Format::rfc2822()),
                     )
                         ->map(static fn(Name $name, Message $message, PointInTime $date) => new Tag($name, $message, $date))
                         ->match(

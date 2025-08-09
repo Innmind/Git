@@ -10,9 +10,9 @@ use Innmind\Git\{
 };
 use Innmind\Immutable\{
     Set,
-    Str,
     Maybe,
     SideEffect,
+    Monoid\Concat,
 };
 
 final class Remotes
@@ -36,10 +36,10 @@ final class Remotes
                 ->command()
                 ->withArgument('remote')
         )
-            ->match(
-                static fn($output) => Str::of($output->toString()),
-                static fn() => Str::of(''),
-            );
+            ->toSequence()
+            ->flatMap(static fn($output) => $output)
+            ->map(static fn($chunk) => $chunk->data())
+            ->fold(new Concat);
 
         /** @var Set<Remote> */
         return Set::of(

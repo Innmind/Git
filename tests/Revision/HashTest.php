@@ -4,9 +4,9 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Git\Revision;
 
 use Innmind\Git\Revision\Hash;
-use PHPUnit\Framework\TestCase;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
+    PHPUnit\Framework\TestCase,
     Set,
 };
 
@@ -25,11 +25,11 @@ class HashTest extends TestCase
         );
     }
 
-    public function testReturnNothingWhenInvalidHash()
+    public function testReturnNothingWhenInvalidHash(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set::strings())
-            ->then(function($string): void {
+            ->prove(function($string): void {
                 $this->assertNull(Hash::maybe($string)->match(
                     static fn($hash) => $hash,
                     static fn() => null,
@@ -37,11 +37,11 @@ class HashTest extends TestCase
             });
     }
 
-    public function testOnlyHashAreAccepted()
+    public function testOnlyHashAreAccepted(): BlackBox\Proof
     {
-        $this
+        return $this
             ->forAll(Set::strings())
-            ->then(function($string): void {
+            ->prove(function($string): void {
                 $hash = \sha1($string);
                 $short = \substr($hash, 0, 7);
 

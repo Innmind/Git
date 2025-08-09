@@ -5,49 +5,31 @@ namespace Tests\Innmind\Git;
 
 use Innmind\Git\Binary;
 use Innmind\Server\Control\{
-    Server,
-    Server\Processes,
-    Server\Process,
-    Server\Process\ExitCode,
-    Server\Process\Output,
-    Server\Command
+    Server\Command,
+    Servers\Mock,
 };
 use Innmind\Url\Path;
-use Innmind\Immutable\{
-    Either,
-    SideEffect,
-};
-use PHPUnit\Framework\TestCase;
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class BinaryTest extends TestCase
 {
     public function testSuccessfulInvokation()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'watev'" &&
-                    $command->toBeRunInBackground() === false &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
+        $server = Mock::new($this->assert())
+            ->willExecute(function($command) {
+                $this->assertSame(
+                    "git 'watev'",
+                    $command->toString(),
+                );
+                $this->assertFalse($command->toBeRunInBackground());
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
                         static fn($path) => $path->toString(),
                         static fn() => null,
-                    );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::right(new SideEffect));
-        $process
-            ->expects($this->once())
-            ->method('output')
-            ->willReturn($output = $this->createMock(Output::class));
+                    ),
+                );
+            });
 
         $bin = new Binary(
             $server,
@@ -60,37 +42,31 @@ class BinaryTest extends TestCase
             static fn($path) => $path->toString(),
             static fn() => null,
         ));
-        $this->assertSame($output, $bin($bin->command()->withArgument('watev'))->match(
-            static fn($output) => $output,
+        $this->assertSame(0, $bin($bin->command()->withArgument('watev'))->match(
+            static fn($output) => $output->size(),
             static fn() => null,
         ));
     }
 
     public function testReturnNothingWhenCommandFailed()
     {
-        $server = $this->createMock(Server::class);
-        $server
-            ->expects($this->once())
-            ->method('processes')
-            ->willReturn($processes = $this->createMock(Processes::class));
-        $processes
-            ->expects($this->once())
-            ->method('execute')
-            ->with($this->callback(static function($command): bool {
-                return $command->toString() === "git 'watev'" &&
-                    '/tmp/foo' === $command->workingDirectory()->match(
-                        static fn($path) => $path->toString(),
-                        static fn() => null,
+        $server = Mock::new($this->assert())
+            ->willExecute(
+                function($command) {
+                    $this->assertSame(
+                        "git 'watev'",
+                        $command->toString(),
                     );
-            }))
-            ->willReturn($process = $this->createMock(Process::class));
-        $process
-            ->expects($this->once())
-            ->method('wait')
-            ->willReturn(Either::left(new Process\Failed(
-                new ExitCode(1),
-                $this->createMock(Output::class),
-            )));
+                    $this->assertSame(
+                        '/tmp/foo',
+                        $command->workingDirectory()->match(
+                            static fn($path) => $path->toString(),
+                            static fn() => null,
+                        ),
+                    );
+                },
+                static fn($_, $builder) => $builder->failed(),
+            );
 
         $bin = new Binary(
             $server,
@@ -106,7 +82,7 @@ class BinaryTest extends TestCase
     public function testHomeIsAddedToTheCommandEnvironment()
     {
         $bin = new Binary(
-            $this->createMock(Server::class),
+            Mock::new($this->assert()),
             Path::of('/tmp/foo'),
             Path::of('/Users/baptouuuu'),
         );
