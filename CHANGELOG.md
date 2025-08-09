@@ -5,6 +5,12 @@
 ### Changed
 
 - All methods that modify the state of the repository or that may fail to read from it now return an `Innmind\Immutable\Attempt`
+- `Innmind\Git\Repository\Branches` constructor is now private and internal
+- `Innmind\Git\Repository\Checkout` constructor is now private and internal
+- `Innmind\Git\Repository\Remote` constructor is now private and internal
+- `Innmind\Git\Repository\Remotes` constructor is now private and internal
+- `Innmind\Git\Repository\Tag` constructor is now private and internal
+- `Innmind\Git\Repository\Tags` constructor is now private and internal
 
 ### Fixed
 

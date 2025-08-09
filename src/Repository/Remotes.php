@@ -17,8 +17,16 @@ use Innmind\Immutable\{
 
 final class Remotes
 {
-    public function __construct(private Binary $binary)
+    private function __construct(private Binary $binary)
     {
+    }
+
+    /**
+     * @internal
+     */
+    public static function of(Binary $binary): self
+    {
+        return new self($binary);
     }
 
     /**
@@ -50,7 +58,7 @@ final class Remotes
     #[\NoDiscard]
     public function get(Name $name): Remote
     {
-        return new Remote(
+        return Remote::of(
             $this->binary,
             $name,
         );

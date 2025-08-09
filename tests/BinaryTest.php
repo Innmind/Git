@@ -31,7 +31,7 @@ class BinaryTest extends TestCase
                 );
             });
 
-        $bin = new Binary(
+        $bin = Binary::of(
             $server,
             Path::of('/tmp/foo'),
         );
@@ -68,7 +68,7 @@ class BinaryTest extends TestCase
                 static fn($_, $builder) => $builder->failed(),
             );
 
-        $bin = new Binary(
+        $bin = Binary::of(
             $server,
             Path::of('/tmp/foo'),
         );
@@ -81,7 +81,7 @@ class BinaryTest extends TestCase
 
     public function testHomeIsAddedToTheCommandEnvironment()
     {
-        $bin = new Binary(
+        $bin = Binary::of(
             Mock::new($this->assert()),
             Path::of('/tmp/foo'),
             Path::of('/Users/baptouuuu'),

@@ -11,7 +11,6 @@ use Innmind\Git\{
 use Innmind\TimeContinuum\{
     Clock,
     Format,
-    PointInTime,
 };
 use Innmind\Immutable\{
     Set,
@@ -24,10 +23,18 @@ use Innmind\Immutable\{
 
 final class Tags
 {
-    public function __construct(
+    private function __construct(
         private Binary $binary,
         private Clock $clock,
     ) {
+    }
+
+    /**
+     * @internal
+     */
+    public static function of(Binary $binary, Clock $clock): self
+    {
+        return new self($binary, $clock);
     }
 
     /**
@@ -121,7 +128,7 @@ final class Tags
                     Message::maybe($message->toString()),
                     $this->clock->at($time->toString(), Format::rfc2822()),
                 )
-                    ->map(static fn(Name $name, Message $message, PointInTime $date) => new Tag($name, $message, $date))
+                    ->map(Tag::of(...))
                     ->toSequence();
             })
             ->toSet();

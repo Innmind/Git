@@ -22,7 +22,7 @@ final class Binary
     private Server $server;
     private Command $command;
 
-    public function __construct(Server $server, Path $path, ?Path $home = null)
+    private function __construct(Server $server, Path $path, ?Path $home = null)
     {
         $this->server = $server;
         $this->command = Command::foreground('git')
@@ -49,6 +49,14 @@ final class Binary
                     ->attempt(static fn($error) => new \RuntimeException($error::class)),
             )
             ->map(static fn($success) => $success->output());
+    }
+
+    /**
+     * @internal
+     */
+    public static function of(Server $server, Path $path, ?Path $home = null): self
+    {
+        return new self($server, $path, $home);
     }
 
     #[\NoDiscard]

@@ -18,8 +18,16 @@ use Innmind\Immutable\{
 
 final class Branches
 {
-    public function __construct(private Binary $binary)
+    private function __construct(private Binary $binary)
     {
+    }
+
+    /**
+     * @internal
+     */
+    public static function of(Binary $binary): self
+    {
+        return new self($binary);
     }
 
     /**

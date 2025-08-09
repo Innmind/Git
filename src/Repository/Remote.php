@@ -16,12 +16,20 @@ use Innmind\Immutable\{
 
 final class Remote
 {
-    public function __construct(
+    private function __construct(
         private Binary $binary,
         private Name $name,
     ) {
         $this->binary = $binary;
         $this->name = $name;
+    }
+
+    /**
+     * @internal
+     */
+    public static function of(Binary $binary, Name $name): self
+    {
+        return new self($binary, $name);
     }
 
     #[\NoDiscard]

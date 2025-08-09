@@ -35,8 +35,8 @@ class CheckoutTest extends TestCase
                 );
             });
 
-        $checkout = new Checkout(
-            new Binary(
+        $checkout = Checkout::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),
@@ -69,8 +69,8 @@ class CheckoutTest extends TestCase
                 );
             });
 
-        $checkout = new Checkout(
-            new Binary(
+        $checkout = Checkout::of(
+            Binary::of(
                 $server,
                 Path::of('/tmp/foo'),
             ),

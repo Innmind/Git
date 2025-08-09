@@ -55,7 +55,7 @@ final class Repository
                     ->attempt(static fn($error) => new \RuntimeException($error::class)),
             )
             ->map(static fn() => new self(
-                new Binary(
+                Binary::of(
                     $server,
                     $path,
                     $home,
@@ -120,7 +120,7 @@ final class Repository
     #[\NoDiscard]
     public function branches(): Branches
     {
-        return new Branches($this->binary);
+        return Branches::of($this->binary);
     }
 
     /**
@@ -154,19 +154,19 @@ final class Repository
     #[\NoDiscard]
     public function remotes(): Remotes
     {
-        return new Remotes($this->binary);
+        return Remotes::of($this->binary);
     }
 
     #[\NoDiscard]
     public function checkout(): Checkout
     {
-        return new Checkout($this->binary);
+        return Checkout::of($this->binary);
     }
 
     #[\NoDiscard]
     public function tags(): Tags
     {
-        return new Tags($this->binary, $this->clock);
+        return Tags::of($this->binary, $this->clock);
     }
 
     /**
