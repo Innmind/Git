@@ -114,7 +114,7 @@ final class Branches
     /**
      * @return Maybe<SideEffect>
      */
-    public function new(Branch $name, Hash|Branch $off = null): Maybe
+    public function new(Branch $name, Hash|Branch|null $off = null): Maybe
     {
         $command = $this
             ->binary

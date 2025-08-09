@@ -48,7 +48,7 @@ final class Tags
     /**
      * @return Maybe<SideEffect>
      */
-    public function add(Name $name, Message $message = null): Maybe
+    public function add(Name $name, ?Message $message = null): Maybe
     {
         $command = $this
             ->binary

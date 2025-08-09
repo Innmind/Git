@@ -32,7 +32,7 @@ final class Repository
         Server $server,
         Path $path,
         Clock $clock,
-        Path $home = null,
+        ?Path $home = null,
     ) {
         $this->binary = new Binary($server, $path, $home);
         $this->clock = $clock;
@@ -45,7 +45,7 @@ final class Repository
         Server $server,
         Path $path,
         Clock $clock,
-        Path $home = null,
+        ?Path $home = null,
     ): Maybe {
         /** @var Maybe<self> */
         return $server
