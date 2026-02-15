@@ -37,7 +37,7 @@ class RemotesTest extends TestCase
                         REMOTES,
                         'output',
                     ]])
-                    ->build()
+                    ->build(),
             ),
         );
 
