@@ -14,7 +14,6 @@ use Innmind\Server\Control\{
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Set,
     Attempt,
     SideEffect,
 };
@@ -63,7 +62,6 @@ class BranchesTest extends TestCase
         );
         $local = $branches->local();
 
-        $this->assertInstanceOf(Set::class, $local);
         $this->assertSame(3, $local->size());
         $local = $local->toList();
         $this->assertSame('develop', \current($local)->toString());
@@ -114,7 +112,6 @@ class BranchesTest extends TestCase
         );
         $remote = $branches->remote();
 
-        $this->assertInstanceOf(Set::class, $remote);
         $this->assertSame(3, $remote->size());
         $remote = $remote->toList();
         $this->assertSame('origin/develop', \current($remote)->toString());
@@ -190,7 +187,6 @@ class BranchesTest extends TestCase
         );
         $all = $branches->all();
 
-        $this->assertInstanceOf(Set::class, $all);
         $this->assertSame(6, $all->size());
         $all = $all->toList();
         $this->assertSame('develop', \current($all)->toString());

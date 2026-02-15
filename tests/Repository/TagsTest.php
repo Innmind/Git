@@ -19,7 +19,6 @@ use Innmind\Time\{
     Format,
 };
 use Innmind\Immutable\{
-    Set,
     Attempt,
     SideEffect,
 };
@@ -212,7 +211,6 @@ class TagsTest extends TestCase
 
         $all = $tags->all();
 
-        $this->assertInstanceOf(Set::class, $all);
         $this->assertSame(3, $all->size());
         $all = $all->toList();
         $this->assertSame('1.0.0', \current($all)->name()->toString());
@@ -271,7 +269,6 @@ class TagsTest extends TestCase
 
         $all = $tags->all();
 
-        $this->assertInstanceOf(Set::class, $all);
         $this->assertSame(0, $all->size());
     }
 }
