@@ -8,7 +8,7 @@ use Innmind\Git\{
     Repository\Tag\Name,
     Message,
 };
-use Innmind\TimeContinuum\PointInTime;
+use Innmind\Time\Point;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class TagTest extends TestCase
@@ -18,7 +18,7 @@ class TagTest extends TestCase
         $tag = Tag::of(
             $name = Name::of('1.0.0'),
             $message = Message::of('watev'),
-            $date = PointInTime::now(),
+            $date = Point::now(),
         );
 
         $this->assertSame($name, $tag->name());

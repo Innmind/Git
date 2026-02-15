@@ -8,7 +8,7 @@ use Innmind\Server\Control\{
     Server\Command,
 };
 use Innmind\Url\Path;
-use Innmind\TimeContinuum\Clock;
+use Innmind\Time\Clock;
 use Innmind\Immutable\{
     Attempt,
     Maybe,
@@ -64,7 +64,7 @@ final class Git
                 static fn($success) => $success
                     ->output()
                     ->map(static fn($chunk) => $chunk->data())
-                    ->fold(new Concat)
+                    ->fold(Concat::monoid)
                     ->capture(
                         '~version (?<major>\d+)\.(?<minor>\d+)\.(?<bugfix>\d+)~',
                     )

@@ -16,7 +16,7 @@ use Innmind\Server\Control\{
     Server\Command,
 };
 use Innmind\Url\Path;
-use Innmind\TimeContinuum\Clock;
+use Innmind\Time\Clock;
 use Innmind\Immutable\{
     Str,
     Attempt,
@@ -76,7 +76,7 @@ final class Repository
             ->map(
                 static fn($output) => $output
                     ->map(static fn($chunk) => $chunk->data())
-                    ->fold(new Concat),
+                    ->fold(Concat::monoid),
             )
             ->flatMap(
                 static fn($output) => match ($output->contains('Initialized empty Git repository') || $output->contains('Reinitialized existing Git repository')) {
@@ -101,7 +101,7 @@ final class Repository
             ->flatMap(
                 static fn($output) => $output
                     ->map(static fn($chunk) => $chunk->data())
-                    ->fold(new Concat)
+                    ->fold(Concat::monoid)
                     ->split("\n")
                     ->filter(static function(Str $line): bool {
                         return $line->matches('~^\* .+~');

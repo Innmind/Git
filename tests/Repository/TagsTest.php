@@ -9,14 +9,17 @@ use Innmind\Git\{
     Message,
     Repository\Tag\Name,
 };
-use Innmind\Server\Control\Servers\Mock;
+use Innmind\Server\Control\{
+    Server,
+    Server\Process\Builder,
+};
 use Innmind\Url\Path;
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Format,
 };
 use Innmind\Immutable\{
-    Set,
+    Attempt,
     SideEffect,
 };
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -25,8 +28,8 @@ class TagsTest extends TestCase
 {
     public function testPush()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'push' '--tags'",
                     $command->toString(),
@@ -38,7 +41,10 @@ class TagsTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $tags = Tags::of(
             Binary::of(
@@ -59,8 +65,8 @@ class TagsTest extends TestCase
 
     public function testAdd()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'tag' '1.0.0' '-a' '-m' 'first release'",
                     $command->toString(),
@@ -72,7 +78,10 @@ class TagsTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $tags = Tags::of(
             Binary::of(
@@ -93,8 +102,8 @@ class TagsTest extends TestCase
 
     public function testAddWithoutMessage()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'tag' '1.0.0'",
                     $command->toString(),
@@ -106,7 +115,10 @@ class TagsTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $tags = Tags::of(
             Binary::of(
@@ -127,8 +139,8 @@ class TagsTest extends TestCase
 
     public function testSign()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'tag' '-s' '-a' '1.0.0' '-m' 'first release'",
                     $command->toString(),
@@ -140,7 +152,10 @@ class TagsTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $tags = Tags::of(
             Binary::of(
@@ -161,26 +176,31 @@ class TagsTest extends TestCase
 
     public function testAll()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(
-                function($command) {
-                    $this->assertSame(
-                        "git 'tag' '--list' '--format=%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)'",
-                        $command->toString(),
-                    );
-                    $this->assertSame(
-                        '/tmp/foo',
-                        $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        ),
-                    );
-                },
-                static fn($_, $builder) => $builder->success([[
-                    "1.0.0|||first release|||Sat, 16 Mar 2019 12:09:24 +0100\n1.0.1|||fix eris dependency|||Sat, 30 Mar 2019 12:30:35 +0100\n2.0.0|||tag in first 9 days of month is parsed|||Wed, 1 Jun 2022 12:00:00 +0200",
-                    'output',
-                ]]),
-            );
+        $server = Server::via(
+            function($command) {
+                $this->assertSame(
+                    "git 'tag' '--list' '--format=%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ),
+                );
+
+                return Attempt::result(
+                    Builder::foreground(2)
+                        ->success([[
+                            "1.0.0|||first release|||Sat, 16 Mar 2019 12:09:24 +0100\n1.0.1|||fix eris dependency|||Sat, 30 Mar 2019 12:30:35 +0100\n2.0.0|||tag in first 9 days of month is parsed|||Wed, 1 Jun 2022 12:00:00 +0200",
+                            'output',
+                        ]])
+                        ->build(),
+                );
+            },
+        );
+
         $tags = Tags::of(
             Binary::of(
                 $server,
@@ -191,8 +211,7 @@ class TagsTest extends TestCase
 
         $all = $tags->all();
 
-        $this->assertInstanceOf(Set::class, $all);
-        $this->assertCount(3, $all);
+        $this->assertSame(3, $all->size());
         $all = $all->toList();
         $this->assertSame('1.0.0', \current($all)->name()->toString());
         $this->assertSame('first release', \current($all)->message()->toString());
@@ -218,23 +237,28 @@ class TagsTest extends TestCase
 
     public function testAllWhenNoTag()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(
-                function($command) {
-                    $this->assertSame(
-                        "git 'tag' '--list' '--format=%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)'",
-                        $command->toString(),
-                    );
-                    $this->assertSame(
-                        '/tmp/foo',
-                        $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        ),
-                    );
-                },
-                static fn($_, $builder) => $builder->success([[' ', 'output']]),
-            );
+        $server = Server::via(
+            function($command) {
+                $this->assertSame(
+                    "git 'tag' '--list' '--format=%(refname:strip=2)|||%(subject)|||%(creatordate:rfc2822)'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ),
+                );
+
+                return Attempt::result(
+                    Builder::foreground(2)
+                        ->success([[' ', 'output']])
+                        ->build(),
+                );
+            },
+        );
+
         $tags = Tags::of(
             Binary::of(
                 $server,
@@ -245,7 +269,6 @@ class TagsTest extends TestCase
 
         $all = $tags->all();
 
-        $this->assertInstanceOf(Set::class, $all);
-        $this->assertCount(0, $all);
+        $this->assertSame(0, $all->size());
     }
 }

@@ -9,7 +9,7 @@ use Innmind\Git\{
     Repository\Remote\Url,
 };
 use Innmind\Immutable\{
-    Set,
+    Sequence,
     Attempt,
     SideEffect,
     Monoid\Concat,
@@ -30,10 +30,10 @@ final class Remotes
     }
 
     /**
-     * @return Set<Remote>
+     * @return Sequence<Remote>
      */
     #[\NoDiscard]
-    public function all(): Set
+    public function all(): Sequence
     {
         return ($this->binary)(
             static fn($command) => $command->withArgument('remote'),
@@ -42,14 +42,13 @@ final class Remotes
             ->toSequence()
             ->flatMap(static fn($output) => $output)
             ->map(static fn($chunk) => $chunk->data())
-            ->fold(new Concat)
+            ->fold(Concat::monoid)
             ->split("\n")
             ->flatMap(
                 fn($remote) => Name::maybe($remote->toString())
                     ->map($this->get(...))
                     ->toSequence(),
-            )
-            ->toSet();
+            );
     }
 
     #[\NoDiscard]
