@@ -16,7 +16,6 @@ use Innmind\Server\Control\{
 };
 use Innmind\Url\Path;
 use Innmind\Immutable\{
-    Set,
     Attempt,
     SideEffect,
 };
@@ -50,7 +49,6 @@ class RemotesTest extends TestCase
 
         $all = $remotes->all();
 
-        $this->assertInstanceOf(Set::class, $all);
         $this->assertSame(3, $all->size());
         $all = $all->toList();
         $this->assertSame('origin', \current($all)->name()->toString());

@@ -10,7 +10,7 @@ use Innmind\Git\{
 };
 use Innmind\Server\Control\Server\Command;
 use Innmind\Immutable\{
-    Set,
+    Sequence,
     Str,
     Attempt,
     SideEffect,
@@ -32,10 +32,10 @@ final class Branches
     }
 
     /**
-     * @return Set<Branch>
+     * @return Sequence<Branch>
      */
     #[\NoDiscard]
-    public function local(): Set
+    public function local(): Sequence
     {
         return ($this->binary)(
             static fn($command) => $command
@@ -54,15 +54,14 @@ final class Branches
                 static fn(Str $branch) => Branch::maybe(
                     $branch->drop(2)->toString(),
                 )->toSequence(),
-            )
-            ->toSet();
+            );
     }
 
     /**
-     * @return Set<Branch>
+     * @return Sequence<Branch>
      */
     #[\NoDiscard]
-    public function remote(): Set
+    public function remote(): Sequence
     {
         return ($this->binary)(
             static fn($command) => $command
@@ -82,19 +81,18 @@ final class Branches
                 static fn(Str $branch) => Branch::maybe(
                     $branch->drop(2)->toString(),
                 )->toSequence(),
-            )
-            ->toSet();
+            );
     }
 
     /**
-     * @return Set<Branch>
+     * @return Sequence<Branch>
      */
     #[\NoDiscard]
-    public function all(): Set
+    public function all(): Sequence
     {
         return $this
             ->local()
-            ->merge($this->remote());
+            ->append($this->remote());
     }
 
     /**

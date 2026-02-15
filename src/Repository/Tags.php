@@ -14,7 +14,7 @@ use Innmind\Time\{
     Format,
 };
 use Innmind\Immutable\{
-    Set,
+    Sequence,
     Str,
     Attempt,
     Maybe,
@@ -89,10 +89,10 @@ final class Tags
     }
 
     /**
-     * @return Set<Tag>
+     * @return Sequence<Tag>
      */
     #[\NoDiscard]
-    public function all(): Set
+    public function all(): Sequence
     {
         return ($this->binary)(
             static fn($command) => $command
@@ -123,7 +123,6 @@ final class Tags
                 )
                     ->map(Tag::of(...))
                     ->toSequence();
-            })
-            ->toSet();
+            });
     }
 }

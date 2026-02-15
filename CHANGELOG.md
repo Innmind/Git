@@ -6,6 +6,9 @@
 
 - Requires PHP `8.4`
 - Requires `innmind/foundation:~2.1`
+- `Innmind\Git\Repository\Branches::local()`, `::remote()` and `::all()` now return a `Innmind\Immutable\Sequence`
+- `Innmind\Git\Repository\Remotes::::all()` now return a `Innmind\Immutable\Sequence`
+- `Innmind\Git\Repository\Tags::::all()` now return a `Innmind\Immutable\Sequence`
 
 ## 4.0.0 - 2025-08-09
 
