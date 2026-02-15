@@ -9,9 +9,13 @@ use Innmind\Git\{
     Version,
 };
 use Innmind\OperatingSystem\Factory;
-use Innmind\Server\Control\Servers\Mock;
+use Innmind\Server\Control\{
+    Server,
+    Server\Process\Builder,
+};
 use Innmind\Url\Path;
-use Innmind\TimeContinuum\Clock;
+use Innmind\Time\Clock;
+use Innmind\Immutable\Attempt;
 use Symfony\Component\Filesystem\Filesystem;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
@@ -54,14 +58,20 @@ class GitTest extends TestCase
     public function testReturnNothingWhenFailToDetermineVersion()
     {
         $git = Git::of(
-            Mock::new($this->assert())
-                ->willExecute(
-                    fn($command) => $this->assertSame(
+            Server::via(
+                function($command) {
+                    $this->assertSame(
                         "git '--version'",
                         $command->toString(),
-                    ),
-                    static fn($_, $builder) => $builder->failed(),
-                ),
+                    );
+
+                    return Attempt::result(
+                        Builder::foreground(2)
+                            ->failed()
+                            ->build(),
+                    );
+                },
+            ),
             Clock::live(),
         );
 

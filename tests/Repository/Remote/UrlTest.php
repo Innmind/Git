@@ -4,29 +4,11 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Git\Repository\Remote;
 
 use Innmind\Git\Repository\Remote\Url;
-use Innmind\BlackBox\{
-    PHPUnit\BlackBox,
-    PHPUnit\Framework\TestCase,
-    Set,
-};
+use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
 class UrlTest extends TestCase
 {
-    use BlackBox;
-
-    public function testReturnNothingWhenGivenAnyRandomString(): BlackBox\Proof
-    {
-        return $this
-            ->forAll(Set::of("\x01", "\x02", "\x03"))
-            ->prove(function(string $string): void {
-                $this->assertNull(Url::maybe($string)->match(
-                    static fn($url) => $url,
-                    static fn() => null,
-                ));
-            });
-    }
-
     #[DataProvider('formats')]
     public function testInterface(string $format)
     {

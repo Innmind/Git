@@ -10,10 +10,14 @@ use Innmind\Git\{
     Repository\Remote\Url,
     Binary,
 };
-use Innmind\Server\Control\Servers\Mock;
+use Innmind\Server\Control\{
+    Server,
+    Server\Process\Builder,
+};
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Set,
+    Attempt,
     SideEffect,
 };
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -22,18 +26,20 @@ class RemotesTest extends TestCase
 {
     public function testAll()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(
-                static fn() => null,
-                static fn($_, $builder) => $builder->success([[
-                    <<<REMOTES
-                    origin
-                    gitlab
-                    local
-                    REMOTES,
-                    'output',
-                ]]),
-            );
+        $server = Server::via(
+            static fn() => Attempt::result(
+                Builder::foreground(2)
+                    ->success([[
+                        <<<REMOTES
+                        origin
+                        gitlab
+                        local
+                        REMOTES,
+                        'output',
+                    ]])
+                    ->build()
+            ),
+        );
 
         $remotes = Remotes::of(
             Binary::of(
@@ -45,7 +51,7 @@ class RemotesTest extends TestCase
         $all = $remotes->all();
 
         $this->assertInstanceOf(Set::class, $all);
-        $this->assertCount(3, $all);
+        $this->assertSame(3, $all->size());
         $all = $all->toList();
         $this->assertSame('origin', \current($all)->name()->toString());
         \next($all);
@@ -58,7 +64,7 @@ class RemotesTest extends TestCase
     {
         $remotes = Remotes::of(
             Binary::of(
-                Mock::new($this->assert()),
+                Server::via(static fn() => null),
                 Path::of('watev'),
             ),
         );
@@ -71,8 +77,8 @@ class RemotesTest extends TestCase
 
     public function testAdd()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'remote' 'add' 'origin' 'git@github.com:Innmind/Git.git'",
                     $command->toString(),
@@ -84,7 +90,10 @@ class RemotesTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $remotes = Remotes::of(
             Binary::of(
@@ -104,8 +113,8 @@ class RemotesTest extends TestCase
 
     public function testRemove()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'remote' 'remove' 'origin'",
                     $command->toString(),
@@ -117,7 +126,10 @@ class RemotesTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $remotes = Remotes::of(
             Binary::of(

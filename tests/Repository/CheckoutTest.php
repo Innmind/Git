@@ -9,9 +9,15 @@ use Innmind\Git\{
     Revision\Hash,
     Binary,
 };
-use Innmind\Server\Control\Servers\Mock;
+use Innmind\Server\Control\{
+    Server,
+    Server\Process\Builder,
+};
 use Innmind\Url\Path;
-use Innmind\Immutable\SideEffect;
+use Innmind\Immutable\{
+    Attempt,
+    SideEffect,
+};
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\Attributes\DataProvider;
 
@@ -20,8 +26,8 @@ class CheckoutTest extends TestCase
     #[DataProvider('paths')]
     public function testFile(string $path)
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) use ($path) {
+        $server = Server::via(
+            function($command) use ($path) {
                 $this->assertSame(
                     "git 'checkout' '--' '$path'",
                     $command->toString(),
@@ -33,7 +39,10 @@ class CheckoutTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $checkout = Checkout::of(
             Binary::of(
@@ -54,8 +63,8 @@ class CheckoutTest extends TestCase
     #[DataProvider('revisions')]
     public function testRevision(Hash|Branch $revision)
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) use ($revision) {
+        $server = Server::via(
+            function($command) use ($revision) {
                 $this->assertSame(
                     "git 'checkout' '{$revision->toString()}'",
                     $command->toString(),
@@ -67,7 +76,10 @@ class CheckoutTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $checkout = Checkout::of(
             Binary::of(

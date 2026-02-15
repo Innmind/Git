@@ -4,16 +4,20 @@ declare(strict_types = 1);
 namespace Tests\Innmind\Git;
 
 use Innmind\Git\Binary;
-use Innmind\Server\Control\Servers\Mock;
+use Innmind\Server\Control\{
+    Server,
+    Server\Process\Builder,
+};
 use Innmind\Url\Path;
+use Innmind\Immutable\Attempt;
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class BinaryTest extends TestCase
 {
     public function testSuccessfulInvokation()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'watev'",
                     $command->toString(),
@@ -26,7 +30,10 @@ class BinaryTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $bin = Binary::of(
             $server,
@@ -44,23 +51,27 @@ class BinaryTest extends TestCase
 
     public function testReturnNothingWhenCommandFailed()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(
-                function($command) {
-                    $this->assertSame(
-                        "git 'watev'",
-                        $command->toString(),
-                    );
-                    $this->assertSame(
-                        '/tmp/foo',
-                        $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        ),
-                    );
-                },
-                static fn($_, $builder) => $builder->failed(),
-            );
+        $server = Server::via(
+            function($command) {
+                $this->assertSame(
+                    "git 'watev'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ),
+                );
+
+                return Attempt::result(
+                    Builder::foreground(2)
+                        ->failed()
+                        ->build(),
+                );
+            },
+        );
 
         $bin = Binary::of(
             $server,
@@ -75,8 +86,8 @@ class BinaryTest extends TestCase
 
     public function testHomeIsAddedToTheCommandEnvironment()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'watev'",
                     $command->toString(),
@@ -96,7 +107,10 @@ class BinaryTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $bin = Binary::of(
             $server,

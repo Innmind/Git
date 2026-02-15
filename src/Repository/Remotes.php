@@ -42,7 +42,7 @@ final class Remotes
             ->toSequence()
             ->flatMap(static fn($output) => $output)
             ->map(static fn($chunk) => $chunk->data())
-            ->fold(new Concat)
+            ->fold(Concat::monoid)
             ->split("\n")
             ->flatMap(
                 fn($remote) => Name::maybe($remote->toString())
