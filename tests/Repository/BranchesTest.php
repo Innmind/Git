@@ -8,10 +8,14 @@ use Innmind\Git\{
     Revision\Branch,
     Binary,
 };
-use Innmind\Server\Control\Servers\Mock;
+use Innmind\Server\Control\{
+    Server,
+    Server\Process\Builder,
+};
 use Innmind\Url\Path;
 use Innmind\Immutable\{
     Set,
+    Attempt,
     SideEffect,
 };
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
@@ -20,32 +24,36 @@ class BranchesTest extends TestCase
 {
     public function testLocal()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(
-                function($command) {
-                    $this->assertSame(
-                        "git 'branch' '--no-color'",
-                        $command->toString(),
-                    );
-                    $this->assertSame(
-                        '/tmp/foo',
-                        $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        ),
-                    );
-                },
-                static fn($_, $builder) => $builder->success([[
-                    <<<BRANCHES
-                    * (HEAD detached at aa4a336)
-                      develop
-                      foo-bar-baz
-                      master
+        $server = Server::via(
+            function($command) {
+                $this->assertSame(
+                    "git 'branch' '--no-color'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ),
+                );
 
-                    BRANCHES,
-                    'output',
-                ]]),
-            );
+                return Attempt::result(
+                    Builder::foreground(2)
+                        ->success([[
+                            <<<BRANCHES
+                            * (HEAD detached at aa4a336)
+                              develop
+                              foo-bar-baz
+                              master
+
+                            BRANCHES,
+                            'output',
+                        ]])
+                        ->build(),
+                );
+            },
+        );
 
         $branches = Branches::of(
             Binary::of(
@@ -56,7 +64,7 @@ class BranchesTest extends TestCase
         $local = $branches->local();
 
         $this->assertInstanceOf(Set::class, $local);
-        $this->assertCount(3, $local);
+        $this->assertSame(3, $local->size());
         $local = $local->toList();
         $this->assertSame('develop', \current($local)->toString());
         \next($local);
@@ -67,32 +75,36 @@ class BranchesTest extends TestCase
 
     public function testRemote()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(
-                function($command) {
-                    $this->assertSame(
-                        "git 'branch' '-r' '--no-color'",
-                        $command->toString(),
-                    );
-                    $this->assertSame(
-                        '/tmp/foo',
-                        $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        ),
-                    );
-                },
-                static fn($_, $builder) => $builder->success([[
-                    <<<BRANCHES
-                      origin/HEAD -> origin/master
-                      origin/develop
-                      origin/foo-bar-baz
-                      origin/master
+        $server = Server::via(
+            function($command) {
+                $this->assertSame(
+                    "git 'branch' '-r' '--no-color'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ),
+                );
 
-                    BRANCHES,
-                    'output',
-                ]]),
-            );
+                return Attempt::result(
+                    Builder::foreground(2)
+                        ->success([[
+                            <<<BRANCHES
+                              origin/HEAD -> origin/master
+                              origin/develop
+                              origin/foo-bar-baz
+                              origin/master
+
+                            BRANCHES,
+                            'output',
+                        ]])
+                        ->build(),
+                );
+            },
+        );
 
         $branches = Branches::of(
             Binary::of(
@@ -103,7 +115,7 @@ class BranchesTest extends TestCase
         $remote = $branches->remote();
 
         $this->assertInstanceOf(Set::class, $remote);
-        $this->assertCount(3, $remote);
+        $this->assertSame(3, $remote->size());
         $remote = $remote->toList();
         $this->assertSame('origin/develop', \current($remote)->toString());
         \next($remote);
@@ -114,13 +126,9 @@ class BranchesTest extends TestCase
 
     public function testAll()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(
-                function($command) {
-                    $this->assertSame(
-                        "git 'branch' '--no-color'",
-                        $command->toString(),
-                    );
+        $server = Server::via(
+            function($command) {
+                if ($command->toString() === "git 'branch' '--no-color'") {
                     $this->assertSame(
                         '/tmp/foo',
                         $command->workingDirectory()->match(
@@ -128,43 +136,51 @@ class BranchesTest extends TestCase
                             static fn() => null,
                         ),
                     );
-                },
-                static fn($_, $builder) => $builder->success([[
-                    <<<BRANCHES
-                    * (HEAD detached at aa4a336)
-                      develop
-                      foo-bar-baz
-                      master
 
-                    BRANCHES,
-                    'output',
-                ]]),
-            )
-            ->willExecute(
-                function($command) {
-                    $this->assertSame(
-                        "git 'branch' '-r' '--no-color'",
-                        $command->toString(),
-                    );
-                    $this->assertSame(
-                        '/tmp/foo',
-                        $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        ),
-                    );
-                },
-                static fn($_, $builder) => $builder->success([[
-                    <<<BRANCHES
-                      origin/HEAD -> origin/master
-                      origin/develop
-                      origin/foo-bar-baz
-                      origin/master
+                    return Attempt::result(
+                        Builder::foreground(2)
+                            ->success([[
+                                <<<BRANCHES
+                                * (HEAD detached at aa4a336)
+                                  develop
+                                  foo-bar-baz
+                                  master
 
-                    BRANCHES,
-                    'output',
-                ]]),
-            );
+                                BRANCHES,
+                                'output',
+                            ]])
+                            ->build(),
+                    );
+                }
+
+                $this->assertSame(
+                    "git 'branch' '-r' '--no-color'",
+                    $command->toString(),
+                );
+                $this->assertSame(
+                    '/tmp/foo',
+                    $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ),
+                );
+
+                return Attempt::result(
+                    Builder::foreground(2)
+                        ->success([[
+                            <<<BRANCHES
+                              origin/HEAD -> origin/master
+                              origin/develop
+                              origin/foo-bar-baz
+                              origin/master
+
+                            BRANCHES,
+                            'output',
+                        ]])
+                        ->build(),
+                );
+            },
+        );
 
         $branches = Branches::of(
             Binary::of(
@@ -175,7 +191,7 @@ class BranchesTest extends TestCase
         $all = $branches->all();
 
         $this->assertInstanceOf(Set::class, $all);
-        $this->assertCount(6, $all);
+        $this->assertSame(6, $all->size());
         $all = $all->toList();
         $this->assertSame('develop', \current($all)->toString());
         \next($all);
@@ -192,8 +208,8 @@ class BranchesTest extends TestCase
 
     public function testNew()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'branch' 'bar'",
                     $command->toString(),
@@ -205,7 +221,10 @@ class BranchesTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $branches = Branches::of(
             Binary::of(
@@ -225,8 +244,8 @@ class BranchesTest extends TestCase
 
     public function testNewOff()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'branch' 'bar' 'develop'",
                     $command->toString(),
@@ -238,7 +257,10 @@ class BranchesTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $branches = Branches::of(
             Binary::of(
@@ -258,8 +280,8 @@ class BranchesTest extends TestCase
 
     public function testNewOrphan()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'checkout' '--orphan' 'bar'",
                     $command->toString(),
@@ -271,7 +293,10 @@ class BranchesTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $branches = Branches::of(
             Binary::of(
@@ -291,8 +316,8 @@ class BranchesTest extends TestCase
 
     public function testDelete()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'branch' '-d' 'bar'",
                     $command->toString(),
@@ -304,7 +329,10 @@ class BranchesTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $branches = Branches::of(
             Binary::of(
@@ -324,8 +352,8 @@ class BranchesTest extends TestCase
 
     public function testForceDelete()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'branch' '-D' 'bar'",
                     $command->toString(),
@@ -337,7 +365,10 @@ class BranchesTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $branches = Branches::of(
             Binary::of(

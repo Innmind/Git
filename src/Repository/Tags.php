@@ -9,7 +9,7 @@ use Innmind\Git\{
     Repository\Tag\Name,
 };
 use Innmind\Server\Control\Server\Command;
-use Innmind\TimeContinuum\{
+use Innmind\Time\{
     Clock,
     Format,
 };
@@ -104,7 +104,7 @@ final class Tags
             ->toSequence()
             ->flatMap(static fn($output) => $output)
             ->map(static fn($chunk) => $chunk->data())
-            ->fold(new Concat)
+            ->fold(Concat::monoid)
             ->split("\n")
             ->filter(static fn($line) => !$line->trim()->empty())
             ->flatMap(function(Str $line) {
@@ -119,7 +119,7 @@ final class Tags
                 return Maybe::all(
                     Name::maybe($name->toString()),
                     Message::maybe($message->toString()),
-                    $this->clock->at($time->toString(), Format::rfc2822()),
+                    $this->clock->at($time->toString(), Format::rfc2822())->maybe(),
                 )
                     ->map(Tag::of(...))
                     ->toSequence();

@@ -7,14 +7,14 @@ use Innmind\Git\{
     Repository\Tag\Name,
     Message,
 };
-use Innmind\TimeContinuum\PointInTime;
+use Innmind\Time\Point;
 
 final class Tag
 {
     private function __construct(
         private Name $name,
         private Message $message,
-        private PointInTime $date,
+        private Point $date,
     ) {
     }
 
@@ -24,7 +24,7 @@ final class Tag
     public static function of(
         Name $name,
         Message $message,
-        PointInTime $date,
+        Point $date,
     ): self {
         return new self($name, $message, $date);
     }
@@ -42,7 +42,7 @@ final class Tag
     }
 
     #[\NoDiscard]
-    public function date(): PointInTime
+    public function date(): Point
     {
         return $this->date;
     }

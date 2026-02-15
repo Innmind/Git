@@ -10,9 +10,15 @@ use Innmind\Git\{
     Binary,
     Revision\Branch,
 };
-use Innmind\Server\Control\Servers\Mock;
+use Innmind\Server\Control\{
+    Server,
+    Server\Process\Builder,
+};
 use Innmind\Url\Path;
-use Innmind\Immutable\SideEffect;
+use Innmind\Immutable\{
+    Attempt,
+    SideEffect,
+};
 use Innmind\BlackBox\PHPUnit\Framework\TestCase;
 
 class RemoteTest extends TestCase
@@ -21,7 +27,7 @@ class RemoteTest extends TestCase
     {
         $remote = Remote::of(
             Binary::of(
-                Mock::new($this->assert()),
+                Server::via(static fn() => null),
                 Path::of('/tmp/foo'),
             ),
             $expected = Name::of('origin'),
@@ -32,8 +38,8 @@ class RemoteTest extends TestCase
 
     public function testPrune()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'remote' 'prune' 'origin'",
                     $command->toString(),
@@ -45,7 +51,10 @@ class RemoteTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $remote = Remote::of(
             Binary::of(
@@ -66,8 +75,8 @@ class RemoteTest extends TestCase
 
     public function testSetUrl()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'remote' 'set-url' 'origin' '/local/remote'",
                     $command->toString(),
@@ -79,7 +88,10 @@ class RemoteTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $remote = Remote::of(
             Binary::of(
@@ -100,8 +112,8 @@ class RemoteTest extends TestCase
 
     public function testAddUrl()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'remote' 'set-url' '--add' 'origin' '/local/remote'",
                     $command->toString(),
@@ -113,7 +125,10 @@ class RemoteTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $remote = Remote::of(
             Binary::of(
@@ -134,8 +149,8 @@ class RemoteTest extends TestCase
 
     public function testDeleteUrl()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'remote' 'set-url' '--delete' 'origin' '/local/remote'",
                     $command->toString(),
@@ -147,7 +162,10 @@ class RemoteTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $remote = Remote::of(
             Binary::of(
@@ -168,8 +186,8 @@ class RemoteTest extends TestCase
 
     public function testPush()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'push' '-u' 'origin' 'develop'",
                     $command->toString(),
@@ -181,7 +199,10 @@ class RemoteTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $remote = Remote::of(
             Binary::of(
@@ -202,8 +223,8 @@ class RemoteTest extends TestCase
 
     public function testDelete()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(function($command) {
+        $server = Server::via(
+            function($command) {
                 $this->assertSame(
                     "git 'push' 'origin' ':develop'",
                     $command->toString(),
@@ -215,7 +236,10 @@ class RemoteTest extends TestCase
                         static fn() => null,
                     ),
                 );
-            });
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $remote = Remote::of(
             Binary::of(

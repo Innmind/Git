@@ -16,11 +16,15 @@ use Innmind\Git\{
 use Innmind\OperatingSystem\Factory;
 use Innmind\Server\Control\{
     Server\Command\Str,
-    Servers\Mock,
+    Server,
+    Server\Process\Builder,
 };
 use Innmind\Url\Path;
-use Innmind\TimeContinuum\Clock;
-use Innmind\Immutable\SideEffect;
+use Innmind\Time\Clock;
+use Innmind\Immutable\{
+    Attempt,
+    SideEffect,
+};
 use Symfony\Component\Filesystem\Filesystem;
 use Innmind\BlackBox\{
     PHPUnit\BlackBox,
@@ -40,14 +44,20 @@ class RepositoryTest extends TestCase
 
     public function testReturnNothingWhenDirectoryIsNotAccessible()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(
-                fn($command) => $this->assertSame(
+        $server = Server::via(
+            function($command) {
+                $this->assertSame(
                     "mkdir '-p' '/tmp/foo'",
                     $command->toString(),
-                ),
-                static fn($_, $builder) => $builder->failed(),
-            );
+                );
+
+                return Attempt::result(
+                    Builder::foreground(2)
+                        ->failed()
+                        ->build(),
+                );
+            },
+        );
 
         $repo = Repository::of(
             $server,
@@ -63,18 +73,24 @@ class RepositoryTest extends TestCase
 
     public function testReturnNothingWhenInitProcessFailed()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(static fn() => null)
-            ->willExecute(
-                function($command) {
-                    $this->assertSame("git 'init'", $command->toString());
-                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                        static fn($path) => $path->toString(),
-                        static fn() => null,
-                    ));
-                },
-                static fn($_, $builder) => $builder->failed(),
-            );
+        $server = Server::via(
+            function($command) {
+                if ($command->toString() !== "git 'init'") {
+                    return Attempt::result(Builder::foreground(2)->build());
+                }
+
+                $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                    static fn($path) => $path->toString(),
+                    static fn() => null,
+                ));
+
+                return Attempt::result(
+                    Builder::foreground(2)
+                        ->failed()
+                        ->build(),
+                );
+            },
+        );
 
         $repo = Repository::of(
             $server,
@@ -93,15 +109,21 @@ class RepositoryTest extends TestCase
 
     public function testReturnNothingWhenInitOutputIsNotAsExpected()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(static fn() => null)
-            ->willExecute(function($command) {
-                $this->assertSame("git 'init'", $command->toString());
+        $server = Server::via(
+            function($command) {
+                if ($command->toString() !== "git 'init'") {
+                    return Attempt::result(Builder::foreground(2)->build());
+                }
+
                 $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
                     static fn($path) => $path->toString(),
                     static fn() => null,
                 ));
-            });
+
+                return Attempt::result(Builder::foreground(2)->build(),
+                );
+            },
+        );
 
         $repo = Repository::of(
             $server,
@@ -145,20 +167,24 @@ class RepositoryTest extends TestCase
     #[DataProvider('heads')]
     public function testHead(string $list, string $expected, string $class)
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(static fn() => null)
-            ->willExecute(
-                function($command) {
-                    $this->assertSame("git 'branch' '--no-color'", $command->toString());
-                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                        static fn($path) => $path->toString(),
-                        static fn() => null,
-                    ));
-                },
-                static fn($_, $builder) => $builder->success([
-                    [$list, 'output'],
-                ]),
-            );
+        $server = Server::via(
+            function($command) use ($list) {
+                if ($command->toString() !== "git 'branch' '--no-color'") {
+                    return Attempt::result(Builder::foreground(2)->build());
+                }
+
+                $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                    static fn($path) => $path->toString(),
+                    static fn() => null,
+                ));
+
+                return Attempt::result(
+                    Builder::foreground(2)
+                        ->success([[$list, 'output']])
+                        ->build(),
+                );
+            },
+        );
 
         $repo = Repository::of(
             $server,
@@ -194,15 +220,18 @@ class RepositoryTest extends TestCase
 
     public function testPush()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(static fn() => null)
-            ->willExecute(function($command) {
-                $this->assertSame("git 'push'", $command->toString());
-                $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                    static fn($path) => $path->toString(),
-                    static fn() => null,
-                ));
-            });
+        $server = Server::via(
+            function($command) {
+                if ($command->toString() === "git 'push'") {
+                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ));
+                }
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $repo = Repository::of(
             $server,
@@ -224,15 +253,18 @@ class RepositoryTest extends TestCase
 
     public function testPull()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(static fn() => null)
-            ->willExecute(function($command) {
-                $this->assertSame("git 'pull'", $command->toString());
-                $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                    static fn($path) => $path->toString(),
-                    static fn() => null,
-                ));
-            });
+        $server = Server::via(
+            function($command) {
+                if ($command->toString() === "git 'pull'") {
+                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ));
+                }
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $repo = Repository::of(
             $server,
@@ -296,15 +328,18 @@ class RepositoryTest extends TestCase
 
     public function testAdd()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(static fn() => null)
-            ->willExecute(function($command) {
-                $this->assertSame("git 'add' 'foo'", $command->toString());
-                $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                    static fn($path) => $path->toString(),
-                    static fn() => null,
-                ));
-            });
+        $server = Server::via(
+            function($command) {
+                if ($command->toString() === "git 'add' 'foo'") {
+                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ));
+                }
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $repo = Repository::of(
             $server,
@@ -331,16 +366,19 @@ class RepositoryTest extends TestCase
                 static fn($string) => $string === \trim($string),
             ))
             ->prove(function(string $message): void {
-                $messageArgument = (new Str($message))->toString();
-                $server = Mock::new($this->assert())
-                    ->willExecute(static fn() => null)
-                    ->willExecute(function($command) use ($messageArgument) {
-                        $this->assertSame("git 'commit' '-m' $messageArgument", $command->toString());
-                        $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                            static fn($path) => $path->toString(),
-                            static fn() => null,
-                        ));
-                    });
+                $messageArgument = Str::escape($message);
+                $server = Server::via(
+                    function($command) use ($messageArgument) {
+                        if ($command->toString() === "git 'commit' '-m' $messageArgument") {
+                            $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                                static fn($path) => $path->toString(),
+                                static fn() => null,
+                            ));
+                        }
+
+                        return Attempt::result(Builder::foreground(2)->build());
+                    },
+                );
 
                 $repo = Repository::of(
                     $server,
@@ -363,18 +401,18 @@ class RepositoryTest extends TestCase
 
     public function testMerge()
     {
-        $server = Mock::new($this->assert())
-            ->willExecute(static fn($command) => null)
-            ->willExecute(function($command) {
-                $this->assertSame(
-                    "git 'merge' 'develop'",
-                    $command->toString(),
-                );
-                $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
-                    static fn($path) => $path->toString(),
-                    static fn() => null,
-                ));
-            });
+        $server = Server::via(
+            function($command) {
+                if ($command->toString() === "git 'merge' 'develop'") {
+                    $this->assertSame('/tmp/foo', $command->workingDirectory()->match(
+                        static fn($path) => $path->toString(),
+                        static fn() => null,
+                    ));
+                }
+
+                return Attempt::result(Builder::foreground(2)->build());
+            },
+        );
 
         $repo = Repository::of(
             $server,
